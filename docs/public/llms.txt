@@ -1,0 +1,15 @@
+# @ternaus/js-tools
+
+> React 19 lint rules for ESLint 10, OpenAPI type generation, and type-safe HTTP clients.
+
+## Packages
+
+- [React plugin](https://ternaus.github.io/js-tools/eslint-plugin-react/rules/): React 19 rules not provided by Biome.
+- [OpenAPI TypeScript generator](https://ternaus.github.io/js-tools/introduction): Generate TypeScript types from OpenAPI schemas.
+- [openapi-fetch](https://ternaus.github.io/js-tools/openapi-fetch/): Type-safe Fetch client.
+- [openapi-react-query](https://ternaus.github.io/js-tools/openapi-react-query/): React Query client for OpenAPI.
+- [Type helpers](https://github.com/ternaus/js-tools/tree/main/packages/openapi-typescript-helpers): Shared OpenAPI helper types.
+
+## Support
+
+Support ongoing maintenance at https://github.com/sponsors/ternaus.

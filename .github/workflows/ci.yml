@@ -1,56 +1,49 @@
-name: CI
+name: ci
 
 on:
-  pull_request:
   push:
-    branches: [main]
-
-permissions:
-  contents: read
+    branches:
+      - main
+  pull_request:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Quality (Node 22.13)
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
-        with:
-          node-version: 22.13.0
-          package-manager-cache: false
-      - run: corepack enable
-      - run: yarn install --immutable
-      - name: Set up pre-commit
-        run: python3 -m venv /tmp/eslint-plugin-react-pre-commit
-      - name: Install pre-commit
-        run: /tmp/eslint-plugin-react-pre-commit/bin/python -m pip install --disable-pip-version-check pre-commit
-      - name: Run pre-commit hooks
-        run: /tmp/eslint-plugin-react-pre-commit/bin/pre-commit run --all-files
-      - name: Check commit message
-        run: |
-          git log -1 --pretty=%B > /tmp/eslint-plugin-react-commit-message.txt
-          /tmp/eslint-plugin-react-pre-commit/bin/pre-commit run conventional-pre-commit \
-            --hook-stage commit-msg \
-            --commit-msg-filename /tmp/eslint-plugin-react-commit-message.txt
-      - run: yarn quality:complete
-
-  runtime:
-    name: Tests (Node ${{ matrix.node }})
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm run lint
+  test-node-versions:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        node: [24, 26]
+        node-version: [24, 26]
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
         with:
-          node-version: ${{ matrix.node }}
-          package-manager-cache: false
-      - run: corepack enable
-      - run: yarn install --immutable
-      - run: yarn test
+          node-version: ${{ matrix.node-version }}
+      - run: pnpm test
+  test-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm run test-e2e
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm test
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm test

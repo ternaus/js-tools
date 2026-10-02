@@ -1,0 +1,57 @@
+{
+  "name": "@ternaus/openapi-typescript-helpers",
+  "description": "TypeScript helpers for consuming openapi-typescript types",
+  "version": "0.1.0",
+  "author": {
+    "name": "Drew Powers",
+    "email": "drew@pow.rs"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "homepage": "https://ternaus.github.io/js-tools/introduction",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ternaus/js-tools.git",
+    "directory": "packages/openapi-typescript-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/ternaus/js-tools/issues"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build.mjs",
+    "format": "biome format src --write",
+    "lint": "pnpm run lint:js && pnpm run typecheck",
+    "lint:js": "biome lint . --error-on-warnings",
+    "test": "publint --strict",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "^24.15.0 || ^26.0.0"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "maintainers": [
+    {
+      "name": "Vladimir Iglovikov",
+      "url": "https://github.com/ternaus"
+    }
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

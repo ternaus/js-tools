@@ -1,30 +1,33 @@
-name: Publish npm
+name: release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 permissions:
-  contents: read
-  id-token: write
-
-concurrency:
-  group: publish-npm
-  cancel-in-progress: false
+  id-token: write # Required for OIDC
+  contents: write
+  pull-requests: write
 
 jobs:
-  publish:
+  changelog:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Git setup
+        uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Changesets version and/or publish
+        uses: changesets/action@v1
         with:
-          ref: ${{ github.event.release.tag_name }}
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
-        with:
-          node-version: 24
-          registry-url: https://registry.npmjs.org
-          package-manager-cache: false
-      - run: corepack enable
-      - run: yarn install --immutable
-      - run: node scripts/assert-release-tag.mjs '${{ github.event.release.tag_name }}'
-      - run: npm publish --provenance --access public --tag "${{ github.event.release.prerelease && 'next' || 'latest' }}"
+          version: pnpm run version
+          publish: pnpm exec changeset publish
+          commit: "[ci] release"
+          title: "[ci] release"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

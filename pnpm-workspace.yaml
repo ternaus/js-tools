@@ -1,0 +1,20 @@
+packages:
+  - docs
+  - packages/*
+  - packages/openapi-fetch/examples/*
+
+catalog:
+  execa: 10.0.1
+  typescript: 7.0.2
+  vite: 8.3.2
+
+allowBuilds:
+  '@biomejs/biome': true
+  esbuild: false
+  msw: false
+  sharp: false
+
+minimumReleaseAgeExclude:
+  - '@types/node@26.6.4'
+  - publint@0.3.25
+  - vite@8.3.2

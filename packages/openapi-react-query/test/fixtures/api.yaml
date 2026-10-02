@@ -1,0 +1,205 @@
+openapi: 3.1.0
+info:
+  title: Test Specification
+  version: "1.0"
+paths:
+  /paginated-data:
+    get:
+      parameters:
+        - in: query
+          name: limit
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: cursor
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: integer
+                  nextPage:
+                    type: integer
+        "500":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+  /comment:
+    put:
+      requestBody:
+        $ref: "#/components/requestBodies/CreateReply"
+      responses:
+        "201":
+          $ref: "#/components/responses/CreateReply"
+        "500":
+          $ref: "#/components/responses/Error"
+  /blogposts/{post_id}:
+    parameters:
+      - in: path
+        name: post_id
+        schema:
+          type: string
+        required: true
+    get:
+      parameters:
+        - in: query
+          name: version
+          schema:
+            type: number
+        - in: query
+          name: format
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PostGet"
+        "404":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+    patch:
+      requestBody:
+        $ref: "#/components/requestBodies/PatchPost"
+      responses:
+        "200":
+          $ref: "#/components/responses/PatchPost"
+        "404":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+    delete:
+      responses:
+        "200":
+          $ref: "#/components/responses/PostDelete"
+        "500":
+          $ref: "#/components/responses/Error"
+  /string-array:
+    get:
+      responses:
+        "200":
+          $ref: "#/components/responses/StringArray"
+        "500":
+          $ref: "#/components/responses/Error"
+components:
+  requestBodies:
+    CreateReply:
+      required: true
+      content:
+        application/json;charset=utf-8:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              replied_at:
+                type: number
+            required:
+              - message
+              - replied_at
+    PatchPost:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              body:
+                type: string
+              publish_date:
+                type: number
+  responses:
+    CreateReply:
+      description: CreateReply response
+      content:
+        application/json;charset=utf-8:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+            required:
+              - code
+              - message
+    PostGet:
+      description: PostGet response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Post"
+    PatchPost:
+      description: PatchPost response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+            required:
+              - status
+    PostDelete:
+      description: PostDelete response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+            required:
+              - status
+    StringArray:
+      description: StringArray response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StringArray"
+  schemas:
+    Post:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        publish_date:
+          type: number
+      required:
+        - title
+        - body
+    StringArray:
+      type: array
+      items:
+        type: string

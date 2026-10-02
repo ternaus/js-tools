@@ -1,3 +1,5 @@
+exclude: ^packages/(?:openapi-typescript/test/fixtures|openapi-fetch/test/fixtures|openapi-react-query/test/fixtures)/
+
 ci:
   autofix_commit_msg: "[pre-commit.ci] auto fixes from pre-commit.com hooks
 
@@ -42,9 +44,9 @@ repos:
         args: [feat, fix, refactor, docs, test, chore, build, ci, perf, style]
   - repo: local
     hooks:
-      - id: eslint-plugin-react-quality
-        name: eslint-plugin-react quality
-        entry: yarn quality:precommit
+      - id: js-tools-quality
+        name: js-tools quality
+        entry: pnpm run quality:precommit
         language: system
         always_run: true
         pass_filenames: false

@@ -1,0 +1,87 @@
+{
+  "name": "@ternaus/openapi-typescript",
+  "description": "Convert OpenAPI 3.0 & 3.1 schemas to TypeScript",
+  "version": "7.13.0",
+  "author": {
+    "name": "Drew Powers",
+    "email": "drew@pow.rs"
+  },
+  "license": "MIT",
+  "bin": {
+    "openapi-typescript": "bin/cli.js"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "homepage": "https://ternaus.github.io/js-tools/introduction",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ternaus/js-tools.git",
+    "directory": "packages/openapi-typescript"
+  },
+  "keywords": [
+    "swagger",
+    "typescript",
+    "ts",
+    "dts",
+    "openapi",
+    "codegen",
+    "generation",
+    "openapi 3",
+    "node"
+  ],
+  "bugs": {
+    "url": "https://github.com/ternaus/js-tools/issues"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build.mjs",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "format": "biome format . --write",
+    "lint": "pnpm run lint:js && pnpm run typecheck",
+    "lint:js": "biome lint . --error-on-warnings",
+    "prepack": "pnpm run build",
+    "test": "pnpm run test:js && pnpm run test:fixtures && pnpm run test:exports",
+    "test:js": "vitest run --config ../../vitest.config.ts --project openapi-typescript",
+    "test:exports": "publint --strict",
+    "typecheck": "tsc --noEmit",
+    "test:fixtures": "tsc -p tsconfig.fixtures.json --noEmit"
+  },
+  "dependencies": {
+    "@redocly/openapi-core": "^2.57.0",
+    "change-case": "^5.4.4",
+    "parse-json": "^8.3.0",
+    "yargs-parser": "^22.0.0",
+    "@typescript/typescript6": "6.0.2"
+  },
+  "devDependencies": {
+    "execa": "catalog:",
+    "strip-ansi": "7.2.0"
+  },
+  "maintainers": [
+    {
+      "name": "Vladimir Iglovikov",
+      "url": "https://github.com/ternaus"
+    }
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": "^24.15.0 || ^26.0.0"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "bin"
+  ],
+  "sideEffects": false
+}

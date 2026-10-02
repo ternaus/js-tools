@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "lib": ["ESNext", "DOM"],
+    "noUncheckedIndexedAccess": true,
+    "outDir": "dist",
+    "skipLibCheck": false,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src", "test"],
+  "exclude": ["examples", "node_modules"],
+  "extends": "../../tsconfig.json"
+}

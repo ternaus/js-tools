@@ -1,0 +1,16 @@
+{
+  "name": "@example/js-tools-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../scripts/prepare-docs.mjs && vitepress build",
+    "dev": "node ../scripts/prepare-docs.mjs && vitepress dev"
+  },
+  "devDependencies": {
+    "vitepress": "2.0.0-alpha.20",
+    "vite": "catalog:"
+  },
+  "engines": {
+    "node": "^24.15.0 || ^26.0.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@ternaus/eslint-plugin-react": ["./index.d.mts"],
+      "@ternaus/eslint-plugin-react/configs/all": ["./configs/all.d.mts"],
+      "@ternaus/eslint-plugin-react/configs/recommended": ["./configs/recommended.d.mts"]
+    },
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "ES2024",
+    "types": ["node"]
+  },
+  "include": ["index.d.mts", "configs/*.d.mts", "tests/types/plugin.mts"],
+  "extends": "../../tsconfig.json"
+}

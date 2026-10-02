@@ -1,0 +1,235 @@
+# @ternaus/eslint-plugin-react
+
+> [Sponsor ongoing maintenance on GitHub](https://github.com/sponsors/ternaus)
+
+React 19+ rules for ESLint 10 that Biome does not provide. Use it alongside
+Biome 2.5.13 or later, which owns general JavaScript, JSX, DOM, and React
+checks. This independent native-ESM continuation of
+[`jsx-eslint/eslint-plugin-react`](https://github.com/jsx-eslint/eslint-plugin-react)
+preserves the `react/*` namespace, upstream Git history, and MIT attribution.
+
+## What this package is for
+
+This package is designed for projects using:
+
+- ESLint 10
+- Biome 2.5.13+
+- Node.js 24.15+ and 26
+- flat config in `eslint.config.js`
+
+Start with Biome's `all` preset. Add this plugin for React 19 contracts that
+Biome does not yet expose, such as invalid HTML attribute values, controlled
+form handlers, and React APIs removed in version 19. The `recommended` preset
+contains the entire supported package contract.
+
+React 18 and earlier, ESLint 9, and `.eslintrc*` files are not supported.
+
+## Install
+
+```sh
+pnpm add --dev @biomejs/biome@'>=2.5.13' eslint@^10 @ternaus/eslint-plugin-react
+```
+
+### Use it with `eslint-config-next`
+
+`eslint-config-next` imports the React plugin under the package name
+`eslint-plugin-react`. The following example uses Yarn 4's `resolutions`
+syntax; npm, pnpm, and Yarn Classic use their own dependency override
+mechanisms.
+
+Install Biome, ESLint, and `@ternaus/eslint-plugin-react` as direct
+development dependencies:
+
+```sh
+pnpm add --dev @biomejs/biome@'>=2.5.13' eslint@^10 @ternaus/eslint-plugin-react@8.0.2
+```
+
+Enable Biome's `all` preset, including its React domain, as shown in [Use it
+with Biome](#use-it-with-biome). Then map the transitive package name to the
+same published package with Yarn:
+
+```json
+{
+  "resolutions": {
+    "eslint-plugin-react": "npm:@ternaus/eslint-plugin-react@8.0.2"
+  }
+}
+```
+
+Keep the version in `devDependencies` and `resolutions` synchronized. This
+prevents `eslint-config-next` from installing the ESLint 9-only native React
+plugin alongside the ESLint 10 package. `eslint-config-next` registers the
+resolved plugin under the `react` namespace, so no second React plugin
+registration is needed in your flat config.
+
+## Use it with Biome
+
+Enable Biome's recommended and additional stable rules, including the React
+domain:
+
+```json
+{
+  "linter": {
+    "domains": { "react": "all" },
+    "rules": { "preset": "all" }
+  }
+}
+```
+
+Then add this package's residual React checks to `eslint.config.js`:
+
+```js
+import react from '@ternaus/eslint-plugin-react';
+
+export default [
+  {
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    ...react.configs.flat.recommended,
+  },
+];
+```
+
+Keep this React config scoped to JavaScript and TypeScript source files that
+your parser can handle as JSX. Configure Markdown, JSON, CSS, and other
+processor-managed files separately instead of applying React rules to a broad
+`**/*` glob.
+
+### Use `defineConfig`
+
+`defineConfig` can resolve the plugin's flat presets by name. Register the
+plugin under `react`, then extend the matching `react/flat/*` alias:
+
+```js
+import { defineConfig } from 'eslint/config';
+import react from '@ternaus/eslint-plugin-react';
+
+export default defineConfig({
+  files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+  plugins: { react },
+  extends: ['react/flat/recommended'],
+});
+```
+
+The available alias is `react/flat/recommended`. The same config is available
+for direct composition through `react.configs.flat.recommended`.
+
+Run both tools, then review and apply available automatic fixes:
+
+```sh
+pnpm exec biome check .
+pnpm exec biome check . --write
+pnpm exec eslint .
+pnpm exec eslint . --fix
+```
+
+The package is native ESM, but Node.js 24.15+ and 26 can load it with
+`require`. A CommonJS flat config uses the same plugin object:
+
+```js
+const react = require('@ternaus/eslint-plugin-react');
+
+module.exports = [
+  {
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    ...react.configs.flat.recommended,
+  },
+];
+```
+
+The plugin is always registered as `react`, so rule IDs stay in the familiar
+`react/rule-name` form even though the package is scoped.
+
+## Choose the checks you need
+
+<!-- rule-config-summary:start -->
+| Config | Active rules | Use it when |
+| --- | ---: | --- |
+| `recommended` | 19 | You want the supported baseline of React 19 contracts that Biome does not provide. |
+| `all` | 20 | You want every rule, including checks with a deliberately narrower static-analysis boundary. |
+<!-- rule-config-summary:end -->
+
+Use `recommended` for normal development. Use `all` when you also want checks
+whose static-analysis boundary can require project-specific review. You can
+raise the two performance signals to errors when that fits your project:
+
+```js
+import react from '@ternaus/eslint-plugin-react';
+
+const recommended = react.configs.flat.recommended;
+
+export default [
+  {
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    ...recommended,
+    rules: {
+      ...recommended.rules,
+      'react/jsx-no-constructed-context-values': 'error',
+    },
+  },
+];
+```
+
+The [rule catalog](docs/rules/README.md) lists every rule, what it reports, and
+whether it supports `--fix` or an editor suggestion. Each rule name links to
+examples and its analysis boundary.
+
+The catalog is exhaustive. For an upstream rule ID that is absent here, read
+[why this package does not support it](docs/upstream-rule-support.md) before
+adding a compatibility request.
+
+## Platform boundary
+
+Platform-neutral JSX and React-core checks can analyze React Native source, but
+this package has no React Native compatibility contract or native-specific
+preset. Rules about HTML and React DOM form behavior operate only on proven
+lowercase HTML elements; they skip `View`, `Text`, custom elements, SVG,
+MathML, and dynamic host elements.
+
+## React version behavior
+
+React version detection is not part of this package: every rule has one React
+19+ behavior path and never reads `react/package.json`. Biome owns the
+overlapping React and JSX checks. Each remaining rule page documents its own
+analysis boundary.
+
+## How the project verifies rule behavior
+
+Every rule has a focused reference page and regression tests with ESLint's
+current parser. The complete quality command also enforces coverage thresholds,
+validates the generated rule catalog, inspects the published archive, and loads
+that archive as ESM, CommonJS, and TypeScript.
+
+## Develop the plugin
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm run quality:complete
+```
+
+Biome formats the repository and owns general JavaScript, JSX, DOM, and React
+rules; its completeness check requires every exception to be registered with a
+reason. ESLint enforces the residual Node.js and ESLint-plugin authoring rules.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for change requirements,
+[RELEASING.md](RELEASING.md) for publication, and [UPSTREAM.md](UPSTREAM.md) for
+the project's provenance and independent-maintenance policy.
+
+## Cite this project
+
+If this project supports published work, cite the project. GitHub’s **Cite this
+repository** control reads [CITATION.cff](CITATION.cff) and provides ready-to-copy
+APA and BibTeX entries. You can also use this BibTeX entry:
+
+```bibtex
+@software{Iglovikov_eslint_plugin_react_2026,
+  author = {Iglovikov, Vladimir},
+  title = {{@ternaus/eslint-plugin-react}},
+  url = {https://github.com/ternaus/js-tools},
+  year = {2026}
+}
+```
+
+## License
+
+MIT. The upstream project’s copyright and full Git history are preserved.

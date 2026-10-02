@@ -1,0 +1,6 @@
+# 使用示例
+
+使用维护中的 Fetch 客户端、React Query 集成或 React 19/Next.js 示例。
+
+- [React Query integration](/openapi-react-query/index.md)
+- [React 19/Next.js example](https://github.com/ternaus/js-tools/tree/main/packages/openapi-fetch/examples/nextjs)

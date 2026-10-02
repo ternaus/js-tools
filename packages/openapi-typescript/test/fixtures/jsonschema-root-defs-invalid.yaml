@@ -1,0 +1,8 @@
+openapi: 3.1.0
+info:
+  title: Invalid document definitions
+  version: "1.0"
+components: {}
+$defs:
+  StringType:
+    type: string

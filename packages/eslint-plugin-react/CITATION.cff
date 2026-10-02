@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "@ternaus/eslint-plugin-react"
+date-released: 2026-08-18
+authors:
+  - family-names: Iglovikov
+    given-names: Vladimir
+url: "https://github.com/ternaus/js-tools"
+license: MIT

@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ESNext"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "baseUrl": ".",
-    "paths": {
-      "@ternaus/eslint-plugin-react": ["./index.d.mts"],
-      "@ternaus/eslint-plugin-react/configs/all": ["./configs/all.d.mts"],
-      "@ternaus/eslint-plugin-react/configs/recommended": ["./configs/recommended.d.mts"]
-    },
-    "noEmit": true,
-    "skipLibCheck": true,
+    "removeComments": true,
+    "sourceMap": true,
     "strict": true,
-    "target": "ES2024"
-  },
-  "include": ["index.d.mts", "configs/*.d.mts", "tests/types/plugin.ts"]
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": true,
+    "types": []
+  }
 }

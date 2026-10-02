@@ -1,0 +1,105 @@
+{
+  "name": "@ternaus/eslint-plugin-react",
+  "version": "8.0.2",
+  "description": "React linting rules for ESLint 10 flat config",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^24.15.0 || ^26.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./index.d.mts",
+        "default": "./index.js"
+      },
+      "require": {
+        "types": "./index.d.mts",
+        "default": "./index.js"
+      },
+      "default": "./index.js"
+    },
+    "./configs/recommended": {
+      "import": {
+        "types": "./configs/recommended.d.mts",
+        "default": "./configs/recommended.js"
+      },
+      "require": {
+        "types": "./configs/recommended.d.mts",
+        "default": "./configs/recommended.js"
+      }
+    },
+    "./configs/all": {
+      "import": {
+        "types": "./configs/all.d.mts",
+        "default": "./configs/all.js"
+      },
+      "require": {
+        "types": "./configs/all.d.mts",
+        "default": "./configs/all.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.mts",
+  "files": [
+    "CITATION.cff",
+    "configs/",
+    "configs/*.d.mts",
+    "index.d.mts",
+    "index.js",
+    "lib/",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "check:citation": "node scripts/check-citation.mjs",
+    "check:eslint-residual": "node scripts/check-eslint-residual.mjs",
+    "check:biome-completeness": "node scripts/check-biome-completeness.mjs",
+    "check:rule-documentation": "node scripts/check-rule-documentation.mjs",
+    "docs:rules": "node scripts/update-rule-documentation.mjs",
+    "format": "biome check --write --linter-enabled=false .",
+    "format:check": "biome check --linter-enabled=false .",
+    "lint": "pnpm run check:biome-completeness && pnpm run lint:biome && pnpm run check:eslint-residual && pnpm run lint:eslint && pnpm run typecheck",
+    "lint:biome": "biome lint . --error-on-warnings",
+    "lint:eslint": "pnpm -w run lint:eslint",
+    "pack:check": "publint --strict",
+    "prepack": "pnpm run quality:publish",
+    "quality:complete": "pnpm run quality:publish && pnpm run pack:check && pnpm run test:package",
+    "quality:precommit": "pnpm run format:check && pnpm run check:citation && pnpm run check:rule-documentation && pnpm run lint",
+    "quality:publish": "pnpm run quality:precommit && pnpm run test:coverage",
+    "test": "pnpm run test:coverage && pnpm run pack:check && pnpm run test:package",
+    "test:coverage": "c8 --all --extension .js --include index.js --include 'lib/**/*.js' --reporter text-summary --check-coverage --branches 90 --functions 95 --lines 95 --statements 95 mocha --reporter min \"tests/lib/**/*.js\" tests/index.js tests/flat-config.js",
+    "test:package": "node scripts/test-package-consumer.mjs",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "test:unit": "mocha --reporter min \"tests/lib/**/*.js\" tests/index.js tests/flat-config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ternaus/js-tools.git",
+    "directory": "packages/eslint-plugin-react"
+  },
+  "bugs": {
+    "url": "https://github.com/ternaus/js-tools/issues"
+  },
+  "homepage": "https://github.com/ternaus/js-tools/tree/main/packages/eslint-plugin-react",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "react"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "peerDependencies": {
+    "eslint": "^10.0.0"
+  },
+  "devDependencies": {
+    "c8": "^12.0.0",
+    "mocha": "^11.8.0",
+    "sinon": "^21.0.0"
+  }
+}

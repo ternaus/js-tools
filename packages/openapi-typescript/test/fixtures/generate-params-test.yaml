@@ -1,0 +1,51 @@
+openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /{id}/get-item-string-path-param:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get: &getItem
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+  /{id}/get-item-nested-path-param/{secondId}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: number
+      - name: secondId
+        in: path
+        required: true
+        schema:
+          type: string
+    get: *getItem
+  /{id}/get-item-defined-path-param:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: number
+    get: *getItem
+components:
+  schemas:
+    Item:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
