@@ -1,10 +1,14 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/no-add-transition-type-outside-transition');
 
 const ruleTester = new RuleTester({
-  parserOptions: { ecmaFeatures: { jsx: true }, ecmaVersion: 2024, sourceType: 'module' },
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
 });
 
 ruleTester.run('no-add-transition-type-outside-transition', rule, {

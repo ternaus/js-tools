@@ -13,11 +13,9 @@ describe("response", () => {
 
       const result = await client.GET("/resources");
 
-      // 1. assert data & error may be undefined initially
       assertType<Resource[] | undefined>(result.data);
       assertType<Error | undefined>(result.error);
 
-      // 2. assert data is not undefined inside condition block
       if (result.data) {
         assertType<NonNullable<Resource[]>>(result.data);
         assertType<undefined>(result.error);
@@ -28,7 +26,6 @@ describe("response", () => {
         assertType<undefined>(result.error);
       }
 
-      // 3. assert error is not undefined inside condition block
       if (result.error) {
         assertType<undefined>(result.data);
         assertType<NonNullable<Error>>(result.error);

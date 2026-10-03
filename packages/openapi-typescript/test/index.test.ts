@@ -69,7 +69,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -215,7 +214,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -333,7 +331,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -452,7 +449,6 @@ export interface operations {
         };
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -498,7 +494,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS
       },
     ],
 
@@ -575,7 +570,6 @@ export interface operations {
         };
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -588,20 +582,20 @@ export interface components {
     schemas: {
         Object: {
             sharedDef?: components["schemas"]["StringType"];
-            nestedDef?: components["schemas"]["OtherObject"]["$defs"]["nestedDef"];
+            nestedDef?: NonNullable<components["schemas"]["OtherObject"]["$defs"]>["nestedDef"];
             remoteDef?: components["schemas"]["remoteDef"];
-            $defs: {
+            $defs?: {
                 hasDefs: boolean;
             };
         };
         ArrayOfDefs: components["schemas"]["StringType"][];
         OtherObject: {
-            $defs: {
+            $defs?: {
                 nestedDef: boolean;
             };
         };
         RemoteDefs: {
-            $defs: {
+            $defs?: {
                 remoteDef: components["schemas"]["remoteDef"];
             };
         };
@@ -615,7 +609,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -683,7 +676,6 @@ type WithRequired<T, K extends keyof T> = T & {
     [P in K]-?: T[P];
 };
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [

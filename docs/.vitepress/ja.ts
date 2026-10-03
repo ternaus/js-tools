@@ -12,6 +12,7 @@ const ja = {
           { text: "React Query", link: "/ja/openapi-react-query/" },
         ],
       },
+      { text: "Forks and authors", link: "/about" },
       { text: "GitHub Sponsors", link: "https://github.com/sponsors/ternaus" },
     ],
     sidebar: {

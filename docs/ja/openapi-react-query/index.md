@@ -1,6 +1,6 @@
 # Introduction
 
-openapi-react-queryは、[@tanstack/react-query](https://tanstack.com/query/latest/docs/framework/react/overview) と連携してOpenAPIスキーマを扱うための型安全な軽量ラッパー(1kb)です。
+openapi-react-queryは、[@tanstack/react-query](https://tanstack.com/query/latest/docs/framework/react/overview) と連携してOpenAPIスキーマを扱うための型安全なクライアントです。
 
 これは [openapi-fetch](../openapi-fetch/index.md) および [openapi-typescript](../introduction.md) を使用することで、以下のすべての機能が提供されます：
 

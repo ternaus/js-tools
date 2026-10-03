@@ -11,6 +11,7 @@ const zh = {
           { text: "Fetch 客户端", link: "/zh/openapi-fetch/" },
         ],
       },
+      { text: "Forks and authors", link: "/about" },
       { text: "GitHub Sponsors", link: "https://github.com/sponsors/ternaus" },
     ],
     sidebar: {

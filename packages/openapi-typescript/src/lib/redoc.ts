@@ -1,5 +1,6 @@
 import { performance } from "node:perf_hooks";
 import { Readable } from "node:stream";
+import { text } from "node:stream/consumers";
 import { fileURLToPath } from "node:url";
 import {
   BaseResolver,
@@ -12,7 +13,6 @@ import {
   type Config as RedoclyConfig,
   Source,
 } from "@redocly/openapi-core";
-import parseJson from "parse-json";
 import type { OpenAPI3 } from "../types.js";
 import { debug, error, warn } from "./utils.js";
 
@@ -43,24 +43,13 @@ export async function parseSchema(schema: unknown, { absoluteRef, resolver }: Pa
     throw result.originalError;
   }
   if (schema instanceof Readable) {
-    const contents = await new Promise<string>((resolve) => {
-      schema.resume();
-      schema.setEncoding("utf8");
-      let content = "";
-      schema.on("data", (chunk: string) => {
-        content += chunk;
-      });
-      schema.on("end", () => {
-        resolve(content.trim());
-      });
-    });
+    const contents = (await text(schema)).trim();
     return parseSchema(contents, { absoluteRef, resolver });
   }
   if (schema instanceof Buffer) {
     return parseSchema(schema.toString("utf8"), { absoluteRef, resolver });
   }
   if (typeof schema === "string") {
-    // URL
     if (schema.startsWith("http://") || schema.startsWith("https://") || schema.startsWith("file://")) {
       const url = new URL(schema);
       return parseSchema(url, {
@@ -68,14 +57,6 @@ export async function parseSchema(schema: unknown, { absoluteRef, resolver }: Pa
         resolver,
       });
     }
-    // JSON
-    if (schema[0] === "{") {
-      return {
-        source: new Source(absoluteRef, schema, "application/json"),
-        parsed: parseJson(schema),
-      };
-    }
-    // YAML
     return makeDocumentFromString(schema, absoluteRef);
   }
   if (typeof schema === "object" && !Array.isArray(schema)) {
@@ -132,12 +113,13 @@ export async function validateAndBundle(
     throw new Error("Unsupported schema format, expected `openapi: 3.x`");
   }
   const schema = parsed as OpenAPI3 & { swagger?: unknown };
-  const openapiVersion = Number.parseFloat(schema.openapi);
-  if (schema.swagger || !schema.openapi || Number.isNaN(openapiVersion) || openapiVersion < 3 || openapiVersion >= 4) {
+  const supportedVersion =
+    typeof schema.openapi === "string" && /^3\.[01]\.\d+(?:[-+][A-Za-z0-9.-]+)?$/.test(schema.openapi);
+  if (schema.swagger || !supportedVersion) {
     if (schema.swagger) {
       throw new Error("Unsupported Swagger version: 2.x. Use OpenAPI 3.x instead.");
     }
-    if (schema.openapi || openapiVersion < 3 || openapiVersion >= 4) {
+    if (schema.openapi) {
       throw new Error(`Unsupported OpenAPI version: ${schema.openapi}`);
     }
     throw new Error("Unsupported schema format, expected `openapi: 3.x`");

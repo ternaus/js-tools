@@ -27,10 +27,10 @@ export default function transformRequestBodyObject(
             path: nextPath,
           });
     const property = ts.factory.createPropertySignature(
-      /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-      /* name          */ tsPropertyIndex(contentType),
-      /* questionToken */ undefined,
-      /* type          */ mediaType,
+      tsModifiers({ readonly: options.ctx.immutable }),
+      tsPropertyIndex(contentType),
+      undefined,
+      mediaType,
     );
     addJSDocComment(mediaTypeObject, property);
     type.push(property);
@@ -38,21 +38,14 @@ export default function transformRequestBodyObject(
 
   return ts.factory.createTypeLiteralNode([
     ts.factory.createPropertySignature(
-      /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-      /* name          */ tsPropertyIndex("content"),
-      /* questionToken */ undefined,
-      /* type          */ ts.factory.createTypeLiteralNode(
+      tsModifiers({ readonly: options.ctx.immutable }),
+      tsPropertyIndex("content"),
+      undefined,
+      ts.factory.createTypeLiteralNode(
         type.length
           ? type
           : // add `"*/*": never` if no media types are defined
-            [
-              ts.factory.createPropertySignature(
-                /* modifiers     */ undefined,
-                /* name          */ tsPropertyIndex("*/*"),
-                /* questionToken */ QUESTION_TOKEN,
-                /* type          */ NEVER,
-              ),
-            ],
+            [ts.factory.createPropertySignature(undefined, tsPropertyIndex("*/*"), QUESTION_TOKEN, NEVER)],
       ),
     ),
   ]);

@@ -1,7 +1,4 @@
-import { fileURLToPath } from "node:url";
-import { astToString } from "../../../src/lib/ts.js";
-import transformSchemaObject from "../../../src/transform/schema-object.js";
-import { DEFAULT_CTX, type TestCase } from "../../test-helpers.js";
+import { DEFAULT_CTX, type TestCase, testSchemaObjects } from "../../test-helpers.js";
 
 const DEFAULT_OPTIONS = {
   path: "#/components/schemas/schema-object",
@@ -17,7 +14,6 @@ describe("composition", () => {
           type: ["string", "boolean", "number", "null"],
         },
         want: "string | boolean | number | null",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -28,7 +24,6 @@ describe("composition", () => {
           enum: [null, "blue", "green", "yellow"],
         },
         want: 'null | "blue" | "green" | "yellow"',
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -39,7 +34,6 @@ describe("composition", () => {
           enum: ["blue", "green", "yellow"],
         },
         want: '"blue" | "green" | "yellow" | null',
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -50,7 +44,6 @@ describe("composition", () => {
           enum: ["", "blue", "green", "yellow"],
         },
         want: '"" | "blue" | "green" | "yellow" | null',
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -58,7 +51,6 @@ describe("composition", () => {
       {
         given: { oneOf: [{ type: "string" }, { type: "number" }] },
         want: "string | number",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -71,7 +63,6 @@ describe("composition", () => {
           ],
         },
         want: '"hello" | "world"',
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -84,7 +75,6 @@ describe("composition", () => {
           ],
         },
         want: "0 | 1",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -94,7 +84,6 @@ describe("composition", () => {
           oneOf: [{ type: "integer" }, { type: "string" }, { type: "null" }],
         },
         want: "number | string | null",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -105,7 +94,6 @@ describe("composition", () => {
           nullable: true,
         },
         want: "(number | string) | null",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -123,7 +111,6 @@ describe("composition", () => {
 } | {
     boolean?: boolean;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -147,7 +134,6 @@ describe("composition", () => {
     bar?: string;
 })`,
       },
-      // options: DEFAULT_OPTIONS,
     ],
     [
       "oneOf > polymorphic",
@@ -157,7 +143,6 @@ describe("composition", () => {
           type: ["null", "integer", "string"],
         },
         want: "null | number | string",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -504,7 +489,6 @@ describe("composition", () => {
 } & {
     green: number;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -526,7 +510,6 @@ describe("composition", () => {
 } & {
     green: number;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -609,23 +592,9 @@ describe("composition", () => {
 } | {
     green: number;
 }`,
-        // options: DEFAULT_OPTIONS
       },
     ],
   ];
 
-  for (const [testName, { given, want, options = DEFAULT_OPTIONS, ci }] of tests) {
-    test.skipIf(ci?.skipIf)(
-      testName,
-      async () => {
-        const result = astToString(transformSchemaObject(given, options));
-        if (want instanceof URL) {
-          await expect(result).toMatchFileSnapshot(fileURLToPath(want));
-        } else {
-          expect(result).toBe(`${want}\n`);
-        }
-      },
-      ci?.timeout,
-    );
-  }
+  testSchemaObjects(tests, DEFAULT_OPTIONS);
 });

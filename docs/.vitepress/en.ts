@@ -7,13 +7,15 @@ const en = {
       {
         text: "Packages",
         items: [
-          { text: "ESLint rules for React 19", link: "/eslint-plugin-react/rules/" },
+          { text: "ESLint rules for React 19", link: "/eslint-plugin-react/" },
           { text: "Generator", link: "/introduction" },
           { text: "Fetch client", link: "/openapi-fetch/" },
           { text: "React Query", link: "/openapi-react-query/" },
+          { text: "Type helpers", link: "/openapi-typescript-helpers/" },
         ],
       },
-      { text: "GitHub Sponsors", link: "https://github.com/sponsors/ternaus" },
+      { text: "Forks and authors", link: "/about" },
+      { text: "Buy me a coffee", link: "https://github.com/sponsors/ternaus" },
     ],
     sidebar: {
       "/": [
@@ -49,7 +51,14 @@ const en = {
           ],
         },
         { text: "About", link: "/about" },
-        { text: "React ESLint rules", link: "/eslint-plugin-react/rules/" },
+        {
+          text: "React ESLint plugin",
+          items: [
+            { text: "Installation and config", link: "/eslint-plugin-react/" },
+            { text: "Rules", link: "/eslint-plugin-react/rules/" },
+          ],
+        },
+        { text: "Type helpers", link: "/openapi-typescript-helpers/" },
       ],
     },
   },

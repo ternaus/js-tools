@@ -257,7 +257,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": [
-                        string
+                        string?
                     ];
                 };
             };

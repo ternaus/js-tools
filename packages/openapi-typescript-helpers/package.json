@@ -16,7 +16,7 @@
     },
     "./package.json": "./package.json"
   },
-  "homepage": "https://ternaus.github.io/js-tools/introduction",
+  "homepage": "https://ternaus.github.io/js-tools/openapi-typescript-helpers/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ternaus/js-tools.git",

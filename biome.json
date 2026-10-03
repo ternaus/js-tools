@@ -11,6 +11,7 @@
       "!!**/.next",
       "!!**/.vitepress/cache",
       "!!**/.vitepress/dist",
+      "!!**/.vitepress/.temp",
       "!!packages/openapi-typescript/test/fixtures",
       "!!packages/openapi-fetch/examples",
       "!!packages/openapi-fetch/test/fixtures",

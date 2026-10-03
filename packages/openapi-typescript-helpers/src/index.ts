@@ -1,5 +1,3 @@
-// HTTP types
-
 export type HttpMethod = "get" | "put" | "post" | "delete" | "options" | "head" | "patch" | "trace";
 /** 2XX statuses */
 export type OkStatus = 200 | 201 | 202 | 203 | 204 | 206 | 207 | "2XX";
@@ -11,7 +9,7 @@ export type ErrorStatus = 500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 
 export type OKStatusUnion<T> = FilterKeys<T, OkStatus>;
 
 /** Get first error status, in order */
-// biome-ignore format: this is dumb but reliable
+// biome-ignore format: preserve explicit status priority; keyof unions do not preserve response order
 export type FirstErrorStatus<T> =
   T extends { 500: any }   ? T[500] :
   T extends { 501: any }   ? T[501] :
@@ -64,8 +62,6 @@ export type FirstErrorStatus<T> =
   T extends { 499: any }   ? T[499] :
   T extends { "4XX": any } ? T["4XX"] :
   T extends { default: any } ? T["default"] : never;
-
-// OpenAPI type helpers
 
 /** Given an OpenAPI **Paths Object**, find all paths that have the given method */
 export type PathsWithMethod<Paths extends {}, PathnameMethod extends HttpMethod> = {
@@ -122,7 +118,7 @@ export type OperationRequestBodyContent<T> =
 export type SuccessResponse<
   T extends Record<string | number, any>,
   Media extends MediaType = MediaType,
-> = GetResponseContent<T, Media, OkStatus>;
+> = GetResponseContent<T, Media, Extract<keyof T, OkStatus> extends never ? "default" : OkStatus>;
 
 export type GetResponseContent<
   T extends Record<string | number, any>,
@@ -180,46 +176,4 @@ type RequiredKeysOfHelper<T> = {
 /** Get the required keys of an object, or `never` if no keys are required */
 export type RequiredKeysOf<T> = RequiredKeysOfHelper<T> extends undefined ? never : RequiredKeysOfHelper<T>;
 
-// readOnly/writeOnly visibility markers and helpers
-
-/** Marker type for readOnly properties (excluded from request bodies) */
-export type $Read<T> = { readonly $read: T };
-
-/** Marker type for writeOnly properties (excluded from response bodies) */
-export type $Write<T> = { readonly $write: T };
-
-/**
- * Resolve type for reading (responses): strips $Write properties, unwraps $Read
- * - $Read<T> → T (readable), continues recursion
- * - $Write<T> → never (excluded from response)
- * - object → recursively resolve
- */
-export type Readable<T> =
-  T extends $Write<any>
-    ? never
-    : T extends $Read<infer U>
-      ? Readable<U>
-      : T extends (infer E)[]
-        ? Readable<E>[]
-        : T extends object
-          ? { [K in keyof T as NonNullable<T[K]> extends $Write<any> ? never : K]: Readable<T[K]> }
-          : T;
-
-/**
- * Resolve type for writing (requests): strips $Read properties, unwraps $Write
- * - $Write<T> → T (writable), continues recursion
- * - $Read<T> → never (excluded from request)
- * - object → recursively resolve
- */
-export type Writable<T> =
-  T extends $Read<any>
-    ? never
-    : T extends $Write<infer U>
-      ? Writable<U>
-      : T extends (infer E)[]
-        ? Writable<E>[]
-        : T extends object
-          ? { [K in keyof T as NonNullable<T[K]> extends $Read<any> ? never : K]: Writable<T[K]> } & {
-              [K in keyof T as NonNullable<T[K]> extends $Read<any> ? K : never]?: never;
-            }
-          : T;
+export type { $Read, $Write, Readable, Writable } from "./read-write.js";

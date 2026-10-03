@@ -86,9 +86,10 @@ const BOOLEAN_FLAGS = [
   "rootTypesKeepCasing",
   "rootTypesNoSchemaPrefix",
 ];
+const BOOLEAN_ALIASES = BOOLEAN_FLAGS.map((flag) => kebabCase(flag));
 
 const flags = parser(args, {
-  boolean: BOOLEAN_FLAGS,
+  boolean: [...BOOLEAN_FLAGS, ...BOOLEAN_ALIASES],
   string: ["output", "redocly"],
   alias: {
     redocly: ["c"],
@@ -97,17 +98,7 @@ const flags = parser(args, {
   },
 });
 
-const knownFlags = new Set([
-  "_",
-  "version",
-  "output",
-  "redocly",
-  "o",
-  "c",
-  "t",
-  ...BOOLEAN_FLAGS,
-  ...BOOLEAN_FLAGS.map((flag) => kebabCase(flag)),
-]);
+const knownFlags = new Set(["_", "version", "output", "redocly", "o", "c", "t", ...BOOLEAN_FLAGS, ...BOOLEAN_ALIASES]);
 for (const flag of Object.keys(flags)) {
   if (!knownFlags.has(flag)) {
     errorAndExit(`Unknown option: ${flag}`);
@@ -245,10 +236,7 @@ async function main() {
         done(name, api[REDOC_CONFIG_KEY].output, performance.now() - timeStart);
       }),
     );
-  }
-
-  // handle stdin
-  else if (!input) {
+  } else if (!input) {
     const result = await generateSchema(process.stdin, {
       ...flags,
       redocly,
@@ -264,11 +252,7 @@ async function main() {
       fs.writeFileSync(outFile, result, "utf8");
       done("stdin", flags.output, performance.now() - timeStart);
     }
-  }
-
-  // handle single file
-  else {
-    // throw error on glob
+  } else {
     if (input.includes("*")) {
       errorAndExit("Globs are not supported. Use the `apis` keys in redocly.yaml for multiple schemas.");
     }

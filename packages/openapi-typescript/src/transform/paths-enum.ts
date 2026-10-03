@@ -13,12 +13,10 @@ export default function makeApiPathsEnum(pathsObject: PathsObject): ts.EnumDecla
         continue;
       }
 
-      // Generate a name from the operation ID
       let pathName: string;
       if (operation.operationId) {
         pathName = operation.operationId;
       } else {
-        // If the operation ID is not present, construct a name from the method and path
         pathName = (method + url)
           .split("/")
           .map((part) => {

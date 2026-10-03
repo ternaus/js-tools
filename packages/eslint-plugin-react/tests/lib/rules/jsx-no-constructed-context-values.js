@@ -1,10 +1,14 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/jsx-no-constructed-context-values');
 
 const ruleTester = new RuleTester({
-  parserOptions: { ecmaVersion: 2024, ecmaFeatures: { jsx: true }, sourceType: 'module' },
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
 });
 
 ruleTester.run('jsx-no-constructed-context-values', rule, {

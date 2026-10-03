@@ -70,6 +70,18 @@ describe("CLI", () => {
   );
 
   describe("flags", () => {
+    test(
+      "accepts a kebab-case boolean flag before the input filename",
+      async () => {
+        const input = "./test/fixtures/examples/simple-example.yaml";
+        const { stdout: expected } = await execa(cmd, [input, "--enum-values"], { cwd });
+        const { stdout } = await execa(cmd, ["--enum-values", input], { cwd, input: "", timeout: TIMEOUT });
+        expect(stdout).toBe(expected);
+        expect(stdout).toMatch(/export const \w+Values:/);
+      },
+      TIMEOUT,
+    );
+
     test("--help", async () => {
       const { stdout } = await execa(cmd, ["--help"], { cwd });
       expect(stdout).toEqual(expect.stringMatching(/^Usage\n\s+\$ openapi-typescript \[input\] \[options\]/));

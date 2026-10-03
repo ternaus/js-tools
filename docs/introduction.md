@@ -2,6 +2,8 @@
 
 # Generate TypeScript types from OpenAPI schemas
 
+Fork of [openapi-typescript in openapi-ts/openapi-typescript](https://github.com/openapi-ts/openapi-typescript/tree/main/packages/openapi-typescript), maintained by [Vladimir Iglovikov](https://github.com/ternaus). Original authorship and MIT license notices are preserved.
+
 openapi-typescript turns [OpenAPI 3.0 & 3.1](https://spec.openapis.org/oas/latest.html) schemas into TypeScript quickly using Node.js. No Java/node-gyp/running OpenAPI servers necessary.
 
 The code is [MIT-licensed](https://github.com/ternaus/js-tools/blob/main/packages/openapi-typescript/LICENSE) and free for use.

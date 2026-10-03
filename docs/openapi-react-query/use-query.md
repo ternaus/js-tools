@@ -1,9 +1,9 @@
-# {{ $frontmatter.title }}
+# useQuery
 
 The `useQuery` method allows you to use the original [useQuery](https://tanstack.com/query/latest/docs/framework/react/guides/queries).
 
 - The result is the same as the original function.
-- The query key is `[method, path, params]`.
+- The query key is `[baseUrl, cacheKey, "query", method, path, init]`.
 - `data` and `error` are fully typed.
 - You can pass query options as fourth parameter.
 

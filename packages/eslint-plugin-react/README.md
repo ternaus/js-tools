@@ -4,9 +4,9 @@
 
 React 19+ rules for ESLint 10 that Biome does not provide. Use it alongside
 Biome 2.5.13 or later, which owns general JavaScript, JSX, DOM, and React
-checks. This independent native-ESM continuation of
+checks. This package is a fork of
 [`jsx-eslint/eslint-plugin-react`](https://github.com/jsx-eslint/eslint-plugin-react)
-preserves the `react/*` namespace, upstream Git history, and MIT attribution.
+maintained by [Vladimir Iglovikov](https://github.com/ternaus). It uses native ESM and preserves the `react/*` namespace, upstream Git history, and MIT attribution.
 
 ## What this package is for
 
@@ -211,8 +211,7 @@ Biome formats the repository and owns general JavaScript, JSX, DOM, and React
 rules; its completeness check requires every exception to be registered with a
 reason. ESLint enforces the residual Node.js and ESLint-plugin authoring rules.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for change requirements,
-[RELEASING.md](RELEASING.md) for publication, and [UPSTREAM.md](UPSTREAM.md) for
+See [CONTRIBUTING.md](CONTRIBUTING.md) for change requirements and [UPSTREAM.md](UPSTREAM.md) for
 the project's provenance and independent-maintenance policy.
 
 ## Cite this project

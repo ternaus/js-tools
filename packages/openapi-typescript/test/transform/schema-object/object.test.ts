@@ -1,7 +1,4 @@
-import { fileURLToPath } from "node:url";
-import { astToString } from "../../../src/index.js";
-import transformSchemaObject from "../../../src/transform/schema-object.js";
-import { DEFAULT_CTX, type TestCase } from "../../test-helpers.js";
+import { DEFAULT_CTX, type TestCase, testSchemaObjects } from "../../test-helpers.js";
 
 const DEFAULT_OPTIONS = {
   path: "#/schemas/components/schema-object",
@@ -25,7 +22,6 @@ describe("transformSchemaObject > object", () => {
     required: boolean;
     optional?: boolean;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -50,7 +46,6 @@ describe("transformSchemaObject > object", () => {
       {
         given: { type: "object" },
         want: "Record<string, never>",
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -66,7 +61,6 @@ describe("transformSchemaObject > object", () => {
 } & {
     [key: string]: string;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -96,7 +90,6 @@ describe("transformSchemaObject > object", () => {
         want: `{
     [key: string]: unknown;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -198,7 +191,6 @@ describe("transformSchemaObject > object", () => {
         want: `{
     string?: string;
 } | null`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -212,7 +204,6 @@ describe("transformSchemaObject > object", () => {
         want: `{
     string?: string;
 } | null`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -236,7 +227,6 @@ describe("transformSchemaObject > object", () => {
     /** @default false */
     optionalDefault: boolean;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -278,7 +268,6 @@ describe("transformSchemaObject > object", () => {
     /** @constant */
     constant: "a";
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -286,7 +275,6 @@ describe("transformSchemaObject > object", () => {
       {
         given: { const: "99" },
         want: `"99"`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -301,7 +289,6 @@ describe("transformSchemaObject > object", () => {
     /** @constant */
     constant: 1;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -323,7 +310,6 @@ describe("transformSchemaObject > object", () => {
     /** @constant */
     constant: 0;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -340,12 +326,11 @@ describe("transformSchemaObject > object", () => {
         },
         want: `{
     foo?: string;
-    $defs: {
+    $defs?: {
         /** @enum {string} */
         defEnum: "one" | "two" | "three";
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -359,7 +344,6 @@ describe("transformSchemaObject > object", () => {
         want: `{
     string?: string;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -612,7 +596,7 @@ describe("transformSchemaObject > object", () => {
         },
         want: `{
     foo?: string;
-    $defs: {
+    $defs?: {
         readOnlyDef: $Read<string>;
         writeOnlyDef: $Write<number>;
         normalDef: boolean;
@@ -626,18 +610,5 @@ describe("transformSchemaObject > object", () => {
     ],
   ];
 
-  for (const [testName, { given, want, options = DEFAULT_OPTIONS, ci }] of tests) {
-    test.skipIf(ci?.skipIf)(
-      testName,
-      async () => {
-        const result = astToString(transformSchemaObject(given, options));
-        if (want instanceof URL) {
-          await expect(result).toMatchFileSnapshot(fileURLToPath(want));
-        } else {
-          expect(result).toBe(`${want}\n`);
-        }
-      },
-      ci?.timeout,
-    );
-  }
+  testSchemaObjects(tests, DEFAULT_OPTIONS);
 });

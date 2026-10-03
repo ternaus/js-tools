@@ -18,7 +18,7 @@ export const COMMENT_HEADER = `/**
 `;
 
 /**
- * Convert an OpenAPI schema to TypesScript AST
+ * Convert an OpenAPI schema to TypeScript AST
  * @param {string|URL|object|Readable} source OpenAPI schema source:
  *   - YAML: string
  *   - JSON: parsed object
@@ -27,7 +27,7 @@ export const COMMENT_HEADER = `/**
  */
 export default async function openapiTS(
   source: string | URL | OpenAPI3 | Buffer | Readable,
-  options: OpenAPITSOptions = {} as Partial<OpenAPITSOptions>,
+  options: OpenAPITSOptions = {},
 ): Promise<ts.Node[]> {
   if (!source) {
     throw new Error("Empty schema. Please specify a URL, file path, or Redocly Config");

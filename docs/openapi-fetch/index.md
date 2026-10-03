@@ -2,10 +2,11 @@
 
 # Type-safe Fetch client for TypeScript
 
+Fork of [openapi-fetch in openapi-ts/openapi-typescript](https://github.com/openapi-ts/openapi-typescript/tree/main/packages/openapi-fetch), maintained by [Vladimir Iglovikov](https://github.com/ternaus). Original authorship and MIT license notices are preserved.
+
 `@ternaus/openapi-fetch` infers request and response types from generated OpenAPI declarations.
 
 
-The syntax is inspired by popular libraries like react-query or Apollo client, but without all the bells and whistles and in a 6 kb package.
 
 
 ```ts
@@ -42,7 +43,6 @@ Notice there are no generics, and no manual typing. Your endpoint’s request an
 - ✅ No manual typing of your API
 - ✅ Eliminates `any` types that hide bugs
 - ✅ Also eliminates `as` type overrides that can also hide bugs
-- ✅ All of this in a **6 kb** client package 🎉
 
 ## Setup
 

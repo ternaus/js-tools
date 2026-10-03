@@ -23,10 +23,10 @@ export default function transformResponsesObject(
             path: createRef([options.path, "responses", responseCode]),
           });
     const property = ts.factory.createPropertySignature(
-      /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-      /* name          */ tsPropertyIndex(responseCode),
-      /* questionToken */ undefined,
-      /* type          */ responseType,
+      tsModifiers({ readonly: options.ctx.immutable }),
+      tsPropertyIndex(responseCode),
+      undefined,
+      responseType,
     );
     addJSDocComment(responseObject, property);
     type.push(property);

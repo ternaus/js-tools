@@ -2,9 +2,12 @@ node_modules/
 dist/
 dist-ssr/
 coverage/
+test-results/
+playwright-report/
 .turbo/
 .vitepress/cache/
 .vitepress/dist/
+.vitepress/.temp/
 .next/
 .vercel/
 *.log
@@ -18,6 +21,7 @@ coverage/
 /_internal/
 /output/
 /docs/eslint-plugin-react/
+/docs/openapi-typescript-helpers/
 packages/openapi-fetch/examples/nextjs/next-env.d.ts
 packages/openapi-typescript/test/fixtures/cli-outputs/out/
 packages/openapi-typescript/test/fixtures/redocly/output/

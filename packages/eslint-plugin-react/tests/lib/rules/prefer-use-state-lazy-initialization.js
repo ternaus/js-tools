@@ -1,14 +1,19 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/prefer-use-state-lazy-initialization');
 
 const ruleTester = new RuleTester({
-  parserOptions: { ecmaVersion: 2024, ecmaFeatures: { jsx: true }, sourceType: 'module' },
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
 });
 
 ruleTester.run('prefer-use-state-lazy-initialization', rule, {
   valid: [
+    "import { useState } from 'react'; useState = other; useState(buildValue());",
     {
       code: "import { useState } from 'react'; function App() { const [value] = useState(() => readInitialValue()); return value; }",
     },

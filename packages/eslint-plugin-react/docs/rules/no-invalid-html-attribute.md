@@ -8,7 +8,7 @@ The rule uses the checked-in HTML metadata contract in
 published with this package, so linting does not read the filesystem or load an
 external validator at runtime. To update the metadata, verify the change
 against the relevant WHATWG section, record the source link, inspect the data
-diff, and run `yarn quality:complete`.
+diff, and run `pnpm run quality:complete`.
 
 Read [HTML and React attribute contract](../html-react-attribute-contract.md)
 before changing the metadata or adding a manual exception. It defines the

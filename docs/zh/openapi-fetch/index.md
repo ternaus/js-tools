@@ -4,7 +4,6 @@
 
 `@ternaus/openapi-fetch` 是根据 OpenAPI 类型定义推断请求和响应类型的 Fetch 客户端。
 
-语法灵感来自流行的库，如`react-query`或`Apollo client`，但没有所有这些功能，并且包大小仅为5 kb。
 
 
 ```ts
@@ -41,7 +40,6 @@ await client.PUT("/blogposts", {
 - ✅ 无需手动输入API
 - ✅ 消除隐藏错误的 `any` 类型
 - ✅ 还消除了可能隐藏错误的 `as` 类型覆盖
-- ✅ 所有这些都在一个 **6 kb** 的客户端包中 🎉
 
 ## 安装
 

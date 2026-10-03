@@ -1,6 +1,6 @@
 import { performance } from "node:perf_hooks";
 import ts from "@typescript/typescript6";
-import { addJSDocComment, oapiRef, stringToAST, tsModifiers, tsPropertyIndex } from "../lib/ts.js";
+import { addJSDocComment, BOOLEAN, NUMBER, oapiRef, STRING, tsModifiers, tsPropertyIndex } from "../lib/ts.js";
 import { createRef, debug, getEntries } from "../lib/utils.js";
 import type {
   GlobalContext,
@@ -27,13 +27,12 @@ export default function transformPathsObject(pathsObject: PathsObject, ctx: Glob
 
     const pathT = performance.now();
 
-    // handle $ref
     if ("$ref" in pathItemObject) {
       const property = ts.factory.createPropertySignature(
-        /* modifiers     */ tsModifiers({ readonly: ctx.immutable }),
-        /* name          */ tsPropertyIndex(url),
-        /* questionToken */ undefined,
-        /* type          */ oapiRef(pathItemObject.$ref),
+        tsModifiers({ readonly: ctx.immutable }),
+        tsPropertyIndex(url),
+        undefined,
+        oapiRef(pathItemObject.$ref),
       );
       addJSDocComment(pathItemObject, property);
       type.push(property);
@@ -43,59 +42,47 @@ export default function transformPathsObject(pathsObject: PathsObject, ctx: Glob
         ctx,
       });
 
-      // pathParamsAsTypes
       if (ctx.pathParamsAsTypes && url.includes("{")) {
         const pathParams = extractPathParams(pathItemObject, ctx);
-        const matches = url.match(PATH_PARAM_RE);
-        let rawPath = `\`${url}\``;
-        if (matches) {
-          for (const match of matches) {
-            const paramName = match.slice(1, -1);
-            const param = pathParams[paramName];
-            switch (param?.schema?.type) {
-              case "number":
-              case "integer":
-                rawPath = rawPath.replace(match, `\${number}`);
-                break;
-              case "boolean":
-                rawPath = rawPath.replace(match, `\${boolean}`);
-                break;
-              default:
-                rawPath = rawPath.replace(match, `\${string}`);
-                break;
-            }
-          }
-          // note: creating a string template literal’s AST manually is hard!
-          // just pass an arbitrary string to TS
-          const pathType = (stringToAST(rawPath)[0] as any)?.expression;
-          if (pathType) {
-            type.push(
-              ts.factory.createIndexSignature(
-                /* modifiers     */ tsModifiers({ readonly: ctx.immutable }),
-                /* parameters    */ [
-                  ts.factory.createParameterDeclaration(
-                    /* modifiers      */ undefined,
-                    /* dotDotDotToken */ undefined,
-                    /* name           */ "path",
-                    /* questionToken  */ undefined,
-                    /* type           */ pathType,
-                    /* initializer    */ undefined,
-                  ),
-                ],
-                /* type          */ pathItemType,
-              ),
-            );
-            continue;
-          }
+        const matches = [...url.matchAll(PATH_PARAM_RE)];
+        const first = matches[0];
+        if (first) {
+          const spans = matches.map((match, index) => {
+            const schemaType = pathParams[match[0].slice(1, -1)]?.schema?.type;
+            const parameterType =
+              schemaType === "number" || schemaType === "integer"
+                ? NUMBER
+                : schemaType === "boolean"
+                  ? BOOLEAN
+                  : STRING;
+            const text = url.slice(match.index + match[0].length, matches[index + 1]?.index);
+            const literal =
+              index === matches.length - 1
+                ? ts.factory.createTemplateTail(text)
+                : ts.factory.createTemplateMiddle(text);
+            return ts.factory.createTemplateLiteralTypeSpan(parameterType, literal);
+          });
+          const pathType = ts.factory.createTemplateLiteralType(
+            ts.factory.createTemplateHead(url.slice(0, first.index)),
+            spans,
+          );
+          type.push(
+            ts.factory.createIndexSignature(
+              tsModifiers({ readonly: ctx.immutable }),
+              [ts.factory.createParameterDeclaration(undefined, undefined, "path", undefined, pathType, undefined)],
+              pathItemType,
+            ),
+          );
+          continue;
         }
       }
 
       type.push(
         ts.factory.createPropertySignature(
-          /* modifiers     */ tsModifiers({ readonly: ctx.immutable }),
-          /* name          */ tsPropertyIndex(url),
-          /* questionToken */ undefined,
-          /* type          */ pathItemType,
+          tsModifiers({ readonly: ctx.immutable }),
+          tsPropertyIndex(url),
+          undefined,
+          pathItemType,
         ),
       );
 

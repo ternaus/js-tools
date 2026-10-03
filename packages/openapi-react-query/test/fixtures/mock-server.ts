@@ -10,37 +10,13 @@ import {
 } from "msw";
 import { setupServer } from "msw/node";
 
-/**
- * Mock server instance
- */
 export const server = setupServer();
-
-/**
- * Default baseUrl for tests
- */
 export const baseUrl = "https://api.example.com" as const;
 
-/**
- * Test path helper, returns an absolute URL based on
- * the given path and base
- */
 export function toAbsoluteURL(path: string, base: string = baseUrl) {
-  // If we have absolute path
-  // if (URL.canParse(path)) {
-  //   return new URL(path).toString();
-  // }
-
-  // Otherwise we want to support relative paths
-  // where base may also contain some part of the path
-  // e.g.
-  // base = https://api.foo.bar/v1/
-  // path = /self
-  // should result in https://api.foo.bar/v1/self
-
-  // Construct base URL
+  // Preserve a pathname such as /v1 from the API base URL.
   const baseUrlInstance = new URL(base);
 
-  // prepend base url url pathname to path and ensure only one slash between the URL parts
   const newPath = `${baseUrlInstance.pathname}/${path}`.replace(/\/+/g, "/");
 
   return new URL(newPath, baseUrlInstance).toString();
@@ -49,8 +25,6 @@ export function toAbsoluteURL(path: string, base: string = baseUrl) {
 export type MswHttpMethod = keyof typeof http;
 
 export interface MockRequestHandlerOptions<
-  // Recreate the generic signature of the HTTP resolver
-  // so the arguments passed to http handlers propagate here.
   Params extends PathParams<keyof Params> = PathParams,
   RequestBodyType extends DefaultBodyType = DefaultBodyType,
   ResponseBodyType extends DefaultBodyType = undefined,
@@ -72,12 +46,7 @@ export interface MockRequestHandlerOptions<
   handler?: HttpResponseResolver<Params, RequestBodyType, ResponseBodyType>;
 }
 
-/**
- *  Configures a msw request handler using the provided options.
- */
 export function useMockRequestHandler<
-  // Recreate the generic signature of the HTTP resolver
-  // so the arguments passed to http handlers propagate here.
   Params extends PathParams<keyof Params> = PathParams,
   RequestBodyType extends DefaultBodyType = DefaultBodyType,
   ResponseBodyType extends DefaultBodyType = undefined,

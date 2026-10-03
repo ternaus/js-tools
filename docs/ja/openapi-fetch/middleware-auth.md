@@ -88,7 +88,6 @@ client.eject(myMiddleware);
 
 デフォルトでは、`openapi-fetch` はパフォーマンスのためにリクエストやレスポンスをクローン**しません**。クリーンなコピーを作成するのはあなた次第です。
 
-<!-- prettier-ignore -->
 ```ts
 const myMiddleware: Middleware = {
   onResponse({ response }) {

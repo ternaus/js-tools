@@ -9,13 +9,24 @@ export type $Read<T> = {
 export type $Write<T> = {
     readonly $write: T;
 };
-export type Readable<T> = T extends $Write<any> ? never : T extends $Read<infer U> ? Readable<U> : T extends (infer E)[] ? Readable<E>[] : T extends object ? {
-    [K in keyof T as NonNullable<T[K]> extends $Write<any> ? never : K]: Readable<T[K]>;
+type IsMarker<T, Marker> = [
+    NonNullable<T>
+] extends [
+    never
+] ? false : NonNullable<T> extends Marker ? true : false;
+type Scalar = string | number | boolean | bigint | symbol | null | undefined;
+type Callable = (...args: never[]) => unknown;
+export type Readable<T> = T extends $Write<unknown> ? never : T extends $Read<infer U> ? Readable<U> : T extends Scalar | Callable ? T : T extends readonly unknown[] ? {
+    [K in keyof T]: Readable<T[K]>;
+} : T extends object ? {
+    [K in keyof T as IsMarker<T[K], $Write<unknown>> extends true ? never : K]: Readable<T[K]>;
 } : T;
-export type Writable<T> = T extends $Read<any> ? never : T extends $Write<infer U> ? Writable<U> : T extends (infer E)[] ? Writable<E>[] : T extends object ? {
-    [K in keyof T as NonNullable<T[K]> extends $Read<any> ? never : K]: Writable<T[K]>;
+export type Writable<T> = T extends $Read<unknown> ? never : T extends $Write<infer U> ? Writable<U> : T extends Scalar | Callable ? T : T extends readonly unknown[] ? {
+    [K in keyof T]: Writable<T[K]>;
+} : T extends object ? {
+    [K in keyof T as IsMarker<T[K], $Read<unknown>> extends true ? never : K]: Writable<T[K]>;
 } & {
-    [K in keyof T as NonNullable<T[K]> extends $Read<any> ? K : never]?: never;
+    [K in keyof T as IsMarker<T[K], $Read<unknown>> extends true ? K : never]?: never;
 } : T;
 export interface paths {
     "/users": {

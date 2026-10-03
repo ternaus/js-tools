@@ -88,7 +88,6 @@ client.eject(myMiddleware);
 
 默认情况下，`openapi-fetch` **不会**为了性能而任意克隆请求/响应；由您负责创建干净的副本。
 
-<!-- prettier-ignore -->
 ```ts
 const myMiddleware: Middleware = {
   onResponse(res) {

@@ -1,6 +1,6 @@
 # Upstream provenance and independent maintenance
 
-This standalone repository started from
+This package is a fork of
 [`jsx-eslint/eslint-plugin-react`](https://github.com/jsx-eslint/eslint-plugin-react)
 at commit [`c99d3b274efbc593e46563358e7b77cad8d01957`](https://github.com/jsx-eslint/eslint-plugin-react/commit/c99d3b274efbc593e46563358e7b77cad8d01957).
 The complete upstream Git history and MIT license are retained. The repository

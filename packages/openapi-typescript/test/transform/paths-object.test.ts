@@ -104,7 +104,6 @@ describe("transformPathsObject", () => {
         trace?: never;
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [

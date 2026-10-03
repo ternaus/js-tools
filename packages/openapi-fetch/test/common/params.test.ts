@@ -19,23 +19,19 @@ describe("params", () => {
         return found ? Response.json(found) : Response.json({ code: 404, message: "Not found" }, { status: 404 });
       });
 
-      // assert missing options throws error
       await client
         // @ts-expect-error
         .GET("/resources/{id}");
 
-      // assert missing options.params throws error
       await client
         // @ts-expect-error
         .GET("/resources/{id}", {});
 
-      // assert missing path params throws error
       await client.GET("/resources/{id}", {
         // @ts-expect-error
         params: {},
       });
 
-      // assert empty paths object throws error
       await client.GET("/resources/{id}", {
         params: {
           // @ts-expect-error
@@ -43,7 +39,6 @@ describe("params", () => {
         },
       });
 
-      // assert right name, mismatched type throws error
       await client.GET("/resources/{id}", {
         params: {
           path: {
@@ -53,7 +48,6 @@ describe("params", () => {
         },
       });
 
-      // assert right name, right type passes
       const result = await client.GET("/resources/{id}", { params: { path: { id: 456 } } });
       expect(result.data).toEqual(resource2);
     });
@@ -61,25 +55,22 @@ describe("params", () => {
     test("typechecks (empty path params)", async () => {
       const client = createObservedClient<paths>({}, async () => Response.json([resource1, resource2, resource3]));
 
-      // assert unneeded path params throws type error
       await client.GET("/resources", {
+        // @ts-expect-error
         params: {
-          // @ts-expect-error
           path: { id: 123 },
         },
       });
 
-      // assert even empty objects throw type error
       await client.GET("/resources", {
+        // @ts-expect-error
         params: {
-          // @ts-expect-error
           path: {},
         },
       });
 
       const { data } = await client.GET("/resources");
 
-      // assert data matches expected type
       if (data) {
         assertType<Resource[]>(data);
         expect(data).toEqual([resource1, resource2, resource3]); // also test runtime, too
@@ -319,7 +310,6 @@ describe("params", () => {
         params: { header: { "x-required-header": true } },
       });
 
-      // (no error)
       const response = await client.GET("/header-params", {
         params: { header: { "x-required-header": "correct" } },
       });
@@ -366,7 +356,7 @@ describe("params", () => {
 
       test("array params (empty, multiple)", async () => {
         let actualURL = new URL("https://fakeurl.example");
-        const client = createObservedClient<paths>({}, async (req) => {
+        const client = createObservedClient<Record<string, { get: {} }>>({}, async (req) => {
           actualURL = new URL(req.url);
           return Response.json({});
         });

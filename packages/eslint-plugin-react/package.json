@@ -84,7 +84,7 @@
   "bugs": {
     "url": "https://github.com/ternaus/js-tools/issues"
   },
-  "homepage": "https://github.com/ternaus/js-tools/tree/main/packages/eslint-plugin-react",
+  "homepage": "https://ternaus.github.io/js-tools/eslint-plugin-react/",
   "keywords": [
     "eslint",
     "eslint-plugin",
@@ -99,7 +99,6 @@
   },
   "devDependencies": {
     "c8": "^12.0.0",
-    "mocha": "^11.8.0",
-    "sinon": "^21.0.0"
+    "mocha": "^11.8.0"
   }
 }

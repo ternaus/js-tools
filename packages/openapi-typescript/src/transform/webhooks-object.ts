@@ -10,12 +10,12 @@ export default function transformWebhooksObject(webhooksObject: WebhooksObject, 
   for (const [name, pathItemObject] of getEntries(webhooksObject, options)) {
     type.push(
       ts.factory.createPropertySignature(
-        /* modifiers     */ tsModifiers({
+        tsModifiers({
           readonly: options.immutable,
         }),
-        /* name          */ tsPropertyIndex(name),
-        /* questionToken */ undefined,
-        /* type          */ transformPathItemObject(pathItemObject, {
+        tsPropertyIndex(name),
+        undefined,
+        transformPathItemObject(pathItemObject, {
           path: createRef(["webhooks", name]),
           ctx: options,
         }),

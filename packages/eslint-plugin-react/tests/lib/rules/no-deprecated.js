@@ -1,13 +1,13 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/no-deprecated');
 
 const ruleTester = new RuleTester({
-  parserOptions: {
-    ecmaFeatures: { jsx: true },
+  languageOptions: {
     ecmaVersion: 2024,
     sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
   },
 });
 

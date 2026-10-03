@@ -1,10 +1,14 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/view-transition-event-requires-cleanup');
 
 const ruleTester = new RuleTester({
-  parserOptions: { ecmaFeatures: { jsx: true }, ecmaVersion: 2024, sourceType: 'module' },
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
 });
 
 ruleTester.run('view-transition-event-requires-cleanup', rule, {

@@ -201,7 +201,7 @@ describe("client", () => {
       );
 
       expectTypeOf(result.current[0].data).toEqualTypeOf<string[] | undefined>();
-      expectTypeOf(result.current[0].error).toEqualTypeOf<{ code: number; message: string } | null>();
+      expectTypeOf(result.current[0].error).toEqualTypeOf<{ code: number; message: string } | Error | null>();
 
       expectTypeOf(result.current[1]).toEqualTypeOf<(typeof result.current)[0]>();
 
@@ -213,7 +213,7 @@ describe("client", () => {
           }
         | undefined
       >();
-      expectTypeOf(result.current[2].error).toEqualTypeOf<{ code: number; message: string } | null>();
+      expectTypeOf(result.current[2].error).toEqualTypeOf<{ code: number; message: string } | Error | null>();
 
       expectTypeOf(result.current[3]).toEqualTypeOf<(typeof result.current)[2]>();
 
@@ -246,7 +246,7 @@ describe("client", () => {
       );
 
       expectTypeOf(result.current.data).toEqualTypeOf<"select(true)" | undefined>();
-      expectTypeOf(result.current.error).toEqualTypeOf<false | null>();
+      expectTypeOf(result.current.error).toEqualTypeOf<false | Error | null>();
     });
 
     it("returns query options that can be passed to useSuspenseQuery", async () => {
@@ -272,7 +272,7 @@ describe("client", () => {
       await waitFor(() => expect(result.current).not.toBeNull());
 
       expectTypeOf(result.current.data).toEqualTypeOf<"select(true)">();
-      expectTypeOf(result.current.error).toEqualTypeOf<false | null>();
+      expectTypeOf(result.current.error).toEqualTypeOf<false | Error | null>();
     });
 
     it("returns query options without an init", async () => {
@@ -282,7 +282,7 @@ describe("client", () => {
       });
       const client = createClient(fetchClient);
 
-      expect(client.queryOptions("get", "/foo").queryKey.length).toBe(2);
+      expect(client.queryOptions("get", "/foo").queryKey.length).toBe(6);
     });
   });
 
@@ -434,7 +434,7 @@ describe("client", () => {
 
       expectTypeOf(data).toEqualTypeOf<MethodResponse<typeof client, "get", "/string-array"> | undefined>();
       expectTypeOf(data).toEqualTypeOf<string[] | undefined>();
-      expectTypeOf(error).toEqualTypeOf<{ code: number; message: string } | null>();
+      expectTypeOf(error).toEqualTypeOf<{ code: number; message: string } | Error | null>();
     });
 
     it("should infer correct data when used with select property", async () => {
@@ -952,7 +952,6 @@ describe("client", () => {
       const fetchClient = createFetchClient<paths>({ baseUrl });
       const client = createClient(fetchClient);
 
-      // First page request handler
       const firstRequestHandler = useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -981,15 +980,12 @@ describe("client", () => {
         { wrapper },
       );
 
-      // Wait for initial query to complete
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      // Verify first request
       const firstRequestUrl = firstRequestHandler.getRequestUrl();
       expect(firstRequestUrl?.searchParams.get("limit")).toBe("3");
       expect(firstRequestUrl?.searchParams.get("cursor")).toBe("0");
 
-      // Set up mock for second page before triggering next page fetch
       const secondRequestHandler = useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -998,21 +994,17 @@ describe("client", () => {
         body: { items: [4, 5, 6], nextPage: 2 },
       });
 
-      // Fetch next page
       await act(async () => {
         await result.current.fetchNextPage();
-        // Force a rerender to ensure state is updated
         rerender();
       });
 
-      // Wait for second page to be fetched and verify loading states
       await waitFor(() => {
         expect(result.current.isFetching).toBe(false);
         expect(result.current.hasNextPage).toBe(true);
         expect(result.current.data?.pages).toHaveLength(2);
       });
 
-      // Verify second request
       const secondRequestUrl = secondRequestHandler.getRequestUrl();
       expect(secondRequestUrl?.searchParams.get("limit")).toBe("3");
       expect(secondRequestUrl?.searchParams.get("cursor")).toBe("1");
@@ -1023,13 +1015,11 @@ describe("client", () => {
       expect(result.current.data).toBeDefined();
       expect(result.current.data?.pages[1].nextPage).toBe(2);
 
-      // Verify the complete data structure
       expect(result.current.data?.pages).toEqual([
         { items: [1, 2, 3], nextPage: 1 },
         { items: [4, 5, 6], nextPage: 2 },
       ]);
 
-      // Verify we can access all items through pages
       const allItems = result.current.data?.pages.flatMap((page) => page.items);
       expect(allItems).toEqual([1, 2, 3, 4, 5, 6]);
     });
@@ -1037,7 +1027,6 @@ describe("client", () => {
       const fetchClient = createFetchClient<paths>({ baseUrl });
       const client = createClient(fetchClient);
 
-      // First page request handler
       const firstRequestHandler = useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -1070,15 +1059,12 @@ describe("client", () => {
         { wrapper },
       );
 
-      // Wait for initial query to complete
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      // Verify first request
       const firstRequestUrl = firstRequestHandler.getRequestUrl();
       expect(firstRequestUrl?.searchParams.get("limit")).toBe("3");
       expect(firstRequestUrl?.searchParams.get("cursor")).toBe("0");
 
-      // Set up mock for second page before triggering next page fetch
       useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -1087,19 +1073,16 @@ describe("client", () => {
         body: { items: [4, 5, 6], nextPage: 2 },
       });
 
-      // Fetch next page
       await act(async () => {
         await result.current.fetchNextPage();
         rerender();
       });
 
-      // Wait for second page to complete
       await waitFor(() => {
         expect(result.current.isFetching).toBe(false);
         expect(result.current.hasNextPage).toBe(true);
       });
 
-      // Verify reversed pages and pageParams
       expect(result.current.data).toBeDefined();
 
       // Since pages are reversed, the second page will now come first
@@ -1108,10 +1091,8 @@ describe("client", () => {
         { items: [1, 2, 3], nextPage: 1 },
       ]);
 
-      // Verify reversed pageParams
       expect(result.current.data?.pageParams).toEqual([1, 0]);
 
-      // Verify all items from reversed pages
       const allItems = result.current.data?.pages.flatMap((page) => page.items);
       expect(allItems).toEqual([4, 5, 6, 1, 2, 3]);
     });
@@ -1119,7 +1100,6 @@ describe("client", () => {
       const fetchClient = createFetchClient<paths>({ baseUrl });
       const client = createClient(fetchClient);
 
-      // First page request handler
       const firstRequestHandler = useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -1149,15 +1129,12 @@ describe("client", () => {
         { wrapper },
       );
 
-      // Wait for initial query to complete
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      // Verify first request
       const firstRequestUrl = firstRequestHandler.getRequestUrl();
       expect(firstRequestUrl?.searchParams.get("limit")).toBe("3");
       expect(firstRequestUrl?.searchParams.get("follow_cursor")).toBe("0");
 
-      // Set up mock for second page before triggering next page fetch
       const secondRequestHandler = useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -1166,21 +1143,17 @@ describe("client", () => {
         body: { items: [4, 5, 6], nextPage: 2 },
       });
 
-      // Fetch next page
       await act(async () => {
         await result.current.fetchNextPage();
-        // Force a rerender to ensure state is updated
         rerender();
       });
 
-      // Wait for second page to be fetched and verify loading states
       await waitFor(() => {
         expect(result.current.isFetching).toBe(false);
         expect(result.current.hasNextPage).toBe(true);
         expect(result.current.data?.pages).toHaveLength(2);
       });
 
-      // Verify second request
       const secondRequestUrl = secondRequestHandler.getRequestUrl();
       expect(secondRequestUrl?.searchParams.get("limit")).toBe("3");
       expect(secondRequestUrl?.searchParams.get("follow_cursor")).toBe("1");
@@ -1191,13 +1164,11 @@ describe("client", () => {
       expect(result.current.data).toBeDefined();
       expect(result.current.data?.pages[1].nextPage).toBe(2);
 
-      // Verify the complete data structure
       expect(result.current.data?.pages).toEqual([
         { items: [1, 2, 3], nextPage: 1 },
         { items: [4, 5, 6], nextPage: 2 },
       ]);
 
-      // Verify we can access all items through pages
       const allItems = result.current.data?.pages.flatMap((page) => page.items);
       expect(allItems).toEqual([1, 2, 3, 4, 5, 6]);
     });
@@ -1205,7 +1176,6 @@ describe("client", () => {
       const fetchClient = createFetchClient<paths>({ baseUrl });
       const client = createClient(fetchClient);
 
-      // First page request handler
       useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -1235,13 +1205,11 @@ describe("client", () => {
         { wrapper },
       );
 
-      // Wait for initial query to complete
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expectTypeOf(result.current.data).toEqualTypeOf<number[] | undefined>();
       expect(result.current.data).toEqual([1, 2, 3]);
 
-      // Set up mock for second page before triggering next page fetch
       useMockRequestHandler({
         baseUrl,
         method: "get",
@@ -1250,14 +1218,11 @@ describe("client", () => {
         body: { items: [4, 5, 6], nextPage: 2 },
       });
 
-      // Fetch next page
       await act(async () => {
         await result.current.fetchNextPage();
-        // Force a rerender to ensure state is updated
         rerender();
       });
 
-      // Wait for second page to be fetched and verify loading states
       await waitFor(() => {
         expect(result.current.isFetching).toBe(false);
         expect(result.current.hasNextPage).toBe(true);

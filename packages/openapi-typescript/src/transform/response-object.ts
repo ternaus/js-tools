@@ -24,7 +24,6 @@ export default function transformResponseObject(
 ): ts.TypeNode {
   const type: ts.TypeElement[] = [];
 
-  // headers
   const headersObject: ts.TypeElement[] = [];
   if (responseObject.headers) {
     for (const [name, headerObject] of getEntries(responseObject.headers, options.ctx)) {
@@ -37,10 +36,10 @@ export default function transformResponseObject(
               path: createRef([options.path, "headers", name]),
             });
       const property = ts.factory.createPropertySignature(
-        /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-        /* name          */ tsPropertyIndex(name),
-        /* questionToken */ optional,
-        /* type          */ subType,
+        tsModifiers({ readonly: options.ctx.immutable }),
+        tsPropertyIndex(name),
+        optional,
+        subType,
       );
       addJSDocComment(headerObject, property);
       headersObject.push(property);
@@ -49,37 +48,36 @@ export default function transformResponseObject(
   // allow additional unknown headers
   headersObject.push(
     ts.factory.createIndexSignature(
-      /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-      /* parameters */ [
+      tsModifiers({ readonly: options.ctx.immutable }),
+      [
         ts.factory.createParameterDeclaration(
-          /* modifiers      */ undefined,
-          /* dotDotDotToken */ undefined,
-          /* name           */ ts.factory.createIdentifier("name"),
-          /* questionToken  */ undefined,
-          /* type           */ STRING,
+          undefined,
+          undefined,
+          ts.factory.createIdentifier("name"),
+          undefined,
+          STRING,
         ),
       ],
-      /* type          */ UNKNOWN,
+      UNKNOWN,
     ),
   );
   type.push(
     ts.factory.createPropertySignature(
-      /* modifiers     */ undefined,
-      /* name          */ tsPropertyIndex("headers"),
-      /* questionToken */ undefined,
-      /* type          */ ts.factory.createTypeLiteralNode(headersObject),
+      undefined,
+      tsPropertyIndex("headers"),
+      undefined,
+      ts.factory.createTypeLiteralNode(headersObject),
     ),
   );
 
-  // content
   const contentObject: ts.TypeElement[] = [];
   if (responseObject.content) {
     for (const [contentType, mediaTypeObject] of getEntries(responseObject.content ?? {}, options.ctx)) {
       const property = ts.factory.createPropertySignature(
-        /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-        /* name          */ tsPropertyIndex(contentType),
-        /* questionToken */ undefined,
-        /* type          */ transformMediaTypeObject(mediaTypeObject, {
+        tsModifiers({ readonly: options.ctx.immutable }),
+        tsPropertyIndex(contentType),
+        undefined,
+        transformMediaTypeObject(mediaTypeObject, {
           ...options,
           path: createRef([options.path, "content", contentType]),
         }),
@@ -91,21 +89,14 @@ export default function transformResponseObject(
   if (contentObject.length) {
     type.push(
       ts.factory.createPropertySignature(
-        /* modifiers     */ undefined,
-        /* name          */ tsPropertyIndex("content"),
-        /* questionToken */ undefined,
-        /* type          */ ts.factory.createTypeLiteralNode(contentObject),
+        undefined,
+        tsPropertyIndex("content"),
+        undefined,
+        ts.factory.createTypeLiteralNode(contentObject),
       ),
     );
   } else {
-    type.push(
-      ts.factory.createPropertySignature(
-        /* modifiers     */ undefined,
-        /* name          */ tsPropertyIndex("content"),
-        /* questionToken */ QUESTION_TOKEN,
-        /* type          */ NEVER,
-      ),
-    );
+    type.push(ts.factory.createPropertySignature(undefined, tsPropertyIndex("content"), QUESTION_TOKEN, NEVER));
   }
 
   return ts.factory.createTypeLiteralNode(type);

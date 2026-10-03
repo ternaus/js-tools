@@ -55,7 +55,6 @@
   "dependencies": {
     "@redocly/openapi-core": "^2.57.0",
     "change-case": "^5.4.4",
-    "parse-json": "^8.3.0",
     "yargs-parser": "^22.0.0",
     "@typescript/typescript6": "6.0.2"
   },

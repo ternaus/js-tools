@@ -162,7 +162,6 @@ Since middleware uses native `Request` and `Response` instances, it’s importan
 
 By default, `openapi-fetch` will **NOT** arbitrarily clone requests/responses for performance; it’s up to you to create clean copies.
 
-<!-- prettier-ignore -->
 ```ts
 const myMiddleware: Middleware = {
   async onResponse({ response }) {

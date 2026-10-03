@@ -258,7 +258,7 @@ export function transformSchemaObjectWithComposition(
       }
       // otherwise, if this is a schema object, combine parent `required[]` with its own, if any
       else {
-        const itemRequired = [...(required ?? [])];
+        const itemRequired = (required ?? []).filter((key) => "properties" in item && !!item.properties?.[key]);
         if (typeof item === "object" && Array.isArray(item.required)) {
           itemRequired.push(...item.required);
         }
@@ -290,7 +290,7 @@ export function transformSchemaObjectWithComposition(
   // (note: this may seem counterintuitive, but as TypeScript’s unions are not true XORs, they mimic behavior closer to anyOf than oneOf)
   const anyOfType = collectUnionCompositions(schemaObject.anyOf ?? [], "anyOf");
   if (anyOfType.length) {
-    finalType = tsUnion([...(finalType ? [finalType] : []), ...anyOfType]);
+    finalType = tsIntersection([...(finalType ? [finalType] : []), tsUnion(anyOfType)]);
   }
   // oneOf: union (within intersection with other types, if any)
   const oneOfType = collectUnionCompositions(
@@ -393,105 +393,98 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
       return BOOLEAN;
     }
 
-    // type: array (with support for tuples)
     if (schemaObject.type === "array") {
-      // default to `unknown[]`
-      let itemType: ts.TypeNode = UNKNOWN;
-      // tuple type
-      if (schemaObject.prefixItems || Array.isArray(schemaObject.items)) {
-        const prefixItems = schemaObject.prefixItems ?? (schemaObject.items as (SchemaObject | ReferenceObject)[]);
-        itemType = ts.factory.createTupleTypeNode(prefixItems.map((item) => transformSchemaObject(item, options)));
-      }
-      // standard array type
-      else if (schemaObject.items) {
-        if (hasKey(schemaObject.items, "type") && schemaObject.items.type === "array") {
-          itemType = ts.factory.createArrayTypeNode(transformSchemaObject(schemaObject.items, options));
-        } else {
-          itemType = transformSchemaObject(schemaObject.items, options);
-        }
+      const min = typeof schemaObject.minItems === "number" && schemaObject.minItems >= 0 ? schemaObject.minItems : 0;
+      const max =
+        typeof schemaObject.maxItems === "number" && schemaObject.maxItems >= 0 ? schemaObject.maxItems : undefined;
+      if (max !== undefined && min > max) {
+        return NEVER;
       }
 
-      const min: number =
-        typeof schemaObject.minItems === "number" && schemaObject.minItems >= 0 ? schemaObject.minItems : 0;
-      const max: number | undefined =
-        typeof schemaObject.maxItems === "number" && schemaObject.maxItems >= 0 && min <= schemaObject.maxItems
-          ? schemaObject.maxItems
-          : undefined;
-      const estimateCodeSize = typeof max !== "number" ? min : (max * (max + 1) - min * (min - 1)) / 2;
-      if (
-        options.ctx.arrayLength &&
-        (min !== 0 || max !== undefined) &&
-        estimateCodeSize < 30 // "30" is an arbitrary number but roughly around when TS starts to struggle with tuple inference in practice
-      ) {
-        if (min === max) {
-          const elements: ts.TypeNode[] = [];
-          for (let i = 0; i < min; i++) {
-            elements.push(itemType);
+      if (schemaObject.prefixItems || Array.isArray(schemaObject.items)) {
+        const prefixItems = schemaObject.prefixItems ?? (schemaObject.items as (SchemaObject | ReferenceObject)[]);
+        if (!schemaObject.prefixItems) {
+          return tupleType(
+            prefixItems.map((item) => transformSchemaObject(item, options)),
+            options.ctx.immutable,
+          );
+        }
+        const elements = prefixItems.slice(0, max).map((item, index) => {
+          const type = transformSchemaObject(item, options);
+          return index < min ? type : ts.factory.createOptionalTypeNode(type);
+        });
+        const tail =
+          schemaObject.items === undefined
+            ? UNKNOWN
+            : transformSchemaObject(schemaObject.items as SchemaObject, options);
+        if (tail === NEVER && min > elements.length) {
+          return NEVER;
+        }
+        if (tail !== NEVER && (max === undefined || max > elements.length)) {
+          const boundedMax = options.ctx.arrayLength && max !== undefined && max < 30 ? max : undefined;
+          const requiredLength = min < 30 ? min : elements.length;
+          for (let index = elements.length; index < (boundedMax ?? requiredLength); index++) {
+            elements.push(index < min ? tail : ts.factory.createOptionalTypeNode(tail));
           }
-          return tsUnion([ts.factory.createTupleTypeNode(elements)]);
-        } else if ((schemaObject.maxItems as number) > 0) {
-          // if maxItems is set, then return a union of all permutations of possible tuple types
+          if (boundedMax === undefined) {
+            elements.push(ts.factory.createRestTypeNode(ts.factory.createArrayTypeNode(tail)));
+          }
+        }
+        return tupleType(elements, options.ctx.immutable);
+      }
+
+      const itemType =
+        schemaObject.items === undefined ? UNKNOWN : transformSchemaObject(schemaObject.items as SchemaObject, options);
+      const estimateCodeSize = max === undefined ? min : (max * (max + 1) - min * (min - 1)) / 2;
+      if (options.ctx.arrayLength && (min !== 0 || max !== undefined) && estimateCodeSize < 30) {
+        if (max !== undefined) {
           const members: ts.TypeNode[] = [];
-          // populate 1 short of min …
-          for (let i = 0; i <= (max ?? 0) - min; i++) {
-            const elements: ts.TypeNode[] = [];
-            for (let j = min; j < i + min; j++) {
-              elements.push(itemType);
-            }
-            members.push(ts.factory.createTupleTypeNode(elements));
+          for (let length = min; length <= max; length++) {
+            members.push(
+              tupleType(
+                Array.from({ length }, () => itemType),
+                options.ctx.immutable,
+              ),
+            );
           }
           return tsUnion(members);
         }
-        // if maxItems not set, then return a simple tuple type the length of `min`
-        else {
-          const elements: ts.TypeNode[] = [];
-          for (let i = 0; i < min; i++) {
-            elements.push(itemType);
-          }
-          elements.push(ts.factory.createRestTypeNode(ts.factory.createArrayTypeNode(itemType)));
-          return ts.factory.createTupleTypeNode(elements);
-        }
+        return tupleType(
+          [
+            ...Array.from({ length: min }, () => itemType),
+            ts.factory.createRestTypeNode(ts.factory.createArrayTypeNode(itemType)),
+          ],
+          options.ctx.immutable,
+        );
       }
 
-      const finalType =
-        ts.isTupleTypeNode(itemType) || ts.isArrayTypeNode(itemType)
-          ? itemType
-          : ts.factory.createArrayTypeNode(itemType); // wrap itemType in array type, but only if not a tuple or array already
-
-      return options.ctx.immutable
-        ? ts.factory.createTypeOperatorNode(ts.SyntaxKind.ReadonlyKeyword, finalType)
-        : finalType;
+      const array = ts.factory.createArrayTypeNode(itemType);
+      return options.ctx.immutable ? ts.factory.createTypeOperatorNode(ts.SyntaxKind.ReadonlyKeyword, array) : array;
     }
 
-    // polymorphic, or 3.1 nullable
-    if (Array.isArray(schemaObject.type) && !Array.isArray(schemaObject)) {
-      // skip any primitive types that appear in oneOf as well
+    if (Array.isArray(schemaObject.type)) {
       const uniqueTypes: ts.TypeNode[] = [];
-      if (Array.isArray(schemaObject.oneOf)) {
-        for (const t of schemaObject.type) {
-          if (
-            (t === "boolean" || t === "string" || t === "number" || t === "integer" || t === "null") &&
-            schemaObject.oneOf.find((o) => typeof o === "object" && "type" in o && o.type === t)
-          ) {
-            continue;
-          }
-          uniqueTypes.push(
-            t === "null" || t === null
-              ? NULL
-              : transformSchemaObject(
-                  { ...schemaObject, type: t, oneOf: undefined } as SchemaObject, // don’t stack oneOf transforms
-                  options,
-                ),
-          );
+      for (const type of schemaObject.type) {
+        if (
+          Array.isArray(schemaObject.oneOf) &&
+          ["boolean", "string", "number", "integer", "null"].includes(type) &&
+          schemaObject.oneOf.some((item) => "type" in item && item.type === type)
+        ) {
+          continue;
         }
-      } else {
-        for (const t of schemaObject.type) {
-          if (t === "null" || t === null) {
-            uniqueTypes.push(NULL);
-          } else {
-            uniqueTypes.push(transformSchemaObject({ ...schemaObject, type: t } as SchemaObject, options));
-          }
-        }
+        uniqueTypes.push(
+          type === "null" || type === null
+            ? NULL
+            : transformSchemaObject(
+                {
+                  ...schemaObject,
+                  type,
+                  oneOf: undefined,
+                  ...(type === "object" || type === "array" ? {} : { allOf: undefined, anyOf: undefined }),
+                } as SchemaObject,
+                options,
+              ),
+        );
       }
       return tsUnion(uniqueTypes);
     }
@@ -499,6 +492,28 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
 
   // type: object
   const coreObjectType: ts.TypeElement[] = [];
+
+  for (const key of schemaObject.required ?? []) {
+    const inherited = (schemaObject.allOf ?? []).some((item) => {
+      const resolved = "$ref" in item ? options.ctx.resolve<SchemaObject>(item.$ref) : item;
+      return !!resolved && "properties" in resolved && !!resolved.properties?.[key];
+    });
+    const discriminator =
+      schemaObject.discriminator?.propertyName === key &&
+      schemaObject.oneOf?.every((item) => {
+        const resolved = "$ref" in item ? options.ctx.resolve<SchemaObject>(item.$ref) : item;
+        return (
+          !!resolved && "properties" in resolved && !!resolved.properties?.[key] && !!resolved.required?.includes(key)
+        );
+      });
+    if (
+      !("properties" in schemaObject && schemaObject.properties && key in schemaObject.properties) &&
+      !inherited &&
+      !discriminator
+    ) {
+      coreObjectType.push(ts.factory.createPropertySignature(undefined, tsPropertyIndex(key), undefined, UNKNOWN));
+    }
+  }
 
   // discriminators: explicit mapping on schema object
   for (const k of ["allOf", "anyOf"] as const) {
@@ -591,12 +606,12 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
         type = wrapWithReadWriteMarker(type, !!readOnly, !!writeOnly, options.ctx);
 
         let property = ts.factory.createPropertySignature(
-          /* modifiers     */ tsModifiers({
+          tsModifiers({
             readonly: options.ctx.immutable || (!options.ctx.readWriteMarkers && readOnly),
           }),
-          /* name          */ tsPropertyIndex(k),
-          /* questionToken */ optional,
-          /* type          */ type,
+          tsPropertyIndex(k),
+          optional,
+          type,
         );
 
         // Apply transformProperty hook if available
@@ -629,12 +644,12 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
         );
 
         let property = ts.factory.createPropertySignature(
-          /* modifiers    */ tsModifiers({
+          tsModifiers({
             readonly: options.ctx.immutable || (!options.ctx.readWriteMarkers && defReadOnly),
           }),
-          /* name          */ tsPropertyIndex(k),
-          /* questionToken */ undefined,
-          /* type          */ defType,
+          tsPropertyIndex(k),
+          undefined,
+          defType,
         );
 
         // Apply transformProperty hook if available
@@ -653,10 +668,10 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
       }
       coreObjectType.push(
         ts.factory.createPropertySignature(
-          /* modifiers     */ undefined,
-          /* name          */ tsPropertyIndex("$defs"),
-          /* questionToken */ undefined,
-          /* type          */ ts.factory.createTypeLiteralNode(defKeys),
+          undefined,
+          tsPropertyIndex("$defs"),
+          QUESTION_TOKEN,
+          ts.factory.createTypeLiteralNode(defKeys),
         ),
       );
     }
@@ -697,19 +712,19 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
       ...(coreObjectType.length ? [ts.factory.createTypeLiteralNode(coreObjectType)] : []),
       ts.factory.createTypeLiteralNode([
         ts.factory.createIndexSignature(
-          /* modifiers  */ tsModifiers({
+          tsModifiers({
             readonly: options.ctx.immutable,
           }),
-          /* parameters */ [
+          [
             ts.factory.createParameterDeclaration(
-              /* modifiers      */ undefined,
-              /* dotDotDotToken */ undefined,
-              /* name           */ ts.factory.createIdentifier("key"),
-              /* questionToken  */ undefined,
-              /* type           */ STRING,
+              undefined,
+              undefined,
+              ts.factory.createIdentifier("key"),
+              undefined,
+              STRING,
             ),
           ],
-          /* type       */ stringIndexType,
+          stringIndexType,
         ),
       ]),
     ]);
@@ -726,6 +741,11 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
  */
 function hasKey<K extends string>(possibleObject: unknown, key: K): possibleObject is { [key in K]: unknown } {
   return typeof possibleObject === "object" && possibleObject !== null && key in possibleObject;
+}
+
+function tupleType(elements: ts.TypeNode[], immutable: boolean): ts.TypeNode {
+  const tuple = ts.factory.createTupleTypeNode(elements);
+  return immutable ? ts.factory.createTypeOperatorNode(ts.SyntaxKind.ReadonlyKeyword, tuple) : tuple;
 }
 
 function applyAdditionalPropertiesToEnum(

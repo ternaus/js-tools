@@ -45,7 +45,6 @@ describe("transformResponseObject", () => {
         };
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -67,7 +66,6 @@ describe("transformResponseObject", () => {
     };
     content?: never;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [

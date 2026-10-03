@@ -1,5 +1,5 @@
 // Checked-in HTML metadata contract maintained against the WHATWG HTML Living Standard.
-// Update the table only with a reviewed source link and run yarn quality:complete.
+// Update the table only with a reviewed source link and run pnpm run quality:complete.
 
 export const HTML5_GLOBAL_ATTRIBUTES = {
   contenteditable: ['true', 'false'],

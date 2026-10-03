@@ -1,9 +1,9 @@
-# {{ $frontmatter.title }}
+# useSuspenseQuery
 
 `useSuspenseQuery` メソッドを使用すると、react-query 本来の [useSuspenseQuery](https://tanstack.com/query/latest/docs/framework/react/guides/suspense) を利用できます。
 
 - result は本来の関数と同じです。
-- `functionKey` は `[method, path, params]` です。
+- `queryKey` は `[baseUrl, cacheKey, "query", method, path, init]` です。
 - `data` と `error` は完全に型付けされています。
 - 第4引数としてクエリオプションを渡すことができます。
 

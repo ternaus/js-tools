@@ -3,7 +3,6 @@ import { describe, expect, expectTypeOf, test } from "vitest";
 import { createPathBasedClient, type PathBasedClient } from "../../src/index.js";
 import type { paths } from "./schemas/path-based-client.js";
 
-// identical to helper, but for createObservedPathBasedClient
 function createObservedPathBasedClient<T extends {}, M extends MediaType = MediaType>(
   options?: Parameters<typeof createPathBasedClient<T>>[0],
   onRequest: (input: Request) => Promise<Response> = async () => Response.json({ status: 200, message: "OK" }),
@@ -42,9 +41,8 @@ describe("createPathBasedClient", () => {
       // Wrong method
       // @ts-expect-error
       await client["/posts/{id}"].POST({
+        // @ts-expect-error Unknown property `path`.
         params: {
-          // Unknown property `path`.
-          // @ts-expect-error
           path: {
             id: 123,
           },
@@ -67,16 +65,20 @@ describe("createPathBasedClient", () => {
 
       expect(actualPathname).toBe("/posts/123");
 
-      // Check typing of data.
       if (error) {
         // Fail, but we need the if above for type inference.
         expect(error).toBeUndefined();
       } else {
         // @ts-expect-error
         data.not_a_blogpost_property;
-        // Check typing of result value.
         expect(data.title).toBe("Blog post title");
       }
+    });
+
+    test("caches the forwarder for each endpoint", () => {
+      const client = createObservedPathBasedClient<paths>();
+      expect(client["/posts"]).toBe(client["/posts"]);
+      expect(client["/posts/{id}"]).not.toBe(client["/posts"]);
     });
 
     test('properly binds "this" inside PathCallForwarder', async () => {

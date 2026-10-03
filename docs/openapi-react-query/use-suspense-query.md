@@ -1,9 +1,9 @@
-# {{ $frontmatter.title }}
+# useSuspenseQuery
 
 The `useSuspenseQuery` method allows you to use the original [useSuspenseQuery](https://tanstack.com/query/latest/docs/framework/react/guides/suspense).
 
 - The result is the same as the original function.
-- The `functionKey` is `[method, path, params]`.
+- The `queryKey` is `[baseUrl, cacheKey, "query", method, path, init]`.
 - `data` and `error` are fully typed.
 - You can pass queries options as fourth parameter.
 

@@ -1,27 +1,16 @@
-# About the OpenAPI packages
+# Forks and original authors
 
-## Project goals
+This workspace maintains two sets of forks:
 
-### openapi-typescript
+- `@ternaus/eslint-plugin-react` is a fork of [jsx-eslint/eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react).
+- `@ternaus/openapi-typescript`, `@ternaus/openapi-fetch`, `@ternaus/openapi-react-query`, and `@ternaus/openapi-typescript-helpers` are forks of the packages in [openapi-ts/openapi-typescript](https://github.com/openapi-ts/openapi-typescript).
 
-1. Support converting any valid OpenAPI schema to TypeScript types, no matter how complicated.
-1. Generated types should be statically-analyzable and runtime-free (with minor exceptions like [enums](https://www.typescriptlang.org/docs/handbook/enums.html).
-1. Generated types should match your original schema as closely as possible, preserving original capitalization, etc.
-1. Typegen only needs Node.js to run (no Java, Python, etc.) and works in any environment.
-1. Support fetching OpenAPI schemas from files as well as local and remote servers.
+The OpenAPI generator, Fetch client, and type helpers were originally authored by Drew Powers and contributors. React Query was originally authored by Martin Paucot and contributors. React lint rules retain the authorship and license notices from jsx-eslint/eslint-plugin-react.
 
-### openapi-fetch
+The complete upstream Git histories and package MIT licenses are preserved. See the [merged repository](https://github.com/ternaus/js-tools) for commits and the license file in each package for its original copyright notice.
 
-1. Types should be strict and inferred automatically from OpenAPI schemas with the absolute minimum number of generics needed.
-2. Respect the native Fetch API while reducing boilerplate (such as `await res.json()`).
-3. Be as light and performant as possible.
+## Maintenance of these forks
 
-### openapi-react-query
+[Vladimir Iglovikov](https://github.com/ternaus) maintains the `@ternaus` forks, updates their supported tool versions, fixes bugs, and manages releases. The forks target React 19, ESLint 10, Node.js 24.15+ and 26, and TypeScript 7 checks. The OpenAPI generator uses TypeScript 6 internally for its AST API.
 
-1. Types should be strict and inferred automatically from OpenAPI schemas with the absolute minimum number of generics needed.
-2. Respect the original `@tanstack/react-query` APIs while reducing boilerplate.
-3. Be as light and performant as possible.
-
-## Maintainers
-
-Maintained by [Vladimir Iglovikov](https://github.com/ternaus). Original authorship and MIT notices are preserved.
+[Buy Vladimir a coffee through GitHub Sponsors](https://github.com/sponsors/ternaus) to support ongoing maintenance of these forks.

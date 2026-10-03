@@ -5,20 +5,12 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".vitepress/dist/**"]
     },
-    "format": {
-      "dependsOn": ["^format"]
-    },
-    "lint": {
-      "dependsOn": ["build"]
-    },
-    "size-limit": {
-      "dependsOn": ["build"]
-    },
     "test": {
       "dependsOn": ["build"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"]
     },
     "test-e2e": {
+      "env": ["PORT"],
       "dependsOn": ["build"]
     },
     "typecheck": {

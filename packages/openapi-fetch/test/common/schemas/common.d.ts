@@ -514,6 +514,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            status: unknown;
                             success?: boolean;
                         };
                     };

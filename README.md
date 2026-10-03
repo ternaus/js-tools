@@ -1,6 +1,6 @@
 # @ternaus JavaScript tools
 
-Maintained JavaScript and TypeScript packages for React linting, OpenAPI type generation, and typed HTTP clients.
+This workspace maintains a fork of [jsx-eslint/eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and forks of the four OpenAPI packages from [openapi-ts/openapi-typescript](https://github.com/openapi-ts/openapi-typescript). Vladimir Iglovikov maintains these forks for current React, ESLint, Node.js, and TypeScript versions. The original authors' Git histories and MIT notices are preserved.
 
 [Support ongoing maintenance on GitHub Sponsors](https://github.com/sponsors/ternaus).
 

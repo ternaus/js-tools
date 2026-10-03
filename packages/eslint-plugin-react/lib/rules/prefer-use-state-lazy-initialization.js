@@ -5,21 +5,6 @@ const messages = {
   useLazyInitialization: 'Pass a lazy initializer to useState to avoid recomputing the initial value on every render.',
 };
 
-function isReactUseStateCall(context, node) {
-  if (node.callee.type === 'Identifier') {
-    return reactImports.isNamedImport(context, node.callee, 'react', 'useState');
-  }
-
-  return (
-    node.callee.type === 'MemberExpression' &&
-    !node.callee.computed &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.property.type === 'Identifier' &&
-    node.callee.property.name === 'useState' &&
-    reactImports.isModuleObject(context, node.callee.object, 'react')
-  );
-}
-
 function containsEagerCall(node) {
   if (!node || typeof node !== 'object') {
     return false;
@@ -57,7 +42,7 @@ const exported = {
     return {
       CallExpression(node) {
         const initializer = node.arguments[0];
-        if (!initializer || !isReactUseStateCall(context, node) || !containsEagerCall(initializer)) {
+        if (!initializer || !reactImports.isReactCall(context, node, 'useState') || !containsEagerCall(initializer)) {
           return;
         }
         context.report({ messageId: 'useLazyInitialization', node: initializer });

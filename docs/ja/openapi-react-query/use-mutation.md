@@ -1,9 +1,9 @@
-# {{ $frontmatter.title }}
+# useMutation
 
 `useMutation` メソッドを使用すると、react-query 本来の [useMutation](https://tanstack.com/query/latest/docs/framework/react/guides/mutations) を利用できます。
 
 - result は本来の関数と同じです。
-- `mutationKey` は `[method, path]`です。
+- `mutationKey` は `[baseUrl, cacheKey, "mutation", method, path]`です。
 - `data` と `error` は完全に型付けされています。
 
 > **tip**
@@ -41,7 +41,7 @@ export const $api = createClient(fetchClient);
 ## Api
 
 ```tsx
-const query = $api.useQuery(method, path, options, queryOptions, queryClient);
+const mutation = $api.useMutation(method, path, queryOptions, queryClient);
 ```
 
 **引数**

@@ -9,12 +9,10 @@ describe("DELETE", () => {
       params: { path: { name: "New Tag" } },
     });
 
-    // assert correct data was returned
     assertType<undefined>(data);
     expect(data).toEqual(undefined);
     expect(response.status).toBe(204);
 
-    // assert error is empty
     expect(error).toBeUndefined();
   });
 
@@ -39,11 +37,9 @@ describe("DELETE", () => {
       },
     });
 
-    // assert correct data was returned
     assertType<undefined>(data);
     expect(data).toEqual(undefined);
 
-    // assert error is empty
     expect(error).toBeUndefined();
   });
 
@@ -59,13 +55,10 @@ describe("DELETE", () => {
       },
     });
 
-    // assert data is undefined for error response
     expect(data).toBeUndefined();
 
-    // assert error is undefined for empty body (consistent with 204 and Content-Length: 0 handling)
     expect(error).toBeUndefined();
 
-    // assert response status is preserved
     expect(response.status).toBe(500);
     expect(response.ok).toBe(false);
   });
@@ -82,13 +75,10 @@ describe("DELETE", () => {
       },
     });
 
-    // assert data is undefined for empty body
     expect(data).toBeUndefined();
 
-    // assert error is undefined for success response
     expect(error).toBeUndefined();
 
-    // assert response status is preserved
     expect(response.status).toBe(200);
     expect(response.ok).toBe(true);
   });

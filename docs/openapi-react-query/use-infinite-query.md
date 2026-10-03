@@ -1,9 +1,9 @@
-# {{ $frontmatter.title }}
+# useInfiniteQuery
 
 The `useInfiniteQuery` method allows you to use the original [useInfiniteQuery](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries)
 
 - The result is the same as the original function.
-- The `queryKey` is `[method, path, params]`.
+- The `queryKey` is `[baseUrl, cacheKey, "infinite", method, path, init]`.
 - `data` and `error` are fully typed.
 - You can pass infinite query options as fourth parameter.
 

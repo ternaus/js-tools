@@ -1,5 +1,6 @@
 import { HTML5_ELEMENT_ATTRIBUTES, HTML5_GLOBAL_ATTRIBUTES } from '../html5-attributes.js';
 import docsUrl from '../util/docsUrl.js';
+import elementProps from '../util/elementProps.js';
 import REACT_DOM_ATTRIBUTE_OVERRIDES from '../util/reactDomAttributes.js';
 import reactImports from '../util/reactImports.js';
 
@@ -123,20 +124,6 @@ function getAttributeDefinition(element, elementAttributes, attribute) {
   return undefined;
 }
 
-function isReactCreateElementCall(context, node) {
-  if (node.callee.type === 'Identifier') {
-    return reactImports.isNamedImport(context, node.callee, 'react', 'createElement');
-  }
-  return (
-    node.callee.type === 'MemberExpression' &&
-    !node.callee.computed &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.property.type === 'Identifier' &&
-    node.callee.property.name === 'createElement' &&
-    reactImports.isModuleObject(context, node.callee.object, 'react')
-  );
-}
-
 /** @type {import('eslint').Rule.RuleModule} */
 const exported = {
   meta: {
@@ -220,7 +207,7 @@ const exported = {
 
     function checkCreateElement(node) {
       if (
-        !isReactCreateElementCall(context, node) ||
+        !reactImports.isReactCall(context, node, 'createElement') ||
         node.arguments[0]?.type !== 'Literal' ||
         typeof node.arguments[0].value !== 'string' ||
         node.arguments[1]?.type !== 'ObjectExpression'
@@ -236,15 +223,8 @@ const exported = {
       }
 
       for (const property of properties) {
-        if (
-          property.type !== 'Property' ||
-          property.computed ||
-          (property.key.type !== 'Identifier' && property.key.type !== 'Literal')
-        ) {
-          continue;
-        }
-        const name = property.key.type === 'Identifier' ? property.key.name : property.key.value;
-        if (typeof name === 'string') {
+        const name = elementProps.getPropertyName(property);
+        if (name !== undefined) {
           checkAttribute(element, elementAttributes, name, property.value, property.key);
         }
       }

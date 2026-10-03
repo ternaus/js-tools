@@ -1,4 +1,5 @@
 import docsUrl from '../util/docsUrl.js';
+import elementProps from '../util/elementProps.js';
 import reactImports from '../util/reactImports.js';
 
 const READ_ONLY_VALUE_INPUT_TYPES = new Set(['button', 'checkbox', 'hidden', 'image', 'radio', 'reset', 'submit']);
@@ -18,17 +19,11 @@ function collectObjectProperties(properties) {
 
   const result = new Map();
   for (const property of properties) {
-    if (
-      property.type !== 'Property' ||
-      property.computed ||
-      (property.key.type !== 'Identifier' && property.key.type !== 'Literal')
-    ) {
-      continue;
+    const name = elementProps.getPropertyName(property);
+    if (name === undefined) {
+      return null;
     }
-    const name = property.key.type === 'Identifier' ? property.key.name : property.key.value;
-    if (typeof name === 'string') {
-      result.set(name, property.value);
-    }
+    result.set(name, property.value);
   }
   return result;
 }
@@ -71,20 +66,6 @@ function literalInputType(properties) {
     return literalInputType(new Map([['type', type.expression]]));
   }
   return null;
-}
-
-function isReactCreateElementCall(context, node) {
-  if (node.callee.type === 'Identifier') {
-    return reactImports.isNamedImport(context, node.callee, 'react', 'createElement');
-  }
-  return (
-    node.callee.type === 'MemberExpression' &&
-    !node.callee.computed &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.property.type === 'Identifier' &&
-    node.callee.property.name === 'createElement' &&
-    reactImports.isModuleObject(context, node.callee.object, 'react')
-  );
 }
 
 /** @type {import('eslint').Rule.RuleModule} */
@@ -152,7 +133,7 @@ const exported = {
       },
       CallExpression(node) {
         if (
-          !isReactCreateElementCall(context, node) ||
+          !reactImports.isReactCall(context, node, 'createElement') ||
           node.arguments[0]?.type !== 'Literal' ||
           !['input', 'select', 'textarea'].includes(node.arguments[0].value) ||
           node.arguments[1]?.type !== 'ObjectExpression'

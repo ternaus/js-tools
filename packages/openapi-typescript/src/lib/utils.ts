@@ -26,33 +26,29 @@ export function createDiscriminatorProperty(
       ([, v]) => (!v.startsWith("#") && v === value) || (v.startsWith("#") && parseRef(v).pointer.pop() === value),
     );
     if (matchedValue) {
-      value = matchedValue[0]; // why was this designed backwards!?
+      value = matchedValue[0];
     }
   }
   return ts.factory.createPropertySignature(
-    /* modifiers     */ tsModifiers({
+    tsModifiers({
       readonly,
     }),
-    /* name          */ tsPropertyIndex(discriminator.propertyName),
-    /* questionToken */ undefined,
-    /* type          */ tsLiteral(value),
+    tsPropertyIndex(discriminator.propertyName),
+    undefined,
+    tsLiteral(value),
   );
 }
 
-/** Create a $ref pointer (even from other $refs) */
+/** Create a URI-fragment JSON Pointer, optionally extending a leading reference. */
 export function createRef(parts: (number | string | undefined | null)[]): string {
   let pointer = "#";
-  for (const part of parts) {
-    if (part === undefined || part === null || part === "") {
+  for (const [index, part] of parts.entries()) {
+    if (part === undefined || part === null || (index === 0 && part === "")) {
       continue;
     }
-    const maybeRef = parseRef(String(part)).pointer;
-    if (maybeRef.length) {
-      for (const refPart of maybeRef) {
-        pointer += `/${escapePointer(refPart)}`;
-      }
-    } else {
-      pointer += `/${escapePointer(part)}`;
+    const maybeRef = index === 0 ? parseRef(String(part)).pointer : [];
+    for (const fragment of maybeRef.length ? maybeRef : [String(part)]) {
+      pointer += `/${encodeURIComponent(escapePointer(fragment))}`;
     }
   }
   return pointer;
@@ -313,7 +309,7 @@ export function scanDiscriminators(schema: OpenAPI3, options: OpenAPITSOptions) 
       return;
     }
 
-    for (const item of (obj as any).allOf) {
+    for (const item of obj.allOf) {
       if ("$ref" in item) {
         if (!objects[item.$ref]) {
           return;

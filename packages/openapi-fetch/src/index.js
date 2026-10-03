@@ -1,4 +1,3 @@
-// settings & const
 const PATH_PARAM_RE = /\{[^{}]+\}/g;
 
 /**
@@ -29,11 +28,6 @@ export default function createClient(clientOptions) {
   baseUrl = removeTrailingSlash(baseUrl);
   const globalMiddlewares = [];
 
-  /**
-   * Per-request fetch (keeps settings created in createClient()
-   * @param {T} url
-   * @param {import('./index.js').FetchOptions<T>} fetchOptions
-   */
   async function coreFetch(schemaPath, fetchOptions) {
     const {
       baseUrl: localBaseUrl,
@@ -51,7 +45,7 @@ export default function createClient(clientOptions) {
     } = fetchOptions || {};
     let finalBaseUrl = baseUrl;
     if (localBaseUrl) {
-      finalBaseUrl = removeTrailingSlash(localBaseUrl) ?? baseUrl;
+      finalBaseUrl = removeTrailingSlash(localBaseUrl);
     }
 
     let querySerializer =
@@ -75,18 +69,12 @@ export default function createClient(clientOptions) {
         ? undefined
         : bodySerializer(
             body,
-            // Note: we declare mergeHeaders() both here and below because it’s a bit of a chicken-or-egg situation:
-            // bodySerializer() needs all headers so we aren’t dropping ones set by the user, however,
-            // the result of this ALSO sets the lowest-priority content-type header. So we re-merge below,
-            // setting the content-type at the very beginning to be overwritten.
-            // Lastly, based on the way headers work, it’s not a simple “present-or-not” check becauase null intentionally un-sets headers.
+            // The serializer needs user headers; the later merge adds the default
+            // Content-Type at lowest priority and preserves explicit null deletions.
             mergeHeaders(baseHeaders, headers, params.header),
           );
     const finalHeaders = mergeHeaders(
-      // with no body, we should not to set Content-Type
-      serializedBody === undefined ||
-        // if serialized body is FormData; browser will correctly set Content-Type & boundary expression
-        serializedBody instanceof FormData
+      serializedBody === undefined || serializedBody instanceof FormData
         ? {}
         : {
             "Content-Type": "application/json",
@@ -114,8 +102,6 @@ export default function createClient(clientOptions) {
       requestInit,
     );
     let response;
-
-    /** Add custom parameters to Request object */
     for (const key in init) {
       if (!(key in request)) {
         request[key] = init[key];
@@ -125,7 +111,6 @@ export default function createClient(clientOptions) {
     if (finalMiddlewares.length) {
       id = randomID();
 
-      // middleware (request)
       options = Object.freeze({
         baseUrl: finalBaseUrl,
         fetch,
@@ -158,12 +143,10 @@ export default function createClient(clientOptions) {
     }
 
     if (!response) {
-      // fetch!
       try {
         response = await fetch(request, requestInitExt);
       } catch (error) {
         let errorAfterMiddleware = error;
-        // middleware (error)
         // execute in reverse-array order (first priority gets last transform)
         if (finalMiddlewares.length) {
           for (let i = finalMiddlewares.length - 1; i >= 0; i--) {
@@ -202,7 +185,6 @@ export default function createClient(clientOptions) {
         }
       }
 
-      // middleware (response)
       // execute in reverse-array order (first priority gets last transform)
       if (finalMiddlewares.length) {
         for (let i = finalMiddlewares.length - 1; i >= 0; i--) {
@@ -228,7 +210,6 @@ export default function createClient(clientOptions) {
     }
 
     const contentLength = response.headers.get("Content-Length");
-    // handle empty content
     if (
       response.status === 204 ||
       request.method === "HEAD" ||
@@ -239,21 +220,15 @@ export default function createClient(clientOptions) {
 
     // parse response (falling back to .text() when necessary)
     if (response.ok) {
-      const getResponseData = async () => {
-        // if "stream", skip parsing entirely
-        if (parseAs === "stream") {
-          return response.body;
-        }
-
-        if (parseAs === "json" && !contentLength) {
-          // use text() when no content-length is provided to avoid errors parsing empty bodies (200 with no content)
-          const raw = await response.text();
-          return raw ? JSON.parse(raw) : undefined;
-        }
-
-        return await response[parseAs]();
-      };
-      return { data: await getResponseData(), response };
+      if (parseAs === "stream") {
+        return { data: response.body, response };
+      }
+      if (parseAs === "json" && !contentLength) {
+        // Empty success bodies without Content-Length must not reach JSON.parse.
+        const raw = await response.text();
+        return { data: raw ? JSON.parse(raw) : undefined, response };
+      }
+      return { data: await response[parseAs](), response };
     }
 
     // handle errors (use text() when no content-length to safely handle empty bodies from proxies)
@@ -264,7 +239,7 @@ export default function createClient(clientOptions) {
     }
     let error = raw;
     try {
-      error = JSON.parse(raw); // attempt to parse as JSON
+      error = JSON.parse(raw);
     } catch {
       // noop - keep as raw text
     }
@@ -272,42 +247,36 @@ export default function createClient(clientOptions) {
   }
 
   return {
+    get baseUrl() {
+      return baseUrl;
+    },
     request(method, url, init) {
       return coreFetch(url, { ...init, method: method.toUpperCase() });
     },
-    /** Call a GET endpoint */
     GET(url, init) {
       return coreFetch(url, { ...init, method: "GET" });
     },
-    /** Call a PUT endpoint */
     PUT(url, init) {
       return coreFetch(url, { ...init, method: "PUT" });
     },
-    /** Call a POST endpoint */
     POST(url, init) {
       return coreFetch(url, { ...init, method: "POST" });
     },
-    /** Call a DELETE endpoint */
     DELETE(url, init) {
       return coreFetch(url, { ...init, method: "DELETE" });
     },
-    /** Call a OPTIONS endpoint */
     OPTIONS(url, init) {
       return coreFetch(url, { ...init, method: "OPTIONS" });
     },
-    /** Call a HEAD endpoint */
     HEAD(url, init) {
       return coreFetch(url, { ...init, method: "HEAD" });
     },
-    /** Call a PATCH endpoint */
     PATCH(url, init) {
       return coreFetch(url, { ...init, method: "PATCH" });
     },
-    /** Call a TRACE endpoint */
     TRACE(url, init) {
       return coreFetch(url, { ...init, method: "TRACE" });
     },
-    /** Register middleware */
     use(...middleware) {
       for (const m of middleware) {
         if (!m) {
@@ -319,7 +288,6 @@ export default function createClient(clientOptions) {
         globalMiddlewares.push(m);
       }
     },
-    /** Unregister middleware */
     eject(...middleware) {
       for (const m of middleware) {
         const i = globalMiddlewares.indexOf(m);
@@ -363,40 +331,21 @@ class PathCallForwarder {
   };
 }
 
-class PathClientProxyHandler {
-  constructor() {
-    this.client = null;
-  }
-
-  // Assume the property is an URL.
-  get(coreClient, url) {
-    const forwarder = new PathCallForwarder(coreClient, url);
-    this.client[url] = forwarder;
-    return forwarder;
-  }
-}
-
 /**
  * Wrap openapi-fetch client to support a path based API.
  * @type {import("./index.js").wrapAsPathBasedClient}
  */
 export function wrapAsPathBasedClient(coreClient) {
-  const handler = new PathClientProxyHandler();
-  const proxy = new Proxy(coreClient, handler);
-
-  // Put the proxy on the prototype chain of the actual client.
-  // This means if we do not have a memoized PathCallForwarder,
-  // we fall back to the proxy to synthesize it.
-  // However, the proxy itself is not on the hot-path (if we fetch the same
-  // endpoint multiple times, only the first call will hit the proxy).
-  function Client() {}
-  Client.prototype = proxy;
-
-  const client = new Client();
-
-  // Feed the client back to the proxy handler so it can store the generated
-  // PathCallForwarder.
-  handler.client = client;
+  // Cache endpoint forwarders on the client so repeated calls bypass the proxy.
+  const client = Object.create(
+    new Proxy(coreClient, {
+      get(target, url) {
+        const forwarder = new PathCallForwarder(target, url);
+        client[url] = forwarder;
+        return forwarder;
+      },
+    }),
+  );
 
   return client;
 }
@@ -409,8 +358,6 @@ export function wrapAsPathBasedClient(coreClient) {
 export function createPathBasedClient(clientOptions) {
   return wrapAsPathBasedClient(createClient(clientOptions));
 }
-
-// utils
 
 /**
  * Serialize primitive param values
@@ -498,8 +445,6 @@ export function serializeArrayParam(name, value, options) {
       case "matrix": {
         return `;${name}=${final}`;
       }
-      // case "spaceDelimited":
-      // case "pipeDelimited":
       default: {
         return `${name}=${final}`;
       }
@@ -606,6 +551,9 @@ export function defaultPathSerializer(pathname, pathParams) {
     }
     nextURL = nextURL.replace(match, style === "label" ? `.${encodeURIComponent(value)}` : encodeURIComponent(value));
   }
+  if (/(?:^|\/)(?:\.|%2e){1,2}(?:\/|$)/i.test(nextURL)) {
+    throw new Error("Invalid path dot segment.");
+  }
   return nextURL;
 }
 
@@ -619,11 +567,15 @@ export function defaultBodySerializer(body, headers) {
   }
   if (headers) {
     const contentType =
-      headers.get instanceof Function
-        ? (headers.get("Content-Type") ?? headers.get("content-type"))
+      typeof headers.get === "function"
+        ? headers.get("Content-Type")
         : (headers["Content-Type"] ?? headers["content-type"]);
-    if (contentType === "application/x-www-form-urlencoded") {
+    const mediaType = contentType?.split(";")[0].trim().toLowerCase();
+    if (mediaType === "application/x-www-form-urlencoded") {
       return new URLSearchParams(body).toString();
+    }
+    if (typeof body === "string" && mediaType?.startsWith("text/")) {
+      return body;
     }
   }
   return JSON.stringify(body);
@@ -640,7 +592,7 @@ export function createFinalURL(pathname, options) {
   }
   let search = options.querySerializer(options.params.query ?? {});
   if (search.startsWith("?")) {
-    search = search.substring(1);
+    search = search.slice(1);
   }
   if (search) {
     finalURL += `?${search}`;
@@ -679,8 +631,5 @@ export function mergeHeaders(...allHeaders) {
  * @type {import("./index.js").removeTrailingSlash}
  */
 export function removeTrailingSlash(url) {
-  if (url.endsWith("/")) {
-    return url.substring(0, url.length - 1);
-  }
-  return url;
+  return url.endsWith("/") ? url.slice(0, -1) : url;
 }

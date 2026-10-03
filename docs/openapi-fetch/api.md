@@ -17,6 +17,8 @@ createClient<paths>(options);
 | `pathSerializer`  | PathSerializer  | (optional) Provide a [pathSerializer](#pathserializer)                                                                                  |
 | (Fetch options)   |                 | Any valid fetch option (`headers`, `mode`, `cache`, `signal` …) ([docs](https://developer.mozilla.org/en-US/docs/Web/API/fetch#options) |
 
+The returned client exposes a readonly `baseUrl` with its trailing slash removed. A per-request `baseUrl` override applies only to that request.
+
 ## Fetch options
 
 The following options apply to all request methods (`.GET()`, `.POST()`, etc.)
@@ -140,10 +142,10 @@ const client = createClient({
       const value = queryParams[name];
       if (Array.isArray(value)) {
         for (const item of value) {
-          s.push(`${name}[]=${encodeURIComponent(item)}`);
+          search.push(`${name}[]=${encodeURIComponent(item)}`);
         }
       } else {
-        s.push(`${name}=${encodeURLComponent(value)}`);
+        search.push(`${name}=${encodeURIComponent(value)}`);
       }
     }
     return search.join(","); // ?tags[]=food,tags[]=california,tags[]=healthy
@@ -158,7 +160,9 @@ const client = createClient({
 
 ## bodySerializer
 
-Similar to [querySerializer](#queryserializer), bodySerializer allows you to customize how the requestBody is serialized if you don’t want the default [JSON.stringify()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) behavior. You probably only need this when using `multipart/form-data`:
+The default serializer preserves `FormData`, URL-encodes bodies with `application/x-www-form-urlencoded`, and sends string bodies unchanged for `text/*`. Other bodies use `JSON.stringify`, including scalar strings sent as JSON. Content-Type matching ignores case and parameters such as `charset`.
+
+A custom `bodySerializer(body, headers)` receives the merged user headers before the default Content-Type is added. For example, use `FormData` for a multipart request:
 
 ```ts
 const { data, error } = await client.PUT("/submit", {
@@ -227,6 +231,8 @@ const { data, error } = await client.GET("/users/{id}", {
 
 // URL: `/users/[5]`
 ```
+
+The default path serializer rejects complete `.` and `..` path segments before sending a request because the URL parser would change the route. Values such as `file.txt` and `.well-known` remain valid.
 
 ### Default Path Serializer
 

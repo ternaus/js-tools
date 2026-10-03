@@ -1,8 +1,11 @@
+import { fileURLToPath } from "node:url";
 import { createConfig } from "@redocly/openapi-core";
+import { expect, test } from "vitest";
+import { astToString } from "../src/lib/ts.js";
 import { resolveRef } from "../src/lib/utils.js";
+import transformSchemaObject from "../src/transform/schema-object.js";
 import type { GlobalContext, TransformNodeOptions } from "../src/types.js";
 
-/** Default options for all transform* functions */
 export const DEFAULT_CTX: GlobalContext = {
   additionalProperties: false,
   alphabetize: false,
@@ -39,27 +42,30 @@ export const DEFAULT_CTX: GlobalContext = {
   readWriteMarkers: false,
 };
 
-/** Generic test case */
 export type TestCase<T = any, O = TransformNodeOptions> = [
   string,
   {
-    /**
-     * The OpenAPI schema.  * Typing as `any` is good because it lets us test
-     * any invalid or unexpected formats without fighting with TypeScript.
-     */
+    // Fixtures may contain invalid schemas.
     given: T;
-    /**
-     * The expected TypeScript output. Be mindful of indentation and
-     * parentheses!
-     */
     want: string | URL;
-    /**
-     * Transform options.
-     */
     options?: O;
-    /**
-     * Options for Vitest
-     */
     ci?: { timeout?: number; skipIf?: boolean };
   },
 ];
+
+export function testSchemaObjects(tests: TestCase[], defaultOptions: TransformNodeOptions) {
+  for (const [name, { given, want, options = defaultOptions, ci }] of tests) {
+    test.skipIf(ci?.skipIf)(
+      name,
+      async () => {
+        const result = astToString(transformSchemaObject(given, options));
+        if (want instanceof URL) {
+          await expect(result).toMatchFileSnapshot(fileURLToPath(want));
+        } else {
+          expect(result).toBe(`${want}\n`);
+        }
+      },
+      ci?.timeout,
+    );
+  }
+}

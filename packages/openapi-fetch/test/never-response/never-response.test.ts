@@ -31,14 +31,11 @@ describe("GET", () => {
 
     assertType<typeof mockData | undefined>(data);
 
-    // assert correct URL was called
     expect(actualPathname).toBe("/posts/123");
 
-    // assert correct data was returned
     expect(data).toEqual(mockData);
     expect(response.status).toBe(200);
 
-    // assert error is empty
     expect(error).toBeUndefined();
   });
 
@@ -55,14 +52,11 @@ describe("GET", () => {
 
     assertType<components["schemas"]["Post"] | undefined>(data);
 
-    // assert correct URL was called
     expect(actualPathname).toBe("/posts/123");
 
-    // assert 204 to be transformed to be undefined
     expect(data).toEqual(undefined);
     expect(response.status).toBe(204);
 
-    // assert error is empty
     expect(error).toBeUndefined();
   });
 
@@ -83,17 +77,13 @@ describe("GET", () => {
 
     assertType<typeof mockError | undefined>(error);
 
-    // assert correct URL was called
     expect(actualPathname).toBe("/posts/123");
 
-    // assert correct method was called
     expect(method).toBe("GET");
 
-    // assert correct error was returned
     expect(error).toEqual(mockError);
     expect(response.status).toBe(404);
 
-    // assert data is empty
     expect(data).toBeUndefined();
   });
 
@@ -105,7 +95,6 @@ describe("GET", () => {
       throw new Error("data empty");
     }
 
-    // assert array type (and only array type) was inferred
     expect(data.length).toBe(0);
   });
 
@@ -122,13 +111,10 @@ describe("GET", () => {
 
     assertType<components["schemas"]["Post"][] | unknown[] | undefined>(data);
 
-    // assert correct URL was called
     expect(actualPathname).toBe("/posts");
 
-    // assert correct method was called
     expect(method).toBe("GET");
 
-    // assert 204 to be transformed to undefined
     expect(data).toEqual(undefined);
   });
 

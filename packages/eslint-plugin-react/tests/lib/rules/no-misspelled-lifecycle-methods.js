@@ -1,12 +1,13 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/no-misspelled-lifecycle-methods');
 
 const ruleTester = new RuleTester({
-  parserOptions: {
+  languageOptions: {
     ecmaVersion: 2024,
     sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
   },
 });
 

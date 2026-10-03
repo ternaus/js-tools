@@ -1,18 +1,21 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/no-invalid-html-attribute');
 
 const ruleTester = new RuleTester({
-  parserOptions: {
-    ecmaFeatures: { jsx: true },
+  languageOptions: {
     ecmaVersion: 2024,
     sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
   },
 });
 
 ruleTester.run('no-invalid-html-attribute', rule, {
   valid: [
+    "import React from 'react'; React.createElement('div', { [href]: '/docs' });",
+    "import React from 'react'; React.createElement('a', { ['href']: '/docs' });",
+    "import { createElement } from 'react'; createElement = other; createElement('div', { rel: 'alternate' });",
     '<button type="submit" className="primary" data-variant="compact" aria-label="Save" />',
     '<button type="submit" name="operation">Save</button>',
     '<input type="email" defaultValue="address@example.com" />',
@@ -57,6 +60,10 @@ ruleTester.run('no-invalid-html-attribute', rule, {
     "import { createElement } from 'react'; createElement('textarea', { value: message, onChange: handleChange });",
   ],
   invalid: [
+    {
+      code: "import React from 'react'; React.createElement('div', { ['href']: '/docs' });",
+      errors: [{ messageId: 'invalidAttribute', data: { attribute: 'href', element: 'div' } }],
+    },
     {
       code: '<div name="operation" />',
       errors: [{ messageId: 'invalidAttribute', data: { attribute: 'name', element: 'div' } }],

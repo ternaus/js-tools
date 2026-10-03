@@ -1,5 +1,15 @@
 import reactImports from './reactImports.js';
 
+function getPropertyName(property) {
+  if (property.type !== 'Property') {
+    return undefined;
+  }
+  if (!property.computed && property.key.type === 'Identifier') {
+    return property.key.name;
+  }
+  return property.key.type === 'Literal' && typeof property.key.value === 'string' ? property.key.value : undefined;
+}
+
 function getCreateElementProps(context, node) {
   if (
     !node ||
@@ -13,10 +23,10 @@ function getCreateElementProps(context, node) {
   }
   const props = new Map();
   for (const property of node.properties) {
-    if (property.type !== 'Property' || property.computed || property.kind !== 'init') {
+    const name = getPropertyName(property);
+    if (name === undefined || property.kind !== 'init') {
       return null;
     }
-    const name = property.key.type === 'Identifier' ? property.key.name : property.key.value;
     props.set(name, property.value);
   }
   return props;
@@ -58,6 +68,6 @@ function isHtmlNamespace(context, node) {
   return true;
 }
 
-const exported = { getCreateElementProps, getJsxProps, isHtmlNamespace };
+const exported = { getPropertyName, getCreateElementProps, getJsxProps, isHtmlNamespace };
 export default exported;
 export { exported as 'module.exports' };

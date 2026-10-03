@@ -35,7 +35,6 @@ describe("POST", () => {
       });
 
       // expect present body to be good enough (all fields optional)
-      // (no error)
       await client.POST("/posts", {
         body: {
           title: "Foo",
@@ -54,7 +53,6 @@ describe("POST", () => {
         body: { error: true },
       });
 
-      // (no error)
       await client.POST("/posts-optional-inline", {
         body: {
           title: "",
@@ -67,27 +65,23 @@ describe("POST", () => {
     test("requestBody with required: false", async () => {
       const client = createObservedClient<paths>({});
 
-      // assert missing `body` doesn’t raise a TS error
       await client.POST("/posts-optional");
 
-      // assert error on type mismatch
       await client.POST("/posts-optional", {
+        // @ts-expect-error
         body: {
-          // @ts-expect-error
           error: true,
         },
       });
 
-      // assert error on type mismatch
       await client.POST("/posts-optional", {
+        // @ts-expect-error
         body: {
-          // @ts-expect-error
           title: 42,
           body: "",
         },
       });
 
-      // (no error)
       await client.POST("/posts-optional", {
         body: {
           title: "",
@@ -114,14 +108,11 @@ describe("POST", () => {
       },
     });
 
-    // assert correct URL was called
     expect(actualPathname).toBe("/posts");
 
-    // assert correct data was returned
     expect(data).toEqual(mockData);
     expect(response.status).toBe(201);
 
-    // assert error is empty
     expect(error).toBeUndefined();
   });
 
@@ -169,7 +160,6 @@ describe("POST", () => {
       });
 
       const { data } = await client.POST("/multipart-form-data-file-upload", {
-        // TODO: how to get this to accept FormData?
         body: formData as unknown as string,
       });
 

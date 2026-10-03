@@ -66,7 +66,7 @@ export type QuerySerializerOptions = {
   allowReserved?: boolean;
 };
 
-export type BodySerializer<T> = (body: OperationRequestBodyContent<T>) => any;
+export type BodySerializer<T> = (body: OperationRequestBodyContent<T>, headers: Headers) => any;
 
 export type PathSerializer = (pathname: string, pathParams: Record<string, unknown>) => string;
 
@@ -195,12 +195,31 @@ export type MaybeOptionalInit<Params, Location extends keyof Params> =
     ? FetchOptions<FilterKeys<Params, Location>> | undefined
     : FetchOptions<FilterKeys<Params, Location>>;
 
-// The final init param to accept.
-// - Determines if the param is optional or not.
-// - Performs arbitrary [key: string] addition.
-// Note: the addition MUST happen after all the inference happens (otherwise TS can’t infer if init is required or not).
-type InitParam<Init> =
-  RequiredKeysOf<Init> extends never ? [(Init & { [key: string]: unknown })?] : [Init & { [key: string]: unknown }];
+type Exact<T, Shape> = Shape extends unknown
+  ? unknown extends Shape
+    ? T
+    : T extends Shape
+      ? T extends readonly unknown[]
+        ? Shape extends readonly (infer Item)[]
+          ? { [K in keyof T]: Exact<T[K], Item> }
+          : T
+        : T extends object
+          ? T & { [K in keyof T]: K extends keyof Shape ? Exact<T[K], Shape[K]> : never }
+          : T
+      : never
+  : never;
+
+export type CheckedInit<Init, Options> = Init & {
+  [K in keyof Init as K extends "params" | "body" ? K : never]: K extends keyof NonNullable<Options>
+    ? Exact<NoInfer<Init[K]>, NonNullable<Options>[K]>
+    : never;
+};
+
+// Add custom RequestInit keys after inference so required schema fields remain required.
+type InitParam<Init, Options> =
+  RequiredKeysOf<Init> extends never
+    ? [(CheckedInit<Init, Options> & { [key: string]: unknown })?]
+    : [CheckedInit<Init, Options> & { [key: string]: unknown }];
 
 export type ClientMethod<
   Paths extends Record<string, Record<HttpMethod, {}>>,
@@ -208,7 +227,7 @@ export type ClientMethod<
   Media extends MediaType,
 > = <Path extends PathsWithMethod<Paths, Method>, Init extends MaybeOptionalInit<Paths[Path], Method>>(
   url: Path,
-  ...init: InitParam<Init>
+  ...init: InitParam<Init, MaybeOptionalInit<Paths[Path], Method>>
 ) => Promise<FetchResponse<Paths[Path][Method], Init, Media>>;
 
 export type ClientRequestMethod<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
@@ -218,16 +237,17 @@ export type ClientRequestMethod<Paths extends Record<string, Record<HttpMethod, 
 >(
   method: Method,
   url: Path,
-  ...init: InitParam<Init>
+  ...init: InitParam<Init, MaybeOptionalInit<Paths[Path], Method>>
 ) => Promise<FetchResponse<Paths[Path][Method], Init, Media>>;
 
 export type ClientForPath<PathInfo extends Record<string | number, any>, Media extends MediaType> = {
   [Method in keyof PathInfo as Uppercase<string & Method>]: <Init extends MaybeOptionalInit<PathInfo, Method>>(
-    ...init: InitParam<Init>
+    ...init: InitParam<Init, MaybeOptionalInit<PathInfo, Method>>
   ) => Promise<FetchResponse<PathInfo[Method], Init, Media>>;
 };
 
 export interface Client<Paths extends {}, Media extends MediaType = MediaType> {
+  readonly baseUrl: string;
   request: ClientRequestMethod<Paths, Media>;
   /** Call a GET endpoint */
   GET: ClientMethod<Paths, "get", Media>;
@@ -322,7 +342,10 @@ export declare function createQuerySerializer<T = unknown>(
 export declare function defaultPathSerializer(pathname: string, pathParams: Record<string, unknown>): string;
 
 /** Serialize body object to string */
-export declare function defaultBodySerializer<T>(body: T): string;
+export declare function defaultBodySerializer<T>(
+  body: T,
+  headers?: Headers | Record<string, string>,
+): string | FormData;
 
 /** Construct URL string from baseUrl and handle path and query params */
 export declare function createFinalURL<O>(

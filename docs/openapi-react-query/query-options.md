@@ -1,4 +1,4 @@
-# {{ $frontmatter.title }}
+# queryOptions
 
 The `queryOptions` method allows you to construct type-safe [Query Options](https://tanstack.com/query/latest/docs/framework/react/guides/query-options).
 
@@ -111,5 +111,5 @@ const queryOptions = $api.queryOptions(method, path, options, queryOptions);
 
 - [Query Options](https://tanstack.com/query/latest/docs/framework/react/guides/query-options)
   - Fully typed thus `data` and `error` will be correctly deducted.
-  - `queryKey` is `[method, path, params]`.
+  - `queryKey` is `[baseUrl, cacheKey, "query", method, path, init]`.
   - `queryFn` is set to a fetcher function.

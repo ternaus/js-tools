@@ -112,7 +112,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -180,7 +179,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -227,7 +225,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -312,7 +309,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [

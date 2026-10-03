@@ -6,13 +6,14 @@ const siteBase = "/js-tools";
 function addSiteBase(url: string): string {
   const value = new URL(url, siteUrl);
   if (value.origin === siteUrl && !value.pathname.startsWith(`${siteBase}/`)) {
-    value.pathname = `${siteBase}${value.pathname === "/" ? "" : value.pathname}`;
+    value.pathname = `${siteBase}${value.pathname}`;
   }
   return value.href;
 }
 
 const shared: UserConfig<DefaultTheme.Config> = {
   title: "@ternaus/js-tools",
+  titleTemplate: false,
   description: "React ESLint rules, OpenAPI type generation, and type-safe HTTP clients.",
   base: "/js-tools/",
   cleanUrls: true,
@@ -47,7 +48,18 @@ const shared: UserConfig<DefaultTheme.Config> = {
   },
   transformPageData(pageData) {
     const route = pageData.relativePath.replace(/(^|\/)index\.md$/, "").replace(/\.md$/, "");
-    const title = pageData.title.endsWith(".md") ? route.split("/").pop() : pageData.title;
+    const heading = pageData.title.endsWith(".md") ? route.split("/").pop() : pageData.title;
+    const section = route
+      .split("/")
+      .find((part) =>
+        ["openapi-fetch", "openapi-react-query", "openapi-typescript-helpers", "eslint-plugin-react"].includes(part),
+      );
+    const language = route.startsWith("ja/") ? "日本語" : route.startsWith("zh/") ? "简体中文" : "";
+    const title = route
+      ? [heading, section && heading?.includes(section) ? "" : (section ?? "OpenAPI TypeScript"), language]
+          .filter(Boolean)
+          .join(" · ")
+      : heading;
     return {
       title,
       description: pageData.frontmatter.description ?? `${title} documentation for @ternaus/js-tools.`,
@@ -55,12 +67,27 @@ const shared: UserConfig<DefaultTheme.Config> = {
   },
   transformHead({ pageData }) {
     const route = pageData.relativePath.replace(/(^|\/)index\.md$/, "").replace(/\.md$/, "");
+    const url = `${siteUrl}${siteBase}/${route}`;
     return [
-      ["link", { rel: "canonical", href: `${siteUrl}${siteBase}/${route}` }],
+      ["link", { rel: "canonical", href: url }],
       ["meta", { property: "og:title", content: `${pageData.title} | @ternaus/js-tools` }],
       ["meta", { property: "og:description", content: pageData.description }],
-      ["meta", { property: "og:url", content: `${siteUrl}${siteBase}/${route}` }],
-      ["meta", { name: "twitter:card", content: "summary" }],
+      ["meta", { property: "og:url", content: url }],
+      ["meta", { property: "og:type", content: "website" }],
+      ["meta", { property: "og:image", content: `${siteUrl}${siteBase}/social-card.png` }],
+      ["meta", { property: "og:image:alt", content: "@ternaus/js-tools: React linting and typed APIs" }],
+      ["meta", { name: "twitter:card", content: "summary_large_image" }],
+      [
+        "script",
+        { type: "application/ld+json" },
+        JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": route ? "WebPage" : "WebSite",
+          name: pageData.title,
+          description: pageData.description,
+          url,
+        }),
+      ],
     ];
   },
 };

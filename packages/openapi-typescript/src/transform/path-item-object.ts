@@ -20,7 +20,6 @@ export type Method = "get" | "put" | "post" | "delete" | "options" | "head" | "p
 export default function transformPathItemObject(pathItem: PathItemObject, options: TransformNodeOptions): ts.TypeNode {
   const type: ts.TypeElement[] = [];
 
-  // parameters
   type.push(
     ...transformParametersArray(pathItem.parameters ?? [], {
       ...options,
@@ -28,7 +27,6 @@ export default function transformPathItemObject(pathItem: PathItemObject, option
     }),
   );
 
-  // methods
   for (const method of ["get", "put", "post", "delete", "options", "head", "patch", "trace"] as Method[]) {
     const operationObject = pathItem[method];
     if (
@@ -39,10 +37,10 @@ export default function transformPathItemObject(pathItem: PathItemObject, option
     ) {
       type.push(
         ts.factory.createPropertySignature(
-          /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-          /* name          */ tsPropertyIndex(method),
-          /* questionToken */ QUESTION_TOKEN,
-          /* type          */ NEVER,
+          tsModifiers({ readonly: options.ctx.immutable }),
+          tsPropertyIndex(method),
+          QUESTION_TOKEN,
+          NEVER,
         ),
       );
       continue;
@@ -53,14 +51,8 @@ export default function transformPathItemObject(pathItem: PathItemObject, option
     if (!("$ref" in operationObject)) {
       // important: OperationObject parameters come last, and will override any conflicts with PathItem parameters
       for (const parameter of [...(pathItem.parameters ?? []), ...(operationObject.parameters ?? [])]) {
-        // fix: #1798, use unique key
-        const name =
-          "$ref" in parameter
-            ? `${options.ctx.resolve<ParameterObject>(parameter.$ref)?.in}-${options.ctx.resolve<ParameterObject>(parameter.$ref)?.name}`
-            : `${parameter.in}-${parameter.name}`;
-        if (name) {
-          keyedParameters[name] = parameter;
-        }
+        const resolved = "$ref" in parameter ? options.ctx.resolve<ParameterObject>(parameter.$ref) : parameter;
+        keyedParameters[`${resolved?.in}-${resolved?.name}`] = parameter;
       }
     }
 
@@ -87,10 +79,10 @@ export default function transformPathItemObject(pathItem: PathItemObject, option
       );
     }
     const property = ts.factory.createPropertySignature(
-      /* modifiers     */ tsModifiers({ readonly: options.ctx.immutable }),
-      /* name          */ tsPropertyIndex(method),
-      /* questionToken */ undefined,
-      /* type          */ operationType,
+      tsModifiers({ readonly: options.ctx.immutable }),
+      tsPropertyIndex(method),
+      undefined,
+      operationType,
     );
     addJSDocComment(operationObject, property);
     type.push(property);

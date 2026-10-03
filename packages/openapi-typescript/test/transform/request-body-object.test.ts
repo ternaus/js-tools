@@ -35,7 +35,6 @@ describe("transformRequestBodyObject", () => {
         };
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [

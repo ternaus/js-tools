@@ -34,7 +34,6 @@ describe("createClient options", () => {
     const localBaseUrl = "https://api.foo.bar/v3";
     await client.GET("/resources", { baseUrl: localBaseUrl });
 
-    // assert baseUrl and path mesh as expected
     expect(actualURL.href).toBe("https://api.foo.bar/v3/resources");
   });
 
@@ -48,12 +47,10 @@ describe("createClient options", () => {
     const localBaseUrl = "https://api.foo.bar/v3";
     await client.GET("/resources", { baseUrl: localBaseUrl });
 
-    // assert baseUrl and path mesh as expected
     expect(actualURL.href).toBe("https://api.foo.bar/v3/resources");
 
     await client.GET("/resources");
 
-    // assert baseUrl and path mesh as expected
     expect(actualURL.href).toBe("https://api.foo.bar/v2/resources");
   });
 

@@ -1,3 +1,4 @@
+import { parseRef } from "../../src/lib/ref.js";
 import { createRef, getEntries } from "../../src/lib/utils.js";
 
 describe("getEntries", () => {
@@ -43,13 +44,18 @@ describe("createRef", () => {
   });
 
   test("escapes", () => {
-    expect(createRef(["paths", "/foo/{bar}", "get", "parameters"])).toBe("#/paths/~1foo~1{bar}/get/parameters");
+    expect(createRef(["paths", "/foo/{bar}", "get", "parameters"])).toBe("#/paths/~1foo~1%7Bbar%7D/get/parameters");
     expect(createRef(["components", "schemas", "~SchemaObject"])).toBe("#/components/schemas/~0SchemaObject");
   });
 
   test("handles partial paths", () => {
     expect(createRef(["#/paths/~1foo~1{bar}", "parameters", "query", "page"])).toBe(
-      "#/paths/~1foo~1{bar}/parameters/query/page",
+      "#/paths/~1foo~1%7Bbar%7D/parameters/query/page",
     );
+  });
+
+  test.each(["25%", "café", "a#b", "#/literal", "a/b", "~", ""])("preserves property name %j", (name) => {
+    const ref = createRef(["components", "schemas", "Data", name]);
+    expect(parseRef(ref).pointer).toEqual(["components", "schemas", "Data", name]);
   });
 });

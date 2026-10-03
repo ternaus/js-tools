@@ -1,18 +1,22 @@
 'use strict';
 
-const RuleTester = require('../../helpers/ruleTester');
+const { RuleTester } = require('eslint');
 const rule = require('../../../lib/rules/controlled-form-requires-handler');
 
 const ruleTester = new RuleTester({
-  parserOptions: {
-    ecmaFeatures: { jsx: true },
+  languageOptions: {
     ecmaVersion: 2024,
     sourceType: 'module',
+    parserOptions: { ecmaFeatures: { jsx: true } },
   },
 });
 
 ruleTester.run('controlled-form-requires-handler', rule, {
   valid: [
+    "import React from 'react'; React.createElement('input', { value: 'x', ['onChange']: change });",
+    "import React from 'react'; React.createElement('input', { value: 'x', [handler]: change });",
+    '<input {...{value: "x", ["onChange"]: change}} />',
+    "import { createElement } from 'react'; createElement = other; createElement('input', { value: 'name' });",
     '<input value="name" onChange={setName} />',
     '<input value="name" onInput={setName} />',
     '<input value="name" readOnly />',
@@ -33,6 +37,10 @@ ruleTester.run('controlled-form-requires-handler', rule, {
     "React.createElement('input', { value: 'name' });",
   ],
   invalid: [
+    {
+      code: "import React from 'react'; React.createElement('input', { ['value']: 'x' });",
+      errors: [{ messageId: 'missingValueHandler' }],
+    },
     {
       code: '<input value="name" />',
       errors: [{ messageId: 'missingValueHandler' }],

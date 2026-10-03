@@ -91,7 +91,6 @@ describe("transformWebhooksObject", () => {
     };
 }`,
       },
-      // options: DEFAULT_OPTIONS,
     ],
     [
       "$ref",

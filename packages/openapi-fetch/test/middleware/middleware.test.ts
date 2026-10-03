@@ -23,13 +23,9 @@ test("receives a UUID per-request", async () => {
   await client.GET("/posts/{id}", { params: { path: { id: 123 } } });
   await client.GET("/posts/{id}", { params: { path: { id: 123 } } });
 
-  // assert IDs matched between requests and responses
-  expect(requestIDs[0]).toBe(responseIDs[0]);
-  expect(requestIDs[1]).toBe(responseIDs[1]);
-  expect(requestIDs[2]).toBe(responseIDs[2]);
-
-  // assert IDs were unique
-  expect(requestIDs[0] !== requestIDs[1] && requestIDs[1] !== requestIDs[2]).toBe(true);
+  expect(requestIDs).toEqual(responseIDs);
+  expect(requestIDs).toHaveLength(4);
+  expect(new Set(requestIDs).size).toBe(requestIDs.length);
 });
 
 test("can modify request", async () => {
@@ -83,16 +79,11 @@ test("can modify response", async () => {
 
   const { data, response } = await client.GET("/posts/{id}", { params: { path: { id: 123 } } });
 
-  // assert body was modified
   expect((data as any).created_at).toBe(toUnix(rawBody.created_at));
   expect((data as any).updated_at).toBe(toUnix(rawBody.updated_at));
-  // assert rest of body was preserved
   expect((data as any).email).toBe(rawBody.email);
-  // assert status changed
   expect(response.status).toBe(201);
-  // assert server headers were preserved
   expect(response.headers.get("foo")).toBe("bar");
-  // assert middleware heaers were added
   expect(response.headers.get("middleware")).toBe("value");
 });
 
@@ -219,10 +210,8 @@ test("executes in expected order", async () => {
     ],
   });
 
-  // assert requests ended up on step C (array order)
   expect(actualRequest.headers.get("step")).toBe("D");
 
-  // assert responses ended up on step A (reverse order)
   expect(response.headers.get("step")).toBe("A");
 });
 
@@ -363,14 +352,12 @@ test("preserves (and can safely add) headers", async () => {
   client.use(
     {
       onRequest({ request }) {
-        // assert headers are kept in middleware onRequest
         expect(request.headers.get("createClient")).toBe("exists");
         expect(request.headers.get("onFetch")).toBe("exists");
         request.headers.set("onRequest", "exists");
         return request;
       },
       onResponse({ request }) {
-        // assert headers are (still) kept in onResponse
         expect(request.headers.get("createClient")).toBe("exists");
         expect(request.headers.get("onFetch")).toBe("exists");
         expect(request.headers.get("onRequest")).toBe("exists");
@@ -378,7 +365,6 @@ test("preserves (and can safely add) headers", async () => {
     },
     {
       onRequest({ request }) {
-        // also assert a 2nd middleware (that doesn’t modify request) still sees headers
         expect(request.headers.get("createClient")).toBe("exists");
         expect(request.headers.get("onFetch")).toBe("exists");
         expect(request.headers.get("onRequest")).toBe("exists");
@@ -391,7 +377,6 @@ test("preserves (and can safely add) headers", async () => {
     headers: { onFetch: "exists" },
   });
 
-  // assert server received them in final request
   expect(actualRequest.headers.get("createClient")).toBe("exists");
   expect(actualRequest.headers.get("onFetch")).toBe("exists");
   expect(actualRequest.headers.get("onRequest")).toBe("exists");
@@ -438,13 +423,11 @@ test("auth header", async () => {
   });
   client.use(authMiddleware);
 
-  // assert initial call is unauthenticated
   await client.GET("/posts/{id}", {
     params: { path: { id: 123 } },
   });
   expect(headers.get("authorization")).toBeNull();
 
-  // assert after setting token, client is authenticated
   accessToken = "real_token";
   await client.GET("/posts/{id}", {
     params: { path: { id: 123 } },

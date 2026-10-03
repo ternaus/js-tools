@@ -1,6 +1,7 @@
 import { performance } from "node:perf_hooks";
-import ts, { type InterfaceDeclaration, type TypeLiteralNode } from "@typescript/typescript6";
-import { NEVER, STRING, stringToAST, tsModifiers, tsRecord } from "../lib/ts.js";
+import ts from "@typescript/typescript6";
+import { READ_WRITE_HELPER_TYPES } from "../lib/read-write-types.js";
+import { enumCache, NEVER, STRING, stringToAST, tsModifiers, tsRecord } from "../lib/ts.js";
 import { debug } from "../lib/utils.js";
 import type { GlobalContext, OpenAPI3 } from "../types.js";
 import transformComponentsObject from "./components-object.js";
@@ -16,56 +17,41 @@ const transformers: Record<SchemaTransforms, (node: any, options: GlobalContext)
   components: transformComponentsObject,
 };
 
-// Inline helper types for readOnly/writeOnly markers (when readWriteMarkers is enabled)
-const READ_WRITE_HELPER_TYPES = `
-export type $Read<T> = { readonly $read: T };
-export type $Write<T> = { readonly $write: T };
-export type Readable<T> = T extends $Write<any> ? never : T extends $Read<infer U> ? Readable<U> : T extends (infer E)[] ? Readable<E>[] : T extends object ? { [K in keyof T as NonNullable<T[K]> extends $Write<any> ? never : K]: Readable<T[K]> } : T;
-export type Writable<T> = T extends $Read<any> ? never : T extends $Write<infer U> ? Writable<U> : T extends (infer E)[] ? Writable<E>[] : T extends object ? { [K in keyof T as NonNullable<T[K]> extends $Read<any> ? never : K]: Writable<T[K]> } & { [K in keyof T as NonNullable<T[K]> extends $Read<any> ? K : never]?: never } : T;
-`;
-
 export default function transformSchema(schema: OpenAPI3, ctx: GlobalContext) {
+  enumCache.clear();
   const type: ts.Node[] = [];
 
-  // Add inline helper types for readOnly/writeOnly markers
   if (ctx.readWriteMarkers) {
-    const helperNodes = stringToAST(READ_WRITE_HELPER_TYPES) as ts.Node[];
-    type.push(...helperNodes);
+    type.push(...stringToAST(READ_WRITE_HELPER_TYPES));
   }
 
   if (ctx.inject) {
-    const injectNodes = stringToAST(ctx.inject) as ts.Node[];
-    type.push(...injectNodes);
+    type.push(...stringToAST(ctx.inject));
   }
 
   for (const root of Object.keys(transformers) as SchemaTransforms[]) {
     const emptyObj = ts.factory.createTypeAliasDeclaration(
-      /* modifiers      */ tsModifiers({ export: true }),
-      /* name           */ root,
-      /* typeParameters */ undefined,
-      /* type           */ tsRecord(STRING, NEVER),
+      tsModifiers({ export: true }),
+      root,
+      undefined,
+      tsRecord(STRING, NEVER),
     );
 
     if (schema[root] && typeof schema[root] === "object") {
       const rootT = performance.now();
       const subTypes = ([] as ts.Node[]).concat(transformers[root](schema[root], ctx));
       for (const subType of subTypes) {
-        if (ts.isTypeNode(subType)) {
-          if ((subType as ts.TypeLiteralNode).members?.length) {
+        if (ts.isTypeLiteralNode(subType)) {
+          if (subType.members.length) {
             type.push(
               ctx.exportType
-                ? ts.factory.createTypeAliasDeclaration(
-                    /* modifiers      */ tsModifiers({ export: true }),
-                    /* name           */ root,
-                    /* typeParameters */ undefined,
-                    /* type           */ subType,
-                  )
+                ? ts.factory.createTypeAliasDeclaration(tsModifiers({ export: true }), root, undefined, subType)
                 : ts.factory.createInterfaceDeclaration(
-                    /* modifiers       */ tsModifiers({ export: true }),
-                    /* name            */ root,
-                    /* typeParameters  */ undefined,
-                    /* heritageClauses */ undefined,
-                    /* members         */ (subType as TypeLiteralNode).members,
+                    tsModifiers({ export: true }),
+                    root,
+                    undefined,
+                    undefined,
+                    subType.members,
                   ),
             );
             debug(`${root} done`, "ts", performance.now() - rootT);
@@ -86,22 +72,17 @@ export default function transformSchema(schema: OpenAPI3, ctx: GlobalContext) {
     }
   }
 
-  // inject
-  let hasOperations = false;
-  for (const injectedType of ctx.injectFooter) {
-    if (!hasOperations && (injectedType as InterfaceDeclaration)?.name?.escapedText === "operations") {
-      hasOperations = true;
-    }
-    type.push(injectedType);
-  }
+  const hasOperations = ctx.injectFooter.some(
+    (node) => (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) && node.name.text === "operations",
+  );
+  type.push(...ctx.injectFooter);
   if (!hasOperations) {
-    // if no operations created, inject empty operations type
     type.push(
       ts.factory.createTypeAliasDeclaration(
-        /* modifiers      */ tsModifiers({ export: true }),
-        /* name           */ "operations",
-        /* typeParameters */ undefined,
-        /* type           */ tsRecord(STRING, NEVER),
+        tsModifiers({ export: true }),
+        "operations",
+        undefined,
+        tsRecord(STRING, NEVER),
       ),
     );
   }

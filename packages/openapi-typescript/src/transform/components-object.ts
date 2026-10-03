@@ -11,29 +11,15 @@ import transformRequestBodyObject from "./request-body-object.js";
 import transformResponseObject from "./response-object.js";
 import transformSchemaObject from "./schema-object.js";
 
-/**
- * Determines if a schema object represents an enum type to prevent duplicate exports
- * when using --root-types and --enum flags together.
- *
- * When both flags are enabled:
- * - --enum flag generates TypeScript enums at the bottom of the file
- * - --root-types flag would normally also export these as root type aliases
- * - This results in duplicate exports (both enum and type alias for the same schema)
- *
- * This function identifies enum schemas so they can be excluded from root type generation,
- * allowing only the TypeScript enum to be generated.
- *
- * @param schema The schema object to check
- * @returns true if the schema represents an enum type
- */
+/** Root aliases must not duplicate declarations already emitted by --enum. */
 export function isEnumSchema(schema: unknown): boolean {
   return (
     typeof schema === "object" &&
     schema !== null &&
     !Array.isArray(schema) &&
     "enum" in schema &&
-    Array.isArray((schema as any).enum) &&
-    (!("type" in schema) || (schema as any).type !== "object") &&
+    Array.isArray(schema.enum) &&
+    (!("type" in schema) || schema.type !== "object") &&
     !("properties" in schema) &&
     !("additionalProperties" in schema)
   );
@@ -87,16 +73,15 @@ export default function transformComponentsObject(componentsObject: ComponentsOb
         }
 
         const property = ts.factory.createPropertySignature(
-          /* modifiers     */ tsModifiers({ readonly: ctx.immutable }),
-          /* name          */ tsPropertyIndex(name),
-          /* questionToken */ hasQuestionToken ? QUESTION_TOKEN : undefined,
-          /* type          */ subType,
+          tsModifiers({ readonly: ctx.immutable }),
+          tsPropertyIndex(name),
+          hasQuestionToken ? QUESTION_TOKEN : undefined,
+          subType,
         );
-        addJSDocComment(item as unknown as any, property);
+        addJSDocComment(item, property);
         items.push(property);
 
         if (ctx.rootTypes) {
-          // Skip enum schemas when generating root types to prevent duplication (only when --enum flag is enabled)
           const shouldSkipEnumSchema = ctx.enum && key === "schemas" && isEnumSchema(item);
 
           if (!shouldSkipEnumSchema) {
@@ -104,7 +89,6 @@ export default function transformComponentsObject(componentsObject: ComponentsOb
             const componentName = ctx.rootTypesKeepCasing && key === "schemas" ? name : changeCase.pascalCase(name);
             let aliasName = `${componentKey}${componentName}`;
 
-            // Add counter suffix (e.g. "_2") if conflict in name
             let conflictCounter = 1;
 
             while (rootTypeAliases[aliasName] !== undefined) {
@@ -116,10 +100,10 @@ export default function transformComponentsObject(componentsObject: ComponentsOb
               aliasName = aliasName.replace(componentKey, "");
             }
             const typeAlias = ts.factory.createTypeAliasDeclaration(
-              /* modifiers      */ tsModifiers({ export: true }),
-              /* name           */ aliasName,
-              /* typeParameters */ undefined,
-              /* type           */ ref,
+              tsModifiers({ export: true }),
+              aliasName,
+              undefined,
+              ref,
             );
             rootTypeAliases[aliasName] = typeAlias;
           }
@@ -128,17 +112,16 @@ export default function transformComponentsObject(componentsObject: ComponentsOb
     }
     type.push(
       ts.factory.createPropertySignature(
-        /* modifiers     */ undefined,
-        /* name          */ tsPropertyIndex(key),
-        /* questionToken */ undefined,
-        /* type          */ items.length ? ts.factory.createTypeLiteralNode(items) : NEVER,
+        undefined,
+        tsPropertyIndex(key),
+        undefined,
+        items.length ? ts.factory.createTypeLiteralNode(items) : NEVER,
       ),
     );
 
     debug(`Transformed components → ${key}`, "ts", performance.now() - componentT);
   }
 
-  // Extract root types
   let rootTypes: ts.TypeAliasDeclaration[] = [];
   if (ctx.rootTypes) {
     rootTypes = Object.keys(rootTypeAliases).map((k) => rootTypeAliases[k]);
@@ -151,10 +134,8 @@ export function singularizeComponentKey(
   key: `x-${string}` | "schemas" | "responses" | "parameters" | "requestBodies" | "headers" | "pathItems",
 ): string {
   switch (key) {
-    // Handle special singular case
     case "requestBodies":
       return "requestBody";
-    // Default to removing the "s"
     default:
       return key.slice(0, -1);
   }

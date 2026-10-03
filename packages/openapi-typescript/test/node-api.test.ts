@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { fileURLToPath } from "node:url";
 import ts from "@typescript/typescript6";
 import openapiTS, { astToString, COMMENT_HEADER } from "../src/index.js";
@@ -5,6 +8,22 @@ import type { OpenAPITSOptions } from "../src/types.js";
 import type { TestCase } from "./test-helpers.js";
 
 const EXAMPLES_DIR = new URL("./fixtures/examples/", import.meta.url);
+const remoteSchema = await readFile(new URL("simple-example.yaml", EXAMPLES_DIR));
+const server = createServer((_request, response) => {
+  response.setHeader("Content-Type", "application/yaml");
+  response.end(remoteSchema);
+});
+await new Promise<void>((resolve, reject) => {
+  server.once("error", reject);
+  server.listen(0, "127.0.0.1", resolve);
+});
+const remoteSchemaUrl = new URL(`http://127.0.0.1:${(server.address() as AddressInfo).port}/openapi.yaml`);
+afterAll(
+  () =>
+    new Promise<void>((resolve, reject) => {
+      server.close((error) => (error ? reject(error) : resolve()));
+    }),
+);
 
 const DATE = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Date"));
 const BLOB = ts.factory.createTypeReferenceNode("Blob");
@@ -31,7 +50,6 @@ export interface components {
 }
 export type operations = Record<string, never>;`,
       },
-      // options: DEFAULT_OPTIONS,
     ],
     [
       "input > string > JSON",
@@ -53,25 +71,19 @@ export interface components {
 }
 export type operations = Record<string, never>;`,
       },
-      // options: DEFAULT_OPTIONS,
     ],
     [
       "input > string > URL",
       {
-        given:
-          "https://raw.githubusercontent.com/Redocly/redocly-cli/13e753a4ca008293dab212ad3b70109166bf93c5/__tests__/lint/oas3.1/openapi.yaml",
+        given: remoteSchemaUrl.href,
         want: new URL("simple-example.ts", EXAMPLES_DIR),
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
       "input > URL > remote",
       {
-        given: new URL(
-          "https://raw.githubusercontent.com/Redocly/redocly-cli/13e753a4ca008293dab212ad3b70109166bf93c5/__tests__/lint/oas3.1/openapi.yaml",
-        ),
+        given: remoteSchemaUrl,
         want: new URL("simple-example.ts", EXAMPLES_DIR),
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -79,7 +91,6 @@ export type operations = Record<string, never>;`,
       {
         given: new URL("./simple-example.yaml", EXAMPLES_DIR),
         want: new URL("simple-example.ts", EXAMPLES_DIR),
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -102,7 +113,6 @@ export interface components {
 }
 export type operations = Record<string, never>;`,
       },
-      // options: DEFAULT_OPTIONS,
     ],
     [
       "input > buffer",
@@ -123,7 +133,6 @@ export interface components {
     pathItems: never;
 }
 export type operations = Record<string, never>;`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -602,13 +611,6 @@ export type operations = Record<string, never>;`,
                */
               return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("DateOrTime"));
             }
-
-            // Previously, in order to access the schema in postTransform,
-            // you could resolve the schema using the path.
-            // Now, the schema is made available directly on the options.
-            // const schema = options.path
-            //   ? options.ctx.resolve<ReferenceObject | SchemaObject>(options.path)
-            //   : undefined;
             const schema = options.schema;
 
             if (
@@ -1013,13 +1015,13 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const pathsUrlGetParametersQueryStatusValues: ReadonlyArray<FlattenedDeepRequired<paths>["/url"]["get"]["parameters"]["query"]["status"]> = ["active", "inactive"];
 export const statusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Status"]> = ["active", "inactive"];
@@ -1067,13 +1069,13 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const complexEditKeyDtoStatesValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["ComplexEditKeyDto"]["states"][string]> = ["TRANSLATED", "REVIEWED"];
 export type operations = Record<string, never>;`,
@@ -1244,13 +1246,13 @@ export interface operations {
         };
     };
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const pathsAnalyticsDataGetResponses400ContentApplicationJsonAnyOf0MessageValues: ReadonlyArray<Extract<FlattenedDeepRequired<paths>["/analytics/data"]["get"]["responses"]["400"]["content"]["application/json"], {
     message: unknown;
@@ -1429,13 +1431,13 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const pathsTestGetRequestBodyContentApplicationJsonStatusValues: ReadonlyArray<FlattenedDeepRequired<paths>["/test"]["get"]["requestBody"]["content"]["application/json"]["status"]> = ["active", "inactive"];
 export type operations = Record<string, never>;`,
@@ -1503,6 +1505,7 @@ export interface components {
     schemas: {
         Resource: {
             items?: ({
+                type: unknown;
                 id: string;
             } & ({
                 /** @enum {string} */
@@ -1523,13 +1526,13 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const resourceItemsOneOf0TypeValues: ReadonlyArray<Extract<FlattenedDeepRequired<components>["schemas"]["Resource"]["items"], {
     type: unknown;
@@ -1623,13 +1626,13 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const resourceItemsOneOf0NestedTypeValues: ReadonlyArray<Extract<Extract<FlattenedDeepRequired<components>["schemas"]["Resource"]["items"], {
     nested: unknown;
@@ -1738,13 +1741,13 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-type FlattenedDeepRequired<T> = {
-    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
-};
+type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? {
+    [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>>;
+} : NonNullable<T>;
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
-    unknown[]
+    readonly unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const resourceOuterOneOf0KindValues: ReadonlyArray<Extract<FlattenedDeepRequired<components>["schemas"]["Resource"]["outer"], {
     kind: unknown;

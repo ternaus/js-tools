@@ -253,7 +253,6 @@ describe("transformPathItemObject", () => {
         };
     };
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -299,7 +298,6 @@ describe("transformPathItemObject", () => {
     patch?: never;
     trace?: never;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [
@@ -326,7 +324,6 @@ describe("transformPathItemObject", () => {
     patch?: never;
     trace?: never;
 }`,
-        // options: DEFAULT_OPTIONS,
       },
     ],
     [

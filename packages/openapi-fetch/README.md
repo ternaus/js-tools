@@ -1,3 +1,7 @@
+# @ternaus/openapi-fetch
+
+Fork of [openapi-fetch in openapi-ts/openapi-typescript](https://github.com/openapi-ts/openapi-typescript/tree/main/packages/openapi-fetch), maintained by [Vladimir Iglovikov](https://github.com/ternaus). The original authorship, Git history, and MIT license are preserved.
+
 <img src="../../docs/public/assets/openapi-fetch.svg" alt="@ternaus/openapi-fetch" width="216" height="40" />
 
 `@ternaus/openapi-fetch` infers paths, parameters, request bodies, and responses from generated OpenAPI declarations. It uses the native Fetch API.

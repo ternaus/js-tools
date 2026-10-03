@@ -8,7 +8,6 @@ export const JS_ENUM_INVALID_CHARS_RE = /[^A-Za-z_$0-9]+(.)?/g;
 export const JS_PROPERTY_INDEX_INVALID_CHARS_RE = /[^A-Za-z_$0-9]+/g;
 export const SPECIAL_CHARACTER_MAP: Record<string, string> = {
   "+": "Plus",
-  // Add more mappings as needed
 };
 
 export const BOOLEAN = ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -22,22 +21,22 @@ export const TRUE = ts.factory.createLiteralTypeNode(ts.factory.createTrue());
 export const UNDEFINED = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
 export const UNKNOWN = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
 
-const LB_RE = /\r?\n/g;
+const LB_RE = /\r\n|[\r\n\u2028\u2029]/g;
 const COMMENT_RE = /\*\//g;
 
 export interface AnnotatedSchemaObject {
-  const?: unknown; // jsdoc without value
-  default?: unknown; // jsdoc with value
-  deprecated?: boolean; // jsdoc without value
-  description?: string; // jsdoc with value
-  enum?: unknown[]; // jsdoc without value
-  example?: string; // jsdoc with value
+  const?: unknown;
+  default?: unknown;
+  deprecated?: boolean;
+  description?: string;
+  enum?: unknown[];
+  example?: string;
   examples?: unknown;
-  format?: string; // not jsdoc
-  nullable?: boolean; // Node information
-  summary?: string; // not jsdoc
-  title?: string; // not jsdoc
-  type?: string | string[]; // Type of node
+  format?: string;
+  nullable?: boolean;
+  summary?: string;
+  title?: string;
+  type?: string | string[];
 }
 
 /**
@@ -51,7 +50,6 @@ export function addJSDocComment(schemaObject: AnnotatedSchemaObject, node: ts.Pr
   }
   const output: string[] = [];
 
-  // Not JSDoc tags: [title, format]
   if (schemaObject.title) {
     output.push(schemaObject.title.trim().replace(LB_RE, "\n *     "));
   }
@@ -62,13 +60,10 @@ export function addJSDocComment(schemaObject: AnnotatedSchemaObject, node: ts.Pr
     output.push(`Format: ${schemaObject.format}`);
   }
 
-  // JSDoc tags without value
-  // 'Deprecated' without value
   if (schemaObject.deprecated) {
     output.push("@deprecated");
   }
 
-  // JSDoc tags with value
   const supportedJsDocTags = ["description", "default", "example"] as const;
   for (const field of supportedJsDocTags) {
     const allowEmptyString = field === "default" || field === "example";
@@ -90,12 +85,10 @@ export function addJSDocComment(schemaObject: AnnotatedSchemaObject, node: ts.Pr
     }
   }
 
-  // JSDoc 'Constant' without value
   if ("const" in schemaObject) {
     output.push("@constant");
   }
 
-  // JSDoc 'Enum' with type
   if (schemaObject.enum) {
     let type = "unknown";
     if (Array.isArray(schemaObject.type)) {
@@ -106,22 +99,14 @@ export function addJSDocComment(schemaObject: AnnotatedSchemaObject, node: ts.Pr
     output.push(`@enum {${type}${schemaObject.nullable ? "|null" : ""}}`);
   }
 
-  // attach comment if it has content
-
   if (output.length) {
-    // Check if any output item contains multi-line content (has internal line breaks)
     const hasMultiLineContent = output.some((item) => item.includes("\n"));
 
     let text =
       output.length === 1 && !hasMultiLineContent ? `* ${output.join("\n")} ` : `*\n * ${output.join("\n * ")}\n `;
     text = text.replace(COMMENT_RE, "*\\/"); // prevent inner comments from leaking
 
-    ts.addSyntheticLeadingComment(
-      /* node               */ node,
-      /* kind               */ ts.SyntaxKind.MultiLineCommentTrivia, // note: MultiLine just refers to a "/* */" comment
-      /* text               */ text,
-      /* hasTrailingNewLine */ true,
-    );
+    ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, text, true);
   }
 }
 
@@ -156,10 +141,10 @@ function wrapWithExtract(type: ts.TypeNode, propertyName: string): ts.TypeNode {
     type,
     ts.factory.createTypeLiteralNode([
       ts.factory.createPropertySignature(
-        /* modifiers     */ undefined,
-        /* name          */ ts.factory.createIdentifier(propertyName),
-        /* questionToken */ undefined,
-        /* type          */ ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
+        undefined,
+        ts.factory.createIdentifier(propertyName),
+        undefined,
+        ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
       ),
     ]),
   ]);
@@ -235,6 +220,10 @@ export function oapiRef(path: string, resolved?: OapiRefResolved, options: OapiR
       return addIndexedAccess(narrowedType, segment);
     }
 
+    if (segment === "$defs" && index < original.length - 1) {
+      return ts.factory.createTypeReferenceNode("NonNullable", [addIndexedAccess(acc, segment)]);
+    }
+
     return addIndexedAccess(acc, segment);
   }, leadingType);
 }
@@ -270,14 +259,8 @@ export function astToString(
 }
 
 /** Convert an arbitrary string to TS (assuming it’s valid) */
-export function stringToAST(source: string): unknown[] {
-  return ts.createSourceFile(
-    /* fileName        */ "stringInput",
-    /* sourceText      */ source,
-    /* languageVersion */ ts.ScriptTarget.ESNext,
-    /* setParentNodes  */ undefined,
-    /* scriptKind      */ undefined,
-  ).statements as any;
+export function stringToAST(source: string): ts.Statement[] {
+  return [...ts.createSourceFile("stringInput", source, ts.ScriptTarget.ESNext, undefined, undefined).statements];
 }
 
 /**
@@ -314,23 +297,46 @@ export function tsEnum(
 ) {
   let enumName = sanitizeMemberName(name);
   enumName = `${enumName[0].toUpperCase()}${enumName.substring(1)}`;
+  const entries = members.map((value, index) => ({
+    value,
+    metadata: metadata?.[index],
+    name: enumMemberName(metadata?.[index]?.name ?? String(value)),
+  }));
+  const reservedNames = new Set(entries.map(({ name }) => name.text));
+  const usedNames = new Map<string, number>();
+  for (const entry of entries) {
+    const base = entry.name.text;
+    let suffix = usedNames.get(base) ?? 0;
+    if (suffix) {
+      let candidate: string;
+      do {
+        candidate = `${base}_${++suffix}`;
+      } while (reservedNames.has(candidate) || usedNames.has(candidate));
+      entry.name = ts.isIdentifier(entry.name)
+        ? ts.factory.createIdentifier(candidate)
+        : ts.factory.createStringLiteral(candidate);
+      usedNames.set(base, suffix);
+    }
+    usedNames.set(entry.name.text, 1);
+  }
   let key = "";
   if (options?.shouldCache) {
-    key = `${members
-      .slice(0)
-      .sort()
-      .map((v, i) => {
-        return `${metadata?.[i]?.name ?? String(v)}:${metadata?.[i]?.description || ""}`;
-      })
-      .join(",")}`;
-    if (enumCache.has(key)) {
-      return enumCache.get(key) as ts.EnumDeclaration;
+    key = JSON.stringify(
+      entries
+        .map(({ value, name, metadata }) =>
+          JSON.stringify([value, name.text, metadata?.description?.trim().replace(LB_RE, " ") ?? ""]),
+        )
+        .sort(),
+    );
+    const cached = enumCache.get(key);
+    if (cached) {
+      return cached;
     }
   }
   const enumDeclaration = ts.factory.createEnumDeclaration(
-    /* modifiers */ options ? tsModifiers({ export: options.export ?? false }) : undefined,
-    /* name      */ enumName,
-    /* members   */ members.map((value, i) => tsEnumMember(value, metadata?.[i])),
+    options ? tsModifiers({ export: options.export ?? false }) : undefined,
+    enumName,
+    entries.map(({ value, metadata, name }) => tsEnumMember(value, metadata, name)),
   );
   options?.shouldCache && enumCache.set(key, enumDeclaration);
   return enumDeclaration;
@@ -352,10 +358,11 @@ export function tsArrayLiteralExpression(
       (node) => ts.isTypeAliasDeclaration(node) && node?.name?.escapedText === "FlattenedDeepRequired",
     )
   ) {
-    const helper = stringToAST(
-      "type FlattenedDeepRequired<T> = { [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>; };",
-    )[0] as any;
-    options.injectFooter.push(helper);
+    options.injectFooter.push(
+      ...stringToAST(
+        "type FlattenedDeepRequired<T> = T extends readonly (infer E)[] ? FlattenedDeepRequired<NonNullable<E>> : T extends object ? { [K in keyof T]-?: FlattenedDeepRequired<NonNullable<T[K]>> } : NonNullable<T>;",
+      ),
+    );
   }
 
   const arrayType = options?.readonly
@@ -404,12 +411,13 @@ function sanitizeMemberName(name: string) {
   return sanitizedName;
 }
 
-/** Sanitize TS enum member expression */
-export function tsEnumMember(value: string | number, metadata: { name?: string; description?: string | null } = {}) {
-  let name = metadata.name ?? String(value);
+function enumMemberName(name: string): ts.Identifier | ts.StringLiteral {
+  if (name === "") {
+    return ts.factory.createStringLiteral(name);
+  }
   if (!JS_PROPERTY_INDEX_RE.test(name)) {
     if (Number(name[0]) >= 0) {
-      name = `Value${name}`.replace(".", "_"); // don't forged decimals;
+      name = `Value${name}`.replace(".", "_");
     } else if (name[0] === "-") {
       name = `ValueMinus${name.slice(1)}`;
     }
@@ -417,7 +425,7 @@ export function tsEnumMember(value: string | number, metadata: { name?: string; 
     const invalidCharMatch = name.match(JS_PROPERTY_INDEX_INVALID_CHARS_RE);
     if (invalidCharMatch) {
       if (invalidCharMatch[0] === name) {
-        name = `"${name}"`;
+        return ts.factory.createStringLiteral(name);
       } else {
         name = name.replace(JS_PROPERTY_INDEX_INVALID_CHARS_RE, (s) => {
           return s in SPECIAL_CHARACTER_MAP ? SPECIAL_CHARACTER_MAP[s] : "_";
@@ -425,7 +433,14 @@ export function tsEnumMember(value: string | number, metadata: { name?: string; 
       }
     }
   }
+  return ts.factory.createIdentifier(name);
+}
 
+export function tsEnumMember(
+  value: string | number,
+  metadata: { name?: string; description?: string | null } = {},
+  name = enumMemberName(metadata.name ?? String(value)),
+) {
   let member: ts.EnumMember;
   if (typeof value === "number") {
     const literal =
@@ -446,10 +461,14 @@ export function tsEnumMember(value: string | number, metadata: { name?: string; 
     return member;
   }
 
-  return ts.addSyntheticLeadingComment(member, ts.SyntaxKind.SingleLineCommentTrivia, ` ${trimmedDescription}`, true);
+  return ts.addSyntheticLeadingComment(
+    member,
+    ts.SyntaxKind.SingleLineCommentTrivia,
+    ` ${trimmedDescription.replace(LB_RE, " ")}`,
+    true,
+  );
 }
 
-/** Create an intersection type */
 export function tsIntersection(types: ts.TypeNode[]): ts.TypeNode {
   if (types.length === 0) {
     return NEVER;
@@ -507,21 +526,13 @@ export function tsLiteral(value: unknown): ts.TypeNode {
   if (typeof value === "object") {
     const keys: ts.TypeElement[] = [];
     for (const [k, v] of Object.entries(value)) {
-      keys.push(
-        ts.factory.createPropertySignature(
-          /* modifiers     */ undefined,
-          /* name          */ tsPropertyIndex(k),
-          /* questionToken */ undefined,
-          /* type          */ tsLiteral(v),
-        ),
-      );
+      keys.push(ts.factory.createPropertySignature(undefined, tsPropertyIndex(k), undefined, tsLiteral(v)));
     }
     return keys.length ? ts.factory.createTypeLiteralNode(keys) : tsRecord(STRING, NEVER);
   }
   return UNKNOWN;
 }
 
-/** Modifiers (readonly) */
 export function tsModifiers(modifiers: { readonly?: boolean; export?: boolean }): ts.Modifier[] {
   const typeMods: ts.Modifier[] = [];
   if (modifiers.export) {
@@ -533,12 +544,10 @@ export function tsModifiers(modifiers: { readonly?: boolean; export?: boolean })
   return typeMods;
 }
 
-/** Create a T | null union */
 export function tsNullable(types: ts.TypeNode[]): ts.TypeNode {
   return ts.factory.createUnionTypeNode([...types, NULL]);
 }
 
-/** Create a TS Omit<X, Y> type */
 export function tsOmit(type: ts.TypeNode, keys: string[]): ts.TypeNode {
   return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Omit"), [
     type,
@@ -546,7 +555,6 @@ export function tsOmit(type: ts.TypeNode, keys: string[]): ts.TypeNode {
   ]);
 }
 
-/** Create a TS Record<X, Y> type */
 export function tsRecord(key: ts.TypeNode, value: ts.TypeNode) {
   return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Record"), [key, value]);
 }
@@ -564,7 +572,6 @@ export function tsPropertyIndex(index: string | number) {
     : ts.factory.createStringLiteral(String(index));
 }
 
-/** Create a union type */
 export function tsUnion(types: ts.TypeNode[]): ts.TypeNode {
   if (types.length === 0) {
     return NEVER;
@@ -575,7 +582,6 @@ export function tsUnion(types: ts.TypeNode[]): ts.TypeNode {
   return ts.factory.createUnionTypeNode(tsDedupe(types));
 }
 
-/** Create a WithRequired<X, Y> type */
 export function tsWithRequired(
   type: ts.TypeNode,
   keys: string[],
@@ -585,10 +591,8 @@ export function tsWithRequired(
     return type;
   }
 
-  // inject helper, if needed
   if (!injectFooter.some((node) => ts.isTypeAliasDeclaration(node) && node?.name?.escapedText === "WithRequired")) {
-    const helper = stringToAST("type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };")[0] as any;
-    injectFooter.push(helper);
+    injectFooter.push(...stringToAST("type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };"));
   }
 
   return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("WithRequired"), [
@@ -607,10 +611,11 @@ export function tsReadonlyArray(type: ts.TypeNode, injectFooter?: ts.Node[]): ts
     injectFooter &&
     !injectFooter.some((node) => ts.isTypeAliasDeclaration(node) && node?.name?.escapedText === "ReadonlyArray")
   ) {
-    const helper = stringToAST(
-      "type ReadonlyArray<T> = [Exclude<T, undefined>] extends [unknown[]] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;",
-    )[0] as any;
-    injectFooter.push(helper);
+    injectFooter.push(
+      ...stringToAST(
+        "type ReadonlyArray<T> = [Exclude<T, undefined>] extends [readonly unknown[]] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;",
+      ),
+    );
   }
   return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("ReadonlyArray"), [type]);
 }

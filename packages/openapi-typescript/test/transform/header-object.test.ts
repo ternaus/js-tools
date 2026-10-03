@@ -20,7 +20,6 @@ describe("transformHeaderObject", () => {
           },
         },
         want: "string",
-        // options: DEFAULT_OPTIONS,
       },
     ],
   ];

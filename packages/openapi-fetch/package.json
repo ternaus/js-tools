@@ -56,7 +56,6 @@
     "@ternaus/openapi-typescript-helpers": "workspace:^"
   },
   "devDependencies": {
-    "execa": "catalog:",
     "@ternaus/openapi-typescript": "workspace:^"
   },
   "engines": {
