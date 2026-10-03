@@ -71,7 +71,7 @@
     "quality:precommit": "pnpm run format:check && pnpm run check:citation && pnpm run check:rule-documentation && pnpm run lint",
     "quality:publish": "pnpm run quality:precommit && pnpm run test:coverage",
     "test": "pnpm run test:coverage && pnpm run pack:check && pnpm run test:package",
-    "test:coverage": "c8 --all --extension .js --include index.js --include 'lib/**/*.js' --reporter text-summary --check-coverage --branches 90 --functions 95 --lines 95 --statements 95 mocha --reporter min \"tests/lib/**/*.js\" tests/index.js tests/flat-config.js",
+    "test:coverage": "c8 --all --extension .js --include index.js --include \"lib/**/*.js\" --reporter text-summary --check-coverage --branches 90 --functions 95 --lines 95 --statements 95 mocha --reporter min \"tests/lib/**/*.js\" tests/index.js tests/flat-config.js",
     "test:package": "node scripts/test-package-consumer.mjs",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "test:unit": "mocha --reporter min \"tests/lib/**/*.js\" tests/index.js tests/flat-config.js"
