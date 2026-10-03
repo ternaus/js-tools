@@ -41,7 +41,7 @@ Install Biome, ESLint, and `@ternaus/eslint-plugin-react` as direct
 development dependencies:
 
 ```sh
-pnpm add --dev @biomejs/biome@'>=2.5.13' eslint@^10 @ternaus/eslint-plugin-react@8.0.2
+pnpm add --dev @biomejs/biome@'>=2.5.13' eslint@^10 @ternaus/eslint-plugin-react@9.0.0
 ```
 
 Enable Biome's `all` preset, including its React domain, as shown in [Use it
@@ -51,7 +51,7 @@ same published package with Yarn:
 ```json
 {
   "resolutions": {
-    "eslint-plugin-react": "npm:@ternaus/eslint-plugin-react@8.0.2"
+    "eslint-plugin-react": "npm:@ternaus/eslint-plugin-react@9.0.0"
   }
 }
 ```
