@@ -13,6 +13,11 @@ const packageDirectory = join(temporaryDirectory, 'package');
 const consumerDirectory = join(temporaryDirectory, 'consumer');
 const npmCache = join(temporaryDirectory, 'npm-cache');
 const packageName = '@ternaus/eslint-plugin-react';
+const [npmCommand, ...npmArguments] =
+  process.platform === 'win32'
+    ? [process.execPath, join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js')]
+    : ['npm'];
+const directoryLinkType = process.platform === 'win32' ? 'junction' : 'dir';
 
 function run(command, arguments_, options = {}) {
   return execFileSync(command, arguments_, {
@@ -27,8 +32,17 @@ try {
   await mkdir(archiveDirectory);
   const packed = JSON.parse(
     execFileSync(
-      'npm',
-      ['pack', '--json', '--ignore-scripts', '--cache', npmCache, '--pack-destination', archiveDirectory],
+      npmCommand,
+      [
+        ...npmArguments,
+        'pack',
+        '--json',
+        '--ignore-scripts',
+        '--cache',
+        npmCache,
+        '--pack-destination',
+        archiveDirectory,
+      ],
       {
         cwd: repository,
         encoding: 'utf8',
@@ -41,11 +55,15 @@ try {
   execFileSync('tar', ['-xzf', archive, '-C', packageDirectory]);
 
   await mkdir(join(consumerDirectory, 'node_modules', '@ternaus'), { recursive: true });
-  await symlink(join(workspace, 'node_modules', 'eslint'), join(consumerDirectory, 'node_modules', 'eslint'), 'dir');
+  await symlink(
+    join(workspace, 'node_modules', 'eslint'),
+    join(consumerDirectory, 'node_modules', 'eslint'),
+    directoryLinkType,
+  );
   await symlink(
     join(packageDirectory, 'package'),
     join(consumerDirectory, 'node_modules', '@ternaus', 'eslint-plugin-react'),
-    'dir',
+    directoryLinkType,
   );
 
   await writeFile(join(consumerDirectory, 'package.json'), '{"type":"module"}\n');
