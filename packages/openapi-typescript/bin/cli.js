@@ -205,7 +205,7 @@ async function main() {
       Object.entries(redocly.resolvedConfig.apis).map(async ([name, api]) => {
         let configRoot = CWD;
 
-        const config = { ...flags, redocly };
+        const config = { ...flags, redocly: redocly.forAlias(name) };
         if (redocly.configPath) {
           // note: this will be absolute if --redoc is passed; otherwise, relative
           configRoot = path.isAbsolute(redocly.configPath)

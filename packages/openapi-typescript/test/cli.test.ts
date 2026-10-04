@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import os from "node:os";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execa } from "execa";
 import stripAnsi from "strip-ansi";
@@ -11,6 +12,67 @@ const cmd = "./bin/cli.js";
 const TIMEOUT = 10_000;
 
 describe("CLI", () => {
+  test.each([
+    { name: "API-specific decorators", ignored: false },
+    { name: "ignored lint findings", ignored: true },
+  ])("honors $name", async ({ ignored }) => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "openapi-config-"));
+    const spec = {
+      openapi: "3.1.0",
+      info: { title: "Redocly configuration", version: "1" },
+      paths: {
+        "/keep": { get: { operationId: "keep", responses: { 200: { description: "OK" } } } },
+        "/hide": { get: { operationId: ignored ? "keep" : "hide", responses: { 200: { description: "OK" } } } },
+      },
+    };
+    const config = ignored
+      ? { rules: { "operation-operationId-unique": "error" } }
+      : {
+          apis: {
+            main: {
+              root: "spec.json",
+              "x-openapi-ts": { output: "out.ts" },
+              decorators: { "filter-in": { property: "operationId", value: ["keep"] } },
+            },
+          },
+        };
+    try {
+      fs.writeFileSync(path.join(directory, "spec.json"), JSON.stringify(spec));
+      fs.writeFileSync(path.join(directory, "redocly.yaml"), JSON.stringify(config));
+      if (ignored) {
+        fs.writeFileSync(
+          path.join(directory, ".redocly.lint-ignore.yaml"),
+          JSON.stringify({
+            "spec.json": { "operation-operationId-unique": ["#/paths/~1hide/get/keep"] },
+          }),
+        );
+      }
+      const args = ["--redocly", "redocly.yaml", ...(ignored ? ["spec.json", "-o", "out.ts"] : [])];
+      const result = await execa(fileURLToPath(new URL("bin/cli.js", root)), args, {
+        cwd: directory,
+        input: "",
+        reject: false,
+        timeout: TIMEOUT,
+      });
+      expect(result.exitCode).toBe(0);
+      const output = fs.readFileSync(path.join(directory, "out.ts"), "utf8");
+      expect(output).toContain('"/keep"');
+      expect(output.includes('"/hide"')).toBe(ignored);
+      if (ignored) {
+        fs.rmSync(path.join(directory, ".redocly.lint-ignore.yaml"));
+        const rejected = await execa(fileURLToPath(new URL("bin/cli.js", root)), args, {
+          cwd: directory,
+          input: "",
+          reject: false,
+          timeout: TIMEOUT,
+        });
+        expect(rejected.exitCode).not.toBe(0);
+        expect(rejected.stderr).toContain("unique `operationId`");
+      }
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
   test("rejects unknown options", async () => {
     const result = await execa(cmd, ["--unknown-option", "./test/fixtures/examples/simple-example.yaml"], {
       cwd,

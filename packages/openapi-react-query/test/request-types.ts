@@ -1,9 +1,11 @@
 import createFetchClient from "@ternaus/openapi-fetch";
-import createClient from "../src/index.js";
+import createClient, { type UseMutationMethod } from "../src/index.js";
 import type { paths } from "./fixtures/api.js";
 
 export function useRequestContracts() {
   const client = createClient(createFetchClient<paths>());
+  const useMutation: UseMutationMethod<paths, `${string}/${string}`> = (...args) => client.useMutation(...args);
+  useMutation("put", "/comment");
   client.queryOptions("get", "/paginated-data", { params: { query: { limit: 2 } } }, { retry: false });
   // @ts-expect-error retry belongs in the query options argument
   client.useQuery("get", "/string-array", { retry: false });

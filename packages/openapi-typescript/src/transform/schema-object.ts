@@ -24,7 +24,7 @@ import {
   UNDEFINED,
   UNKNOWN,
 } from "../lib/ts.js";
-import { createDiscriminatorProperty, createRef, getEntries } from "../lib/utils.js";
+import { createDiscriminatorProperty, createRef, getDiscriminatorEnumReference, getEntries } from "../lib/utils.js";
 import type { ReferenceObject, SchemaObject, TransformNodeOptions } from "../types.js";
 
 /**
@@ -232,24 +232,32 @@ export function transformSchemaObjectWithComposition(
   /** Collect allOf with Omit<> for discriminators */
   function collectAllOfCompositions(items: (SchemaObject | ReferenceObject)[], required?: string[]): ts.TypeNode[] {
     const output: ts.TypeNode[] = [];
+    const hasObjectConstraint = items.some((item) => {
+      const schema = "$ref" in item ? options.ctx.resolve<SchemaObject>(item.$ref) : item;
+      return schema?.type === "object" && !schema.nullable && ("$ref" in item || Object.keys(item).length > 1);
+    });
     for (const item of items) {
+      if (hasObjectConstraint && !("$ref" in item) && item.type === "object" && Object.keys(item).length === 1) {
+        continue;
+      }
       let itemType: ts.TypeNode;
       // if this is a $ref, use WithRequired<X, Y> if parent specifies required properties
       // (but only for valid keys)
       if ("$ref" in item) {
-        itemType = transformSchemaObject(item, options);
-
         const resolved = options.ctx.resolve<SchemaObject>(item.$ref);
-
-        // make keys required, if necessary
+        const alternatives = resolved?.oneOf ?? resolved?.anyOf;
         if (
           resolved &&
-          typeof resolved === "object" &&
-          "properties" in resolved &&
-          // we have already handled this item (discriminator property was already added as required)
-          !options.ctx.discriminators.refsHandled.includes(item.$ref)
+          alternatives?.some((alternative) => "$ref" in alternative && alternative.$ref === options.path)
         ) {
-          // add WithRequired<X, Y> if necessary
+          // Inline the common parent constraints; its union already includes this child.
+          const { oneOf: _oneOf, anyOf: _anyOf, ...parent } = resolved;
+          itemType = transformSchemaObject(parent, { ...options, path: item.$ref });
+        } else {
+          itemType = transformSchemaObject(item, options);
+        }
+
+        if (resolved && typeof resolved === "object" && "properties" in resolved) {
           const validRequired = (required ?? []).filter((key) => !!resolved.properties?.[key]);
           if (validRequired.length) {
             itemType = tsWithRequired(itemType, validRequired, options.ctx.injectFooter);
@@ -267,7 +275,10 @@ export function transformSchemaObjectWithComposition(
 
       const discriminator =
         ("$ref" in item && options.ctx.discriminators.objects[item.$ref]) || (item as any).discriminator;
-      if (discriminator) {
+      const hasDiscriminator =
+        options.ctx.discriminators.objects[options.path ?? ""] ||
+        options.ctx.discriminators.refsHandled.includes(options.path ?? "");
+      if (discriminator && hasDiscriminator) {
         output.push(tsOmit(itemType, [discriminator.propertyName]));
       } else {
         output.push(itemType);
@@ -557,20 +568,20 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
           );
         }
 
-        const { $ref, readOnly, writeOnly, hasDefault } =
+        const $ref = typeof v === "object" && "$ref" in v ? v.$ref : undefined;
+        const resolved = $ref ? options.ctx.resolve<SchemaObject>($ref) : undefined;
+        const { readOnly, writeOnly, hasDefault } =
           typeof v === "object"
             ? {
-                $ref: "$ref" in v && v.$ref,
-                readOnly: "readOnly" in v && v.readOnly,
-                writeOnly: "writeOnly" in v && v.writeOnly,
+                readOnly: "readOnly" in v ? v.readOnly : resolved?.readOnly,
+                writeOnly: "writeOnly" in v ? v.writeOnly : resolved?.writeOnly,
                 hasDefault: "default" in v && v.default !== undefined,
               }
             : {};
 
         // handle excludeDeprecated option
         if (options.ctx.excludeDeprecated) {
-          const resolved = $ref ? options.ctx.resolve<SchemaObject>($ref) : v;
-          if ((resolved as SchemaObject)?.deprecated) {
+          if (((resolved ?? v) as SchemaObject)?.deprecated) {
             continue;
           }
         }
@@ -590,6 +601,14 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
               ...options,
               path: createRef([options.path, k]),
             });
+
+        const enumReference = options.ctx.enum && typeof v === "object" && getDiscriminatorEnumReference(v);
+        if (enumReference && "enum" in v && Array.isArray(v.enum)) {
+          type = tsUnion([
+            type,
+            ts.factory.createTypeReferenceNode("Extract", [oapiRef(enumReference), tsUnion(v.enum.map(tsLiteral))]),
+          ]);
+        }
 
         if (typeof options.ctx.transform === "function") {
           const result = options.ctx.transform(v as SchemaObject, options);

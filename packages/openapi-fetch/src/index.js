@@ -128,7 +128,7 @@ export default function createClient(clientOptions) {
             options,
             id,
           });
-          if (result) {
+          if (result && result !== request) {
             if (result instanceof Request) {
               request = result;
             } else if (result instanceof Response) {
@@ -148,33 +148,31 @@ export default function createClient(clientOptions) {
       } catch (error) {
         let errorAfterMiddleware = error;
         // execute in reverse-array order (first priority gets last transform)
-        if (finalMiddlewares.length) {
-          for (let i = finalMiddlewares.length - 1; i >= 0; i--) {
-            const m = finalMiddlewares[i];
-            if (m && typeof m === "object" && typeof m.onError === "function") {
-              const result = await m.onError({
-                request,
-                error: errorAfterMiddleware,
-                schemaPath,
-                params,
-                options,
-                id,
-              });
-              if (result) {
-                // if error is handled by returning a response, skip remaining middleware
-                if (result instanceof Response) {
-                  errorAfterMiddleware = undefined;
-                  response = result;
-                  break;
-                }
-
-                if (result instanceof Error) {
-                  errorAfterMiddleware = result;
-                  continue;
-                }
-
-                throw new Error("onError: must return new Response() or instance of Error");
+        for (let i = finalMiddlewares.length - 1; i >= 0; i--) {
+          const m = finalMiddlewares[i];
+          if (m && typeof m === "object" && typeof m.onError === "function") {
+            const result = await m.onError({
+              request,
+              error: errorAfterMiddleware,
+              schemaPath,
+              params,
+              options,
+              id,
+            });
+            if (result) {
+              // if error is handled by returning a response, skip remaining middleware
+              if (result instanceof Response) {
+                errorAfterMiddleware = undefined;
+                response = result;
+                break;
               }
+
+              if (result instanceof Error) {
+                errorAfterMiddleware = result;
+                continue;
+              }
+
+              throw new Error("onError: must return new Response() or instance of Error");
             }
           }
         }

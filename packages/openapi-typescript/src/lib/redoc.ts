@@ -72,6 +72,9 @@ function _processProblems(problems: NormalizedProblem[], options: { silent: bool
   if (problems.length) {
     let errorMessage: string | undefined;
     for (const problem of problems) {
+      if (problem.ignored) {
+        continue;
+      }
       const problemLocation = problem.location?.[0].pointer;
       const problemMessage = problemLocation ? `${problem.message} at ${problemLocation}` : problem.message;
       if (problem.severity === "error") {
