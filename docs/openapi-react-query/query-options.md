@@ -85,6 +85,20 @@ export const $api = createClient(fetchClient);
 ```
 
 
+## Cache invalidation
+
+Create query options for the endpoint, then pass their key to TanStack Query. This retains the client's cache namespace and the endpoint's checked parameters:
+
+```ts
+const options = $api.queryOptions("get", "/users/{user_id}", {
+  params: { path: { user_id: 5 } },
+});
+
+await queryClient.invalidateQueries({ queryKey: options.queryKey });
+```
+
+Avoid building a universal wrapper from `Parameters<typeof $api.queryOptions>`. That extracts the generic function's constraints and loses the relationship between its method, path, and required request fields. Constructing the options first keeps those checks on the ordinary call.
+
 ## Api
 
 ```tsx

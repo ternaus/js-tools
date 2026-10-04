@@ -147,14 +147,24 @@ export function resolveRef<T>(
   return node;
 }
 
-function createDiscriminatorEnum(values: string[], prevSchema?: SchemaObject): SchemaObject {
-  return {
+const discriminatorEnumReferences = new WeakMap<object, string>();
+
+export function getDiscriminatorEnumReference(schema: object): string | undefined {
+  return discriminatorEnumReferences.get(schema);
+}
+
+function createDiscriminatorEnum(values: string[], prevSchema?: SchemaObject, enumReference?: string): SchemaObject {
+  const schema: SchemaObject = {
     type: "string",
     enum: values,
     description: prevSchema?.description
       ? `${prevSchema.description} (enum property replaced by openapi-typescript)`
       : "discriminator enum property added by openapi-typescript",
   };
+  if (enumReference) {
+    discriminatorEnumReferences.set(schema, enumReference);
+  }
+  return schema;
 }
 
 /** Adds or replaces the discriminator enum with the passed `values` in a schema defined by `ref` */
@@ -165,25 +175,71 @@ function patchDiscriminatorEnum(
   discriminator: DiscriminatorObject,
   discriminatorRef: string,
   options: OpenAPITSOptions,
+  preserveDeclared = false,
 ): boolean {
   const resolvedSchema = resolveRef<SchemaObject>(schema, ref, {
     silent: options.silent ?? false,
   });
+  const parent = options.enum
+    ? resolveRef<SchemaObject>(schema, discriminatorRef, { silent: options.silent ?? false })
+    : undefined;
+  const parentProperty = parent && "properties" in parent ? parent.properties?.[discriminator.propertyName] : undefined;
+  const parentReference =
+    parentProperty && typeof parentProperty === "object" && "$ref" in parentProperty ? parentProperty.$ref : undefined;
+  const parentEnum = parentReference
+    ? resolveRef<SchemaObject>(schema, parentReference, { silent: options.silent ?? false })
+    : undefined;
+  const enumReference =
+    options.enum && parentEnum?.enum && values.every((value) => parentEnum.enum?.includes(value))
+      ? parentReference
+      : undefined;
+
+  const members: (SchemaObject | ReferenceObject)[] = resolvedSchema ? [resolvedSchema] : [];
+  const visited = new Set<SchemaObject>();
+  for (const candidate of members) {
+    const member =
+      "$ref" in candidate
+        ? resolveRef<SchemaObject>(schema, candidate.$ref, { silent: options.silent ?? false })
+        : candidate;
+    if (!member || visited.has(member)) {
+      continue;
+    }
+    visited.add(member);
+    if (member.allOf) {
+      members.push(...member.allOf);
+    }
+    if (!("properties" in member)) {
+      continue;
+    }
+    const property = member.properties?.[discriminator.propertyName];
+    const declared =
+      property && typeof property === "object" && "$ref" in property
+        ? resolveRef<SchemaObject>(schema, property.$ref, { silent: options.silent ?? false })
+        : property;
+    if (resolvedSchema && declared && typeof declared === "object" && ("enum" in declared || "const" in declared)) {
+      const declaredValues = declared.enum ?? [declared.const];
+      if (
+        preserveDeclared ||
+        (values.length === declaredValues.length && values.every((value) => declaredValues.includes(value)))
+      ) {
+        resolvedSchema.required = Array.from(new Set([...(resolvedSchema.required ?? []), discriminator.propertyName]));
+        return true;
+      }
+    }
+  }
 
   if (resolvedSchema?.allOf) {
-    // if the schema is an allOf, we can append a new schema object to the allOf array
     resolvedSchema.allOf.push({
       type: "object",
       // discriminator enum properties always need to be required
       required: [discriminator.propertyName],
       properties: {
-        [discriminator.propertyName]: createDiscriminatorEnum(values),
+        [discriminator.propertyName]: createDiscriminatorEnum(values, undefined, enumReference),
       },
     });
 
     return true;
   } else if (typeof resolvedSchema === "object" && "type" in resolvedSchema && resolvedSchema.type === "object") {
-    // if the schema is an object, we can apply the discriminator enums to its properties
     if (!resolvedSchema.properties) {
       resolvedSchema.properties = {};
     }
@@ -195,10 +251,10 @@ function patchDiscriminatorEnum(
       resolvedSchema.required.push(discriminator.propertyName);
     }
 
-    // add/replace the discriminator enum property
     resolvedSchema.properties[discriminator.propertyName] = createDiscriminatorEnum(
       values,
       resolvedSchema.properties[discriminator.propertyName] as SchemaObject,
+      enumReference,
     );
 
     return true;
@@ -294,7 +350,15 @@ export function scanDiscriminators(schema: OpenAPI3, options: OpenAPITSOptions) 
       const mappedValues = defined ?? [inferred!];
 
       if (
-        patchDiscriminatorEnum(schema as unknown as SchemaObject, mappedRef, mappedValues, discriminator, ref, options)
+        patchDiscriminatorEnum(
+          schema as unknown as SchemaObject,
+          mappedRef,
+          mappedValues,
+          discriminator,
+          ref,
+          options,
+          !defined,
+        )
       ) {
         refsHandled.push(mappedRef);
       }
@@ -317,6 +381,14 @@ export function scanDiscriminators(schema: OpenAPI3, options: OpenAPITSOptions) 
 
         const ref = createRef(path);
         const discriminator = objects[item.$ref];
+        const parent = resolveRef<SchemaObject>(schema, item.$ref, { silent: options.silent ?? false });
+        const alternatives = [...(parent?.oneOf ?? []), ...(parent?.anyOf ?? [])];
+        if (
+          alternatives.length &&
+          !alternatives.some((alternative) => "$ref" in alternative && alternative.$ref === ref)
+        ) {
+          continue;
+        }
         const mappedValues: string[] = [];
 
         if (discriminator.mapping) {
@@ -326,7 +398,7 @@ export function scanDiscriminators(schema: OpenAPI3, options: OpenAPITSOptions) 
             }
           }
 
-          if (mappedValues.length > 0) {
+          if (mappedValues.length > 0 && !refsHandled.includes(ref)) {
             if (
               patchDiscriminatorEnum(
                 schema as unknown as SchemaObject,
@@ -342,9 +414,9 @@ export function scanDiscriminators(schema: OpenAPI3, options: OpenAPITSOptions) 
           }
         }
 
-        objects[ref] = {
-          ...objects[item.$ref],
-        };
+        if (!objects[ref]?.mapping) {
+          objects[ref] = { ...objects[item.$ref] };
+        }
       } else if (item.discriminator?.propertyName) {
         objects[createRef(path)] = { ...item.discriminator };
       }

@@ -36,14 +36,14 @@ type QueryInit<Init, Options> = CheckedInit<Init, Options> & { [K in keyof UseQu
 };
 
 export type QueryKey<
-  Paths extends Record<string, Record<HttpMethod, {}>>,
+  Paths extends Record<string, any>,
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init = MaybeOptionalInit<Paths[Path], Method>,
   Mode extends "query" | "infinite" = "query",
 > = readonly [string, string | null, Mode, Method, Path, Init];
 
-export type QueryOptionsFunction<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
+export type QueryOptionsFunction<Paths extends Record<string, any>, Media extends MediaType> = <
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init extends MaybeOptionalInit<Paths[Path], Method>,
@@ -86,7 +86,7 @@ export type QueryOptionsFunction<Paths extends Record<string, Record<HttpMethod,
   }
 >;
 
-export type UseQueryMethod<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
+export type UseQueryMethod<Paths extends Record<string, any>, Media extends MediaType> = <
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init extends MaybeOptionalInit<Paths[Path], Method>,
@@ -108,7 +108,7 @@ export type UseQueryMethod<Paths extends Record<string, Record<HttpMethod, {}>>,
     : [QueryInit<Init, MaybeOptionalInit<Paths[Path], Method>>, Options?, QueryClient?]
 ) => UseQueryResult<InferSelectReturnType<QueryData<Response["data"]>, Options["select"]>, Response["error"] | Error>;
 
-export type UseInfiniteQueryMethod<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
+export type UseInfiniteQueryMethod<Paths extends Record<string, any>, Media extends MediaType> = <
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init extends MaybeOptionalInit<Paths[Path], Method>,
@@ -136,7 +136,7 @@ export type UseInfiniteQueryMethod<Paths extends Record<string, Record<HttpMetho
   Response["error"] | Error
 >;
 
-export type UseSuspenseQueryMethod<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
+export type UseSuspenseQueryMethod<Paths extends Record<string, any>, Media extends MediaType> = <
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init extends MaybeOptionalInit<Paths[Path], Method>,
@@ -161,7 +161,7 @@ export type UseSuspenseQueryMethod<Paths extends Record<string, Record<HttpMetho
   Response["error"] | Error
 >;
 
-export type UseMutationMethod<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
+export type UseMutationMethod<Paths extends Record<string, any>, Media extends MediaType> = <
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init extends MaybeOptionalInit<Paths[Path], Method>,
@@ -266,7 +266,7 @@ export default function createClient<Paths extends {}, Media extends MediaType =
               params: {
                 ...init?.params,
                 query: {
-                  ...(init?.params as { query?: DefaultParamsOption })?.query,
+                  ...(init?.params as DefaultParamsOption["params"])?.query,
                   ...(pageParam === undefined ? {} : { [pageParamName]: pageParam }),
                 },
               },

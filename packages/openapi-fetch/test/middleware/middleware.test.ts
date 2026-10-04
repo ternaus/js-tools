@@ -3,6 +3,28 @@ import type { Middleware, MiddlewareCallbackParams } from "../../src/index.js";
 import { createObservedClient } from "../helpers.js";
 import type { paths } from "./schemas/middleware.js";
 
+test("accepts the same request returned by middleware with a delegating constructor", async () => {
+  const DelegatingRequest = new Proxy(class extends Request {}, {
+    construct(_target, [input, init]: ConstructorParameters<typeof Request>) {
+      return new Request(input, init);
+    },
+  });
+  let authorization: string | null = null;
+  const client = createObservedClient<paths>({ Request: DelegatingRequest }, async (request) => {
+    authorization = request.headers.get("Authorization");
+    return Response.json({});
+  });
+  client.use({
+    onRequest({ request }) {
+      request.headers.set("Authorization", "Bearer test-token");
+      return request;
+    },
+  });
+  const result = await client.GET("/posts/{id}", { params: { path: { id: 123 } } });
+  expect(result.response.ok).toBe(true);
+  expect(authorization).toBe("Bearer test-token");
+});
+
 test("receives a UUID per-request", async () => {
   const client = createObservedClient<paths>();
 

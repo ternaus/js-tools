@@ -459,3 +459,243 @@ test("escapes literal backticks in typed path templates", async () => {
     'const path: keyof paths = "/quoted`/12";\n// @ts-expect-error id is numeric\nconst wrong: keyof paths = "/quoted`/text";',
   );
 });
+
+test("preserves declared discriminator values instead of replacing them with schema names", async () => {
+  const output = await generate({
+    Comments: {
+      oneOf: [{ $ref: "#/components/schemas/TextComment" }, { $ref: "#/components/schemas/QuoteComment" }],
+      discriminator: { propertyName: "type" },
+    },
+    TextComment: { type: "object", required: ["type"], properties: { type: { type: "string", enum: ["text"] } } },
+    QuoteComment: { type: "object", required: ["type"], properties: { type: { type: "string", enum: ["quote"] } } },
+  });
+  expectTypechecks(output, 'const text: components["schemas"]["TextComment"] = { type: "text" };');
+});
+
+test("does not add a discriminator value to a wrapper around a discriminated union", async () => {
+  const output = await generate({
+    Choice: {
+      oneOf: [{ $ref: "#/components/schemas/Cat" }, { $ref: "#/components/schemas/Dog" }],
+      discriminator: {
+        propertyName: "type",
+        mapping: { cat: "#/components/schemas/Cat", dog: "#/components/schemas/Dog" },
+      },
+    },
+    Wrapped: { allOf: [{ $ref: "#/components/schemas/Choice" }] },
+    Cat: { type: "object", properties: { type: { type: "string", enum: ["cat"] } }, required: ["type"] },
+    Dog: { type: "object", properties: { type: { type: "string", enum: ["dog"] } }, required: ["type"] },
+  });
+  expectTypechecks(output, 'const wrapped: components["schemas"]["Wrapped"] = { type: "cat" };');
+});
+
+test("keeps child discriminator mappings when the parent has its own allOf", async () => {
+  const output = await generate({
+    A: { allOf: [{ $ref: "#/components/schemas/Base" }], properties: { name: { type: "string" } } },
+    Base: {
+      allOf: [{ $ref: "#/components/schemas/Root" }],
+      properties: { id: { type: "string" } },
+      discriminator: { propertyName: "type", mapping: { a: "#/components/schemas/A", z: "#/components/schemas/Z" } },
+    },
+    Root: { type: "object", properties: { type: { type: "string" } }, discriminator: { propertyName: "type" } },
+    Z: { allOf: [{ $ref: "#/components/schemas/Base" }], properties: { name: { type: "string" } } },
+  });
+  expectTypechecks(
+    output,
+    'const a: components["schemas"]["A"] = { type: "a" }; const z: components["schemas"]["Z"] = { type: "z" };',
+  );
+});
+
+test("does not duplicate an existing discriminator constraint in allOf", async () => {
+  const output = await generate({
+    Image: {
+      oneOf: [{ $ref: "#/components/schemas/AgentImage" }],
+      discriminator: { propertyName: "type", mapping: { agent: "#/components/schemas/AgentImage" } },
+    },
+    ImageBase: { type: "object", properties: { url: { type: "string" } }, required: ["url"] },
+    AgentImage: {
+      allOf: [
+        { $ref: "#/components/schemas/ImageBase" },
+        { type: "object", properties: { type: { type: "string", enum: ["agent"] } }, required: ["type"] },
+      ],
+    },
+  });
+  expectTypechecks(output, 'const image: components["schemas"]["AgentImage"] = { type: "agent", url: "url" };');
+  expect(output.match(/type: "agent"/g)).toHaveLength(1);
+});
+
+test("keeps unrelated required properties on discriminator-patched references", async () => {
+  const output = await generate({
+    CatProps: {
+      type: "object",
+      properties: { kittens: { type: "number" }, sound: { type: "string" } },
+      required: ["sound"],
+    },
+    DogProps: {
+      type: "object",
+      properties: { puppies: { type: "number" }, sound: { type: "string" } },
+      required: ["sound"],
+    },
+    Cat: { allOf: [{ $ref: "#/components/schemas/CatProps" }], required: ["kittens"] },
+    Update: {
+      oneOf: [{ $ref: "#/components/schemas/CatProps" }, { $ref: "#/components/schemas/DogProps" }],
+      discriminator: {
+        propertyName: "sound",
+        mapping: { meow: "#/components/schemas/CatProps", bark: "#/components/schemas/DogProps" },
+      },
+    },
+  });
+  expectTypechecks(
+    output,
+    `
+const cat: components["schemas"]["Cat"] = { sound: "meow", kittens: 1 };
+// @ts-expect-error kittens remains required
+const missing: components["schemas"]["Cat"] = { sound: "meow" };
+`,
+  );
+});
+
+test("generates finite inheritance types when the parent union references its children", async () => {
+  const output = await generate({
+    Animal: {
+      type: "object",
+      required: ["type", "name"],
+      properties: { type: { type: "string" }, name: { type: "string" } },
+      oneOf: [{ $ref: "#/components/schemas/Cat" }, { $ref: "#/components/schemas/Dog" }],
+      discriminator: {
+        propertyName: "type",
+        mapping: { cat: "#/components/schemas/Cat", dog: "#/components/schemas/Dog" },
+      },
+    },
+    Cat: {
+      allOf: [{ $ref: "#/components/schemas/Animal" }, { type: "object", properties: { age: { type: "number" } } }],
+    },
+    Dog: {
+      allOf: [{ $ref: "#/components/schemas/Animal" }, { type: "object", properties: { bark: { type: "boolean" } } }],
+    },
+  });
+  expectTypechecks(
+    output,
+    `
+const cat: components["schemas"]["Animal"] = { type: "cat", name: "Misty", age: 1 };
+// @ts-expect-error inherited name remains required
+const missing: components["schemas"]["Cat"] = { type: "cat" };
+// @ts-expect-error discriminator rejects an unknown variant
+const wrong: components["schemas"]["Animal"] = { type: "fish", name: "Nemo" };
+`,
+  );
+});
+
+test("accepts the parent enum member while retaining the generated child enum export", async () => {
+  const output = await generate(
+    {
+      PetType: { type: "string", enum: ["Cat", "Dog"] },
+      Pet: {
+        type: "object",
+        properties: { type: { $ref: "#/components/schemas/PetType" } },
+        required: ["type"],
+        discriminator: { propertyName: "type", mapping: { Cat: "#/components/schemas/Cat" } },
+      },
+      Cat: {
+        allOf: [{ $ref: "#/components/schemas/Pet" }, { type: "object", properties: { name: { type: "string" } } }],
+      },
+    },
+    { enum: true },
+  );
+  expectTypechecks(
+    output,
+    `
+const parent: components["schemas"]["Cat"] = { type: PetType.Cat };
+const child: components["schemas"]["Cat"] = { type: CatType.Cat };
+// @ts-expect-error the parent enum's other member is not a Cat
+const dog: components["schemas"]["Cat"] = { type: PetType.Dog };
+`,
+  );
+});
+
+test("honors referenced readOnly and writeOnly property annotations", async () => {
+  const schemas = {
+    Payload: {
+      type: "object",
+      properties: { role: { $ref: "#/components/schemas/Role" }, password: { $ref: "#/components/schemas/Password" } },
+      required: ["role", "password"],
+    },
+    Role: { type: "string", enum: ["admin", "user"], readOnly: true },
+    Password: { type: "string", writeOnly: true },
+  };
+  const output = await generate(schemas, { enum: true });
+  expectTypechecks(
+    output,
+    `
+declare let payload: components["schemas"]["Payload"];
+// @ts-expect-error the referenced enum is readonly
+payload.role = Role.user;
+`,
+  );
+  const marked = await generate(schemas, { readWriteMarkers: true });
+  expect(marked).toContain('$Read<components["schemas"]["Role"]>');
+  expect(marked).toContain('$Write<components["schemas"]["Password"]>');
+});
+
+test("keeps an empty object member neutral within allOf without admitting primitives", async () => {
+  const output = await generate({
+    Base: { type: "object", properties: { type: { type: "string" } }, required: ["type"] },
+    Extended: { allOf: [{ $ref: "#/components/schemas/Base" }, { type: "object" }] },
+    Closed: { allOf: [{ $ref: "#/components/schemas/Base" }, { type: "object", additionalProperties: false }] },
+    Impossible: { allOf: [{ type: "string" }, { type: "object" }] },
+  });
+  expectTypechecks(
+    output,
+    `
+const value: components["schemas"]["Extended"] = { type: "external" };
+// @ts-expect-error the empty member does not allow undeclared Base properties
+const extra: components["schemas"]["Extended"] = { type: "external", extra: true };
+// @ts-expect-error an explicitly closed empty object forbids Base properties
+const closed: components["schemas"]["Closed"] = { type: "external" };
+// @ts-expect-error an object constraint cannot be satisfied by a string
+const primitive: components["schemas"]["Impossible"] = "text";
+`,
+  );
+});
+
+test("preserves a referenced discriminator constraint without requiring it on the shared schema", async () => {
+  const output = await generate({
+    Choice: { oneOf: [{ $ref: "#/components/schemas/Child" }], discriminator: { propertyName: "type" } },
+    Child: { allOf: [{ $ref: "#/components/schemas/Props" }] },
+    Props: { type: "object", properties: { type: { type: "string", enum: ["text"] } } },
+  });
+  expectTypechecks(
+    output,
+    `
+const child: components["schemas"]["Child"] = { type: "text" };
+const props: components["schemas"]["Props"] = {};
+// @ts-expect-error the discriminator is required on the child
+const missing: components["schemas"]["Child"] = {};
+`,
+  );
+});
+
+test.each(["oneOf", "anyOf"] as const)(
+  "preserves independent constraints when the inheritance cycle is in %s",
+  async (recursive) => {
+    const independent = recursive === "oneOf" ? "anyOf" : "oneOf";
+    const output = await generate({
+      Parent: {
+        type: "object",
+        properties: { type: { type: "string" } },
+        required: ["type"],
+        [recursive]: [{ $ref: "#/components/schemas/Child" }],
+        [independent]: [{ type: "object", properties: { flag: { type: "string" } }, required: ["flag"] }],
+        discriminator: { propertyName: "type", mapping: { child: "#/components/schemas/Child" } },
+      },
+      Child: { allOf: [{ $ref: "#/components/schemas/Parent" }] },
+    });
+    expectTypechecks(
+      output,
+      `
+const child: components["schemas"]["Child"] = { type: "child", flag: "required" };
+// @ts-expect-error independent parent constraint remains required
+const missing: components["schemas"]["Child"] = { type: "child" };
+`,
+    );
+  },
+);

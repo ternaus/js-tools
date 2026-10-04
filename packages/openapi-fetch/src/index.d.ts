@@ -221,16 +221,15 @@ type InitParam<Init, Options> =
     ? [(CheckedInit<Init, Options> & { [key: string]: unknown })?]
     : [CheckedInit<Init, Options> & { [key: string]: unknown }];
 
-export type ClientMethod<
-  Paths extends Record<string, Record<HttpMethod, {}>>,
-  Method extends HttpMethod,
-  Media extends MediaType,
-> = <Path extends PathsWithMethod<Paths, Method>, Init extends MaybeOptionalInit<Paths[Path], Method>>(
+export type ClientMethod<Paths extends Record<string, any>, Method extends HttpMethod, Media extends MediaType> = <
+  Path extends PathsWithMethod<Paths, Method>,
+  Init extends MaybeOptionalInit<Paths[Path], Method>,
+>(
   url: Path,
   ...init: InitParam<Init, MaybeOptionalInit<Paths[Path], Method>>
 ) => Promise<FetchResponse<Paths[Path][Method], Init, Media>>;
 
-export type ClientRequestMethod<Paths extends Record<string, Record<HttpMethod, {}>>, Media extends MediaType> = <
+export type ClientRequestMethod<Paths extends Record<string, any>, Media extends MediaType> = <
   Method extends HttpMethod,
   Path extends PathsWithMethod<Paths, Method>,
   Init extends MaybeOptionalInit<Paths[Path], Method>,
