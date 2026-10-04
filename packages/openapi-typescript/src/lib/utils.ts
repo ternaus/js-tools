@@ -194,8 +194,20 @@ function patchDiscriminatorEnum(
       ? parentReference
       : undefined;
 
-  const members = resolvedSchema?.allOf ?? (resolvedSchema ? [resolvedSchema] : []);
-  for (const member of members) {
+  const members: (SchemaObject | ReferenceObject)[] = resolvedSchema ? [resolvedSchema] : [];
+  const visited = new Set<SchemaObject>();
+  for (const candidate of members) {
+    const member =
+      "$ref" in candidate
+        ? resolveRef<SchemaObject>(schema, candidate.$ref, { silent: options.silent ?? false })
+        : candidate;
+    if (!member || visited.has(member)) {
+      continue;
+    }
+    visited.add(member);
+    if (member.allOf) {
+      members.push(...member.allOf);
+    }
     if (!("properties" in member)) {
       continue;
     }
@@ -204,13 +216,13 @@ function patchDiscriminatorEnum(
       property && typeof property === "object" && "$ref" in property
         ? resolveRef<SchemaObject>(schema, property.$ref, { silent: options.silent ?? false })
         : property;
-    if (declared && typeof declared === "object" && ("enum" in declared || "const" in declared)) {
+    if (resolvedSchema && declared && typeof declared === "object" && ("enum" in declared || "const" in declared)) {
       const declaredValues = declared.enum ?? [declared.const];
       if (
         preserveDeclared ||
         (values.length === declaredValues.length && values.every((value) => declaredValues.includes(value)))
       ) {
-        member.required = Array.from(new Set([...(member.required ?? []), discriminator.propertyName]));
+        resolvedSchema.required = Array.from(new Set([...(resolvedSchema.required ?? []), discriminator.propertyName]));
         return true;
       }
     }
@@ -370,8 +382,11 @@ export function scanDiscriminators(schema: OpenAPI3, options: OpenAPITSOptions) 
         const ref = createRef(path);
         const discriminator = objects[item.$ref];
         const parent = resolveRef<SchemaObject>(schema, item.$ref, { silent: options.silent ?? false });
-        const alternatives = parent?.oneOf ?? parent?.anyOf;
-        if (alternatives && !alternatives.some((alternative) => "$ref" in alternative && alternative.$ref === ref)) {
+        const alternatives = [...(parent?.oneOf ?? []), ...(parent?.anyOf ?? [])];
+        if (
+          alternatives.length &&
+          !alternatives.some((alternative) => "$ref" in alternative && alternative.$ref === ref)
+        ) {
           continue;
         }
         const mappedValues: string[] = [];

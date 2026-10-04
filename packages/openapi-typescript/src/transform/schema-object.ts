@@ -245,13 +245,21 @@ export function transformSchemaObjectWithComposition(
       // (but only for valid keys)
       if ("$ref" in item) {
         const resolved = options.ctx.resolve<SchemaObject>(item.$ref);
-        const alternatives = resolved?.oneOf ?? resolved?.anyOf;
-        if (
-          resolved &&
-          alternatives?.some((alternative) => "$ref" in alternative && alternative.$ref === options.path)
-        ) {
-          // Inline the common parent constraints; its union already includes this child.
-          const { oneOf: _oneOf, anyOf: _anyOf, ...parent } = resolved;
+        const recursiveOneOf = resolved?.oneOf?.some(
+          (alternative) => "$ref" in alternative && alternative.$ref === options.path,
+        );
+        const recursiveAnyOf = resolved?.anyOf?.some(
+          (alternative) => "$ref" in alternative && alternative.$ref === options.path,
+        );
+        if (resolved && (recursiveOneOf || recursiveAnyOf)) {
+          // Preserve independent compositions while removing the inheritance cycle.
+          const parent = { ...resolved };
+          if (recursiveOneOf) {
+            delete parent.oneOf;
+          }
+          if (recursiveAnyOf) {
+            delete parent.anyOf;
+          }
           itemType = transformSchemaObject(parent, { ...options, path: item.$ref });
         } else {
           itemType = transformSchemaObject(item, options);

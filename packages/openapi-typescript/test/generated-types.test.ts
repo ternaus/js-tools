@@ -656,3 +656,46 @@ const primitive: components["schemas"]["Impossible"] = "text";
 `,
   );
 });
+
+test("preserves a referenced discriminator constraint without requiring it on the shared schema", async () => {
+  const output = await generate({
+    Choice: { oneOf: [{ $ref: "#/components/schemas/Child" }], discriminator: { propertyName: "type" } },
+    Child: { allOf: [{ $ref: "#/components/schemas/Props" }] },
+    Props: { type: "object", properties: { type: { type: "string", enum: ["text"] } } },
+  });
+  expectTypechecks(
+    output,
+    `
+const child: components["schemas"]["Child"] = { type: "text" };
+const props: components["schemas"]["Props"] = {};
+// @ts-expect-error the discriminator is required on the child
+const missing: components["schemas"]["Child"] = {};
+`,
+  );
+});
+
+test.each(["oneOf", "anyOf"] as const)(
+  "preserves independent constraints when the inheritance cycle is in %s",
+  async (recursive) => {
+    const independent = recursive === "oneOf" ? "anyOf" : "oneOf";
+    const output = await generate({
+      Parent: {
+        type: "object",
+        properties: { type: { type: "string" } },
+        required: ["type"],
+        [recursive]: [{ $ref: "#/components/schemas/Child" }],
+        [independent]: [{ type: "object", properties: { flag: { type: "string" } }, required: ["flag"] }],
+        discriminator: { propertyName: "type", mapping: { child: "#/components/schemas/Child" } },
+      },
+      Child: { allOf: [{ $ref: "#/components/schemas/Parent" }] },
+    });
+    expectTypechecks(
+      output,
+      `
+const child: components["schemas"]["Child"] = { type: "child", flag: "required" };
+// @ts-expect-error independent parent constraint remains required
+const missing: components["schemas"]["Child"] = { type: "child" };
+`,
+    );
+  },
+);
