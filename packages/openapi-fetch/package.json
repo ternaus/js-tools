@@ -1,7 +1,7 @@
 {
   "name": "@ternaus/openapi-fetch",
   "description": "Type-safe Fetch API client for generated OpenAPI declarations.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Drew Powers",
     "email": "drew@pow.rs"

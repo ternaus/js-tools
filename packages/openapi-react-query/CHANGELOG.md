@@ -1,5 +1,13 @@
 # openapi-react-query
 
+## 1.0.1
+
+### Patch Changes
+
+- [#7](https://github.com/ternaus/js-tools/pull/7) [`037b577`](https://github.com/ternaus/js-tools/commit/037b5774097917ab60bbc9de9b1bde7f1f6182d0) Thanks [@ternaus](https://github.com/ternaus)! - Exported hook helper types accept generated paths interfaces without requiring every HTTP method on every path. Preserve checks on direct calls and use query options results for typed cache invalidation.
+- Updated dependencies [[`037b577`](https://github.com/ternaus/js-tools/commit/037b5774097917ab60bbc9de9b1bde7f1f6182d0)]:
+  - @ternaus/openapi-fetch@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
