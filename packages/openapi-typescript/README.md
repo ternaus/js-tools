@@ -95,3 +95,5 @@ From here, you can use these types for any of the following (but not limited to)
 ## 📓 Docs
 
 [View Docs](https://ternaus.github.io/js-tools/)
+
+Node.js API imports can fail TypeScript 7 declaration checking because of [Redocly issue #3189](https://github.com/Redocly/redocly-cli/issues/3189). See [Node API compatibility](https://ternaus.github.io/js-tools/node#redocly-declaration-compatibility) for the temporary workaround, its tradeoff, and the CLI alternative.

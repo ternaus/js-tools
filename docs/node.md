@@ -13,6 +13,22 @@ npm i --save-dev @ternaus/openapi-typescript typescript
 > For the best experience, use Node ESM by adding `"type": "module"` to `package.json` ([docs](https://nodejs.org/api/esm.html#enabling))
 >
 
+### Redocly declaration compatibility
+
+Importing the Node API can fail TypeScript 7 declaration checking because the Redocly dependency references undeclared React and Markdoc types and an incompatible `json-schema-to-ts` version. This is tracked in [Redocly issue #3189](https://github.com/Redocly/redocly-cli/issues/3189).
+
+Use the [CLI](cli.md) to generate a types file while keeping full declaration checking in your application. If you need the Node API and accept skipping declaration checks, this temporary workaround allows the import:
+
+```json
+{
+  "compilerOptions": {
+    "skipLibCheck": true
+  }
+}
+```
+
+This setting skips checking all `.d.ts` files, including other libraries, while TypeScript still checks your source and typed API calls. Recheck the workaround after Redocly fixes the issue.
+
 ## Usage
 
 The Node.js API accepts either a `URL`, `string`, or JSON object as input:
