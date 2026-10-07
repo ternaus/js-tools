@@ -21,11 +21,9 @@ jobs:
         run: pnpm run build
 
       - name: Changesets version and/or publish
-        uses: changesets/action@v1
+        uses: changesets/action@v2.1.2
         with:
-          version: pnpm run version
-          publish: pnpm exec changeset publish
-          commit: "[ci] release"
-          title: "[ci] release"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: pnpm run version
+          publish-script: pnpm exec changeset publish
+          commit-message: "chore(release): version packages"
+          pr-title: "release: publish package updates"

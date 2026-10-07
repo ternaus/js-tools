@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - [#7](https://github.com/ternaus/js-tools/pull/7) [`037b577`](https://github.com/ternaus/js-tools/commit/037b5774097917ab60bbc9de9b1bde7f1f6182d0) Thanks [@ternaus](https://github.com/ternaus)! - Accept the existing client-created Request when middleware returns it unchanged, including compatible constructors that delegate to the standard Request. Invalid replacements remain rejected.
-  
+
   Exported client helper types accept generated paths interfaces without requiring every HTTP method on every path. Request validation stays strict.
 
 ## 1.0.0
