@@ -53,7 +53,7 @@
     "test:fixtures": "tsc -p tsconfig.fixtures.json --noEmit"
   },
   "dependencies": {
-    "@redocly/openapi-core": "^2.57.0",
+    "@redocly/openapi-core": "^2.61.0",
     "change-case": "^5.4.4",
     "yargs-parser": "^22.0.0",
     "@typescript/typescript6": "6.0.2"
