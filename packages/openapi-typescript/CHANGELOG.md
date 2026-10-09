@@ -1,5 +1,11 @@
 # openapi-typescript
 
+## 8.0.2
+
+### Patch Changes
+
+- [#9](https://github.com/ternaus/js-tools/pull/9) [`b3b5d15`](https://github.com/ternaus/js-tools/commit/b3b5d15cbe1a33e79a9aa8916ee5a49abac09e6b) Thanks [@ternaus](https://github.com/ternaus)! - Require `@redocly/openapi-core` 2.61.0 or later so Node API consumers can use TypeScript 7 with full declaration checking. Remove the temporary `skipLibCheck` workaround.
+
 ## 8.0.1
 
 ### Patch Changes
