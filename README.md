@@ -24,8 +24,6 @@ pnpm run quality:complete
 
 Use Corepack 0.36 or later for pnpm 12. See each package's README for installation and usage, and [the documentation](docs/README.md) for OpenAPI guides.
 
-The generator's existing `skipLibCheck: true` setting accommodates the Redocly declaration defect in [issue #3189](https://github.com/Redocly/redocly-cli/issues/3189). Source checks remain strict. Review this exception by 2026-11-05 or when Redocly releases a fix; [Node API consumers have the same declaration-checking limitation](docs/node.md#redocly-declaration-compatibility).
-
 ## History and attribution
 
 This repository combines the complete Git histories of [ternaus/eslint-plugin-react](https://github.com/ternaus/eslint-plugin-react) and [ternaus/openapi-typescript](https://github.com/ternaus/openapi-typescript) without squashing or rewriting their commits. It preserves the work of [jsx-eslint/eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and [openapi-ts/openapi-typescript](https://github.com/openapi-ts/openapi-typescript), including author records and package license notices.
