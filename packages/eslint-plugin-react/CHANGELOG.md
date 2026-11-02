@@ -1,5 +1,11 @@
 # @ternaus/eslint-plugin-react
 
+## 9.0.1
+
+### Patch Changes
+
+- [#12](https://github.com/ternaus/js-tools/pull/12) [`01e9001`](https://github.com/ternaus/js-tools/commit/01e9001f47a027820d13c43cbfc7842463545a1e) Thanks [@ternaus](https://github.com/ternaus)! - Use non-capturing regular-expression groups when detecting React functions and refresh the packaged README formatting. Rule diagnostics are unchanged.
+
 ## 9.0.0
 
 ### Major Changes
