@@ -11,18 +11,13 @@
 
 ## 使用例
 
-
 ```tsx
 import { $api } from "./api";
 
 export const App = () => {
   const { mutate } = $api.useMutation("patch", "/users");
 
-  return (
-    <button onClick={() => mutate({ body: { firstname: "John" } })}>
-      更新する
-    </button>
-  );
+  return <button onClick={() => mutate({ body: { firstname: "John" } })}>更新する</button>;
 };
 ```
 

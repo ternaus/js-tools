@@ -4,18 +4,18 @@ packages:
   - packages/openapi-fetch/examples/*
 
 catalog:
-  execa: 10.0.1
+  execa: 10.2.1
   typescript: 7.0.2
-  vite: 8.3.2
+  vite: 8.3.5
 
 allowBuilds:
-  '@biomejs/biome': true
+  "@biomejs/biome": true
   esbuild: false
   msw: false
   sharp: false
 
+# Requested stable releases are under 24 hours old; remove after 2026-11-02 11:02 UTC.
 minimumReleaseAgeExclude:
-  - '@types/node@26.6.4'
-  - publint@0.3.25
-  - vite@8.3.2
-  - '@redocly/openapi-core@2.61.0'
+  - "@tanstack/query-core@5.105.1"
+  - "@tanstack/react-query@5.105.1"
+  - globals@17.14.0

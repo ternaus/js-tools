@@ -275,7 +275,6 @@ OpenAPI’s composition tools (`oneOf`/`anyOf`/`allOf`) are powerful tools for r
 
 #### ❌ Bad
 
-
 ```yaml
 Pet:
   type: object
@@ -312,7 +311,6 @@ This generates the following type which mixes both TypeScript unions and interse
 
 
 #### ✅ Better
-
 
 ```yaml
 Pet:
@@ -428,4 +426,3 @@ So be wary about where you define `$defs` as they may go missing in your final g
 > **tip**
 >
 > Use `components.schemas` for shared definitions. `$defs` is supported inside a Schema Object, not at the OpenAPI document root.
->

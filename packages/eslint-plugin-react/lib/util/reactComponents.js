@@ -22,7 +22,10 @@ function functionReturnsJsx(node) {
     if (!current || typeof current !== 'object') {
       return false;
     }
-    if (current !== node && /^(ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(current.type)) {
+    if (
+      current !== node &&
+      /^(?:ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(current.type)
+    ) {
       return false;
     }
     if (current.type === 'ReturnStatement' && canBeJsx(current.argument)) {
@@ -40,7 +43,7 @@ function functionReturnsJsx(node) {
 }
 
 function isFunctionComponent(node) {
-  if (!/^(ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(node.type)) {
+  if (!/^(?:ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(node.type)) {
     return false;
   }
 

@@ -110,7 +110,6 @@ const { data, error } = await client.PUT("/blogposts", {
 });
 ```
 
-
 1. The HTTP method is pulled directly from `createClient()`
 2. You pass in your desired `path` to `GET()`, `PUT()`, etc.
 3. TypeScript takes over the rest and returns helpful errors for anything missing or invalid
@@ -175,5 +174,5 @@ See [`wrapAsPathBasedClient`](api.md#wrapaspathbasedclient) for more.
 | Platform       | Support                                                                                                                                            |
 | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Browsers**   | [See fetch API support](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API#browser_compatibility) (widely-available in all major browsers) |
-| **Node**       | 24.15+ or 26 |
-| **TypeScript** | >= 7.0                                                                                                                        |
+| **Node**       | 24.15+ or 26                                                                                                                                       |
+| **TypeScript** | >= 7.0                                                                                                                                             |

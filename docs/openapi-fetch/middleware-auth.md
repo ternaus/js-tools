@@ -77,15 +77,15 @@ const cacheMiddleware: Middleware = {
       const key = getCacheKey(request);
       cache.set(key, response.clone());
     }
-  }
+  },
 };
 ```
 
 When a middleware returns a `Response`:
 
-* The request is not sent to the server
-* Subsequent `onRequest` handlers are skipped
-* `onResponse` handlers are skipped
+- The request is not sent to the server
+- Subsequent `onRequest` handlers are skipped
+- `onResponse` handlers are skipped
 
 ### Throwing
 

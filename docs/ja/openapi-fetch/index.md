@@ -109,7 +109,6 @@ const { data, error } = await client.PUT("/blogposts", {
 });
 ```
 
-
 1. HTTPメソッドを `createClient()` から直接取得します。
 2. `GET()` , `PUT()` などに希望する `path` を渡します。
 3. TypeScriptが欠落しているものや無効なものがあれば有用なエラーを返します。
@@ -174,5 +173,5 @@ client["/blogposts/{post_id}"].GET({
 | プラットフォーム | サポート                                                                                                                                    |
 | :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
 | **ブラウザ**     | [fetch API サポートを参照](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API#browser_compatibility) (主要なブラウザで広く利用可能) |
-| **Node**         | 24.15+ or 26 |
-| **TypeScript**   | >= 7.0                                                                                                                 |
+| **Node**         | 24.15+ or 26                                                                                                                                |
+| **TypeScript**   | >= 7.0                                                                                                                                      |

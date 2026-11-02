@@ -12,26 +12,24 @@ The `useInfiniteQuery` method allows you to use the original [useInfiniteQuery](
 
 ## Example
 
-
 ```tsx
 import { $api } from "./api";
 const PostList = () => {
-  const { data, fetchNextPage, hasNextPage, isFetching } =
-    $api.useInfiniteQuery(
-      "get",
-      "/posts",
-      {
-        params: {
-          query: {
-            limit: 10,
-          },
+  const { data, fetchNextPage, hasNextPage, isFetching } = $api.useInfiniteQuery(
+    "get",
+    "/posts",
+    {
+      params: {
+        query: {
+          limit: 10,
         },
       },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextPage,
-        initialPageParam: 0,
-      }
-    );
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      initialPageParam: 0,
+    },
+  );
 
   return (
     <div>
@@ -75,13 +73,7 @@ export const $api = createClient(fetchClient);
 ## Api
 
 ```tsx
-const query = $api.useInfiniteQuery(
-  method,
-  path,
-  options,
-  infiniteQueryOptions,
-  queryClient
-);
+const query = $api.useInfiniteQuery(method, path, options, infiniteQueryOptions, queryClient);
 ```
 
 **Arguments**

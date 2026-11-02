@@ -4,13 +4,13 @@ This workspace maintains a fork of [jsx-eslint/eslint-plugin-react](https://gith
 
 [Support ongoing maintenance on GitHub Sponsors](https://github.com/sponsors/ternaus).
 
-| Package | Purpose |
-| --- | --- |
-| [@ternaus/eslint-plugin-react](packages/eslint-plugin-react) | React 19 rules for ESLint 10 alongside Biome |
-| [@ternaus/openapi-typescript](packages/openapi-typescript) | Generate TypeScript types from OpenAPI 3.0 and 3.1 |
-| [@ternaus/openapi-fetch](packages/openapi-fetch) | Typed Fetch API client |
-| [@ternaus/openapi-react-query](packages/openapi-react-query) | Typed TanStack Query client for React 19 |
-| [@ternaus/openapi-typescript-helpers](packages/openapi-typescript-helpers) | Shared request and response type helpers |
+| Package                                                                    | Purpose                                            |
+| -------------------------------------------------------------------------- | -------------------------------------------------- |
+| [@ternaus/eslint-plugin-react](packages/eslint-plugin-react)               | React 19 rules for ESLint 10 alongside Biome       |
+| [@ternaus/openapi-typescript](packages/openapi-typescript)                 | Generate TypeScript types from OpenAPI 3.0 and 3.1 |
+| [@ternaus/openapi-fetch](packages/openapi-fetch)                           | Typed Fetch API client                             |
+| [@ternaus/openapi-react-query](packages/openapi-react-query)               | Typed TanStack Query client for React 19           |
+| [@ternaus/openapi-typescript-helpers](packages/openapi-typescript-helpers) | Shared request and response type helpers           |
 
 Packages keep independent versions and release notes. Development requires Node.js 24.15+ or 26 and the pnpm version pinned in `package.json`. Source and generated types are checked with TypeScript 7; the OpenAPI generator retains TypeScript 6 as its stable AST dependency.
 
@@ -19,10 +19,13 @@ Packages keep independent versions and release notes. Development requires Node.
 ```sh
 corepack enable
 pnpm install --frozen-lockfile
+pnpm exec playwright install --with-deps
 pnpm run quality:complete
 ```
 
 Use Corepack 0.36 or later for pnpm 12. See each package's README for installation and usage, and [the documentation](docs/README.md) for OpenAPI guides.
+
+`quality:complete` runs formatting, linting, contract and type checks, package tests, bundle-size limits, browser tests, the Next.js production rendering test, the documentation build, and a dependency audit that fails on high or critical advisories. Use `quality:precommit` for the faster formatting, lint, contract, and type checks. The Next.js test uses a local API fixture.
 
 ## History and attribution
 

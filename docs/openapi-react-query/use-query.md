@@ -12,7 +12,6 @@ The `useQuery` method allows you to use the original [useQuery](https://tanstack
 
 ## Example
 
-
 ```tsx
 import { $api } from "./api";
 

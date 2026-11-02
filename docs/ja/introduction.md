@@ -57,7 +57,6 @@ npm i -D @ternaus/openapi-typescript typescript
 }
 ```
 
->
 > ## 基本的な使い方
 >
 > まず、`npx @ternaus/openapi-typescript` を実行してローカルの型ファイルを生成します。最初に入力スキーマ（JSON または YAML）を指定し、保存する場所を `--output` （`-o`）で指定します：
@@ -85,13 +84,10 @@ type MyType = components["schemas"]["MyType"];
 type EndpointParams = paths["/my/endpoint"]["parameters"];
 
 // レスポンスオブジェクト
-type SuccessResponse =
-  paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
-type ErrorResponse =
-  paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
+type SuccessResponse = paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
+type ErrorResponse = paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
 ```
 
->
 > ここから、これらの型を以下の用途で使用できます（ただし、これに限定されません）：
 >
 > - OpenAPI対応のfetchクライアントを使用する（例：[openapi-fetch](openapi-fetch/index.md)）

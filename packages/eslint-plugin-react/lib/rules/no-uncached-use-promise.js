@@ -4,7 +4,7 @@ import reactImports from '../util/reactImports.js';
 
 function enclosingFunction(node) {
   for (let parent = node.parent; parent; parent = parent.parent) {
-    if (/^(ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(parent.type)) {
+    if (/^(?:ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(parent.type)) {
       return parent;
     }
   }

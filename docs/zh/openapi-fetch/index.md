@@ -110,7 +110,6 @@ const { data, error } = await client.PUT("/blogposts", {
 });
 ```
 
-
 1. HTTP 方法直接从 `createClient()` 中提取
 2. 将所需的 `path` 传递给 `GET()`、`PUT()` 等
 3. TypeScript 接管其余部分，并为任何缺失或无效的内容返回有帮助的错误
@@ -154,5 +153,5 @@ const { data, error, response } = await client.GET("/url");
 | 平台           | 支持                                                                                                                                  |
 | :------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
 | **浏览器**     | [查看 fetch API 支持](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API#browser_compatibility)（在所有主流浏览器中广泛可用） |
-| **Node**       | 24.15+ or 26 |
-| **TypeScript** | >= 7.0                                                                                                             |
+| **Node**       | 24.15+ or 26                                                                                                                          |
+| **TypeScript** | >= 7.0                                                                                                                                |

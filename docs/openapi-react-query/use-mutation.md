@@ -11,18 +11,13 @@ The `useMutation` method allows you to use the original [useMutation](https://ta
 
 ## Example
 
-
 ```tsx
 import { $api } from "./api";
 
 export const App = () => {
   const { mutate } = $api.useMutation("patch", "/users");
 
-  return (
-    <button onClick={() => mutate({ body: { firstname: "John" } })}>
-      Update
-    </button>
-  );
+  return <button onClick={() => mutate({ body: { firstname: "John" } })}>Update</button>;
 };
 ```
 

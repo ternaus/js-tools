@@ -14,15 +14,23 @@ import { createContext } from 'react';
 
 const Theme = createContext('light');
 
-<Theme><Page /></Theme>;
-<Theme.Provider theme="dark"><Page /></Theme.Provider>;
+<Theme>
+  <Page />
+</Theme>;
+<Theme.Provider theme="dark">
+  <Page />
+</Theme.Provider>;
 ```
 
 ## Correct
 
 ```jsx
-<Theme value="dark"><Page /></Theme>;
-<Theme.Provider value={undefined}><Page /></Theme.Provider>;
+<Theme value="dark">
+  <Page />
+</Theme>;
+<Theme.Provider value={undefined}>
+  <Page />
+</Theme.Provider>;
 ```
 
 Explicit `undefined` is allowed. The rule checks the presence of `value`, not

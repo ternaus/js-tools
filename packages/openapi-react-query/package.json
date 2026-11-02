@@ -55,14 +55,14 @@
     "@ternaus/openapi-typescript-helpers": "workspace:^"
   },
   "devDependencies": {
-    "@tanstack/react-query": "5.104.0",
+    "@tanstack/react-query": "5.105.1",
     "@testing-library/react": "16.3.3",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "msw": "3.0.1",
+    "msw": "3.0.3",
     "@ternaus/openapi-fetch": "workspace:^",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-error-boundary": "6.1.6",
     "@ternaus/openapi-typescript": "workspace:^"
   },

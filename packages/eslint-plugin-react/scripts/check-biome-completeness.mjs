@@ -61,11 +61,11 @@ const trackedFiles = execFileSync('git', ['ls-files', '--cached', '--others', '-
   encoding: 'utf8',
 })
   .split('\n')
-  .filter((file) => file && existsSync(file) && /\.(?:[cm]?[jt]sx?)$/.test(file));
+  .filter((file) => file && existsSync(file) && /\.(?:[cm]?[jt]sx?)$/u.test(file));
 for (const file of trackedFiles) {
   const source = await readFile(file, 'utf8');
   for (const [index, line] of source.split('\n').entries()) {
-    if (/^\s*(?:\/\/|\/\*|\{\/\*)\s*(?:biome-ignore|eslint-disable)/.test(line)) {
+    if (/^\s*(?:\/\/|\/\*|\{\/\*)\s*(?:biome-ignore|eslint-disable)/u.test(line)) {
       issues.push(`${file}:${index + 1}: inline Biome or ESLint suppressions are forbidden.`);
     }
   }

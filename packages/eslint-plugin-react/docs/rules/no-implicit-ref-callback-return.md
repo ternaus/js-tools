@@ -5,13 +5,17 @@ assignment callback therefore has different semantics from earlier React
 versions:
 
 ```jsx
-<div ref={(node) => (instance = node)} />
+<div ref={(node) => (instance = node)} />;
 ```
 
 Write a block body instead:
 
 ```jsx
-<div ref={(node) => { instance = node; }} />
+<div
+  ref={(node) => {
+    instance = node;
+  }}
+/>;
 ```
 
 The rule automatically fixes assignment and update expressions. It leaves a
