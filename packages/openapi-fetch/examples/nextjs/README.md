@@ -2,7 +2,7 @@
 
 Example of using openapi-fetch in [Next.js](https://nextjs.org) using server-rendered data.
 
-For client-side fetching, see the [React Query guide](../../../../../docs/openapi-react-query/index.md).
+For client-side fetching, see the [React Query guide](../../../../docs/openapi-react-query/index.md).
 
 ## Setup
 
