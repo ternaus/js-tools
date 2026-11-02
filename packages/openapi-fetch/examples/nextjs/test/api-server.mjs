@@ -8,4 +8,4 @@ createServer((request, response) => {
   }
   response.writeHead(200, { "Content-Type": "application/json" });
   response.end(JSON.stringify(fact));
-}).listen(4175, "127.0.0.1");
+}).listen(Number(process.env.NEXTJS_API_PORT || 4175), "127.0.0.1");

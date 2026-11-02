@@ -1,4 +1,5 @@
 import client from "../lib/api";
+import FactResponse from "./fact-response";
 
 async function getFact() {
   return await client.GET("/fact", {
@@ -11,15 +12,5 @@ async function getFact() {
 export default async function Home() {
   const fact = await getFact();
 
-  return (
-    <div>
-      {fact.error ? (
-        <div>There was an error: {fact.error.message}</div>
-      ) : (
-        <pre>
-          <code>{JSON.stringify(fact.data, undefined, 2)}</code>
-        </pre>
-      )}
-    </div>
-  );
+  return fact.error ? <div>There was an error: {fact.error.message}</div> : <FactResponse fact={fact.data} />;
 }
