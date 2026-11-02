@@ -32,7 +32,7 @@ client.GET("/my-url", options);
 | `bodySerializer`  | BodySerializer                                                    | (可选) 提供一个 [bodySerializer](#bodyserializer)                                                                                                                          |
 | `parseAs`         | `"json"` \| `"text"` \| `"arrayBuffer"` \| `"blob"` \| `"stream"` | (可选) 使用 [内置实例方法](https://developer.mozilla.org/en-US/docs/Web/API/Response#instance_methods) 解析响应（默认值: `"json"`）。`"stream"` 跳过解析，直接返回原始流。 |
 | `fetch`           | `fetch`                                                           | 用于请求的 Fetch 实例（默认：`createClient` 的 fetch）                                                                                                                     |
-| `middleware`      | `Middleware[]`                                                    | [查看文档](middleware-auth.md)                                                                                                                              |
+| `middleware`      | `Middleware[]`                                                    | [查看文档](middleware-auth.md)                                                                                                                                             |
 | (Fetch 选项)      |                                                                   | 任何有效的 fetch 选项（`headers`、`mode`、`cache`、`signal` 等）（[文档](https://developer.mozilla.org/en-US/docs/Web/API/fetch#options)）                                 |
 
 ## querySerializer
@@ -186,10 +186,10 @@ onRequest(req, options) {
 
 `onRequest()` 接受 2 个参数：
 
-| 名称      |        类型         | 描述                                                                                                                                                                        |
-| :-------- | :-----------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 名称      |        类型         | 描述                                                                                                                                                                                |
+| :-------- | :-----------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `req`     | `MiddlewareRequest` | 带有 `schemaPath`（OpenAPI 路径名）和 `params`（[params](../../openapi-fetch/api.md#fetch-options) 对象）的标准 [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) |
-| `options` |   `MergedOptions`   | [createClient](../../openapi-fetch/api.md#create-client) 选项 + [fetch 覆盖](../../openapi-fetch/api.md#fetch-options) 的组合                                                               |
+| `options` |   `MergedOptions`   | [createClient](../../openapi-fetch/api.md#create-client) 选项 + [fetch 覆盖](../../openapi-fetch/api.md#fetch-options) 的组合                                                       |
 
 它期望的结果要么是：
 
@@ -206,9 +206,9 @@ onResponse(res, options) {
 
 `onResponse()` 也接受 2 个参数：
 
-| 名称      |        类型         | 描述                                                                                                          |
-| :-------- | :-----------------: | :------------------------------------------------------------------------------------------------------------ |
-| `req`     | `MiddlewareRequest` | 一个标准的 [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)。                            |
+| 名称      |        类型         | 描述                                                                                                                          |
+| :-------- | :-----------------: | :---------------------------------------------------------------------------------------------------------------------------- |
+| `req`     | `MiddlewareRequest` | 一个标准的 [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)。                                            |
 | `options` |   `MergedOptions`   | [createClient](../../openapi-fetch/api.md#create-client) 选项 + [fetch 覆盖](../../openapi-fetch/api.md#fetch-options) 的组合 |
 
 它期望的结果要么是：

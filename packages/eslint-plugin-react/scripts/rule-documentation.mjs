@@ -1,9 +1,20 @@
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
 import ruleRegistry from '../lib/rule-registry.js';
 
 export const README_PATH = 'README.md';
 export const CATALOG_PATH = 'docs/rules/README.md';
 export const SUMMARY_START = '<!-- rule-config-summary:start -->';
 export const SUMMARY_END = '<!-- rule-config-summary:end -->';
+
+export function formatMarkdown(source) {
+  const biome = fileURLToPath(new URL('../../../node_modules/@biomejs/biome/bin/biome', import.meta.url));
+  return execFileSync(process.execPath, [biome, 'format', '--stdin-file-path=README.md'], {
+    encoding: 'utf8',
+    input: source,
+  });
+}
 
 function escapeTableCell(value) {
   return value.replaceAll('|', '\\|').replaceAll('\n', ' ');

@@ -12,30 +12,30 @@ user-visible diagnostic. Run Biome with `rules.preset: "all"`; keeping both
 implementations would make users review duplicate diagnostics and would split
 maintenance of one behavior.
 
-These upstream IDs were removed because Biome 2.5.13 or later owns the check:
+These upstream IDs were removed because Biome 2.5.13 or later owns the check. The table uses Biome 2.6 rule groups; in Biome 2.5, `useReactAsyncServerFunction`, `useIframeSandbox`, `noJsxNamespace`, and `noReactStringRefs` belong to `nursery`.
 
-| Upstream rule | Biome rule |
-| --- | --- |
-| `async-server-action` | `nursery/useReactAsyncServerFunction` |
-| `button-has-type` | `a11y/useButtonType` |
-| `iframe-missing-sandbox` | `nursery/useIframeSandbox` |
-| `jsx-key` | `correctness/useJsxKeyInIterable` |
-| `jsx-no-bind` | `performance/noJsxPropsBind` |
-| `jsx-no-comment-textnodes` | `suspicious/noCommentText` |
-| `jsx-no-duplicate-props` | `suspicious/noDuplicateJsxProps` |
-| `jsx-no-leaked-render` | `suspicious/noLeakedRender` |
-| `jsx-no-literals` | `style/noJsxLiterals` |
-| `jsx-no-script-url` | `security/noScriptUrl` |
-| `jsx-no-useless-fragment` | `complexity/noUselessFragments` |
-| `no-array-index-key` | `suspicious/noArrayIndexKey` |
-| `no-children-prop` | `correctness/noChildrenProp` |
-| `no-danger` | `security/noDangerouslySetInnerHtml` |
-| `no-danger-with-children` | `security/noDangerouslySetInnerHtmlWithChildren` |
-| `no-namespace` | `nursery/noJsxNamespace` |
-| `no-string-refs` | `nursery/noReactStringRefs` |
-| `no-unknown-property` | `suspicious/noUnknownAttribute` |
-| `self-closing-comp` | `style/useSelfClosingElements` |
-| `void-dom-elements-no-children` | `correctness/noVoidElementsWithChildren` |
+| Upstream rule                   | Biome rule                                       |
+| ------------------------------- | ------------------------------------------------ |
+| `async-server-action`           | `correctness/useReactAsyncServerFunction`        |
+| `button-has-type`               | `a11y/useButtonType`                             |
+| `iframe-missing-sandbox`        | `security/useIframeSandbox`                      |
+| `jsx-key`                       | `correctness/useJsxKeyInIterable`                |
+| `jsx-no-bind`                   | `performance/noJsxPropsBind`                     |
+| `jsx-no-comment-textnodes`      | `suspicious/noCommentText`                       |
+| `jsx-no-duplicate-props`        | `suspicious/noDuplicateJsxProps`                 |
+| `jsx-no-leaked-render`          | `suspicious/noLeakedRender`                      |
+| `jsx-no-literals`               | `style/noJsxLiterals`                            |
+| `jsx-no-script-url`             | `security/noScriptUrl`                           |
+| `jsx-no-useless-fragment`       | `complexity/noUselessFragments`                  |
+| `no-array-index-key`            | `suspicious/noArrayIndexKey`                     |
+| `no-children-prop`              | `correctness/noChildrenProp`                     |
+| `no-danger`                     | `security/noDangerouslySetInnerHtml`             |
+| `no-danger-with-children`       | `security/noDangerouslySetInnerHtmlWithChildren` |
+| `no-namespace`                  | `correctness/noJsxNamespace`                     |
+| `no-string-refs`                | `suspicious/noReactStringRefs`                   |
+| `no-unknown-property`           | `suspicious/noUnknownAttribute`                  |
+| `self-closing-comp`             | `style/useSelfClosingElements`                   |
+| `void-dom-elements-no-children` | `correctness/noVoidElementsWithChildren`         |
 
 Matching names are not enough to remove or add a rule. For example,
 `suspicious/noUnknownAttribute` detects unknown JSX attribute names, while

@@ -142,10 +142,10 @@ The plugin is always registered as `react`, so rule IDs stay in the familiar
 ## Choose the checks you need
 
 <!-- rule-config-summary:start -->
-| Config | Active rules | Use it when |
-| --- | ---: | --- |
-| `recommended` | 19 | You want the supported baseline of React 19 contracts that Biome does not provide. |
-| `all` | 20 | You want every rule, including checks with a deliberately narrower static-analysis boundary. |
+| Config        | Active rules | Use it when                                                                                  |
+| ------------- | -----------: | -------------------------------------------------------------------------------------------- |
+| `recommended` |           19 | You want the supported baseline of React 19 contracts that Biome does not provide.           |
+| `all`         |           20 | You want every rule, including checks with a deliberately narrower static-analysis boundary. |
 <!-- rule-config-summary:end -->
 
 Use `recommended` for normal development. Use `all` when you also want checks

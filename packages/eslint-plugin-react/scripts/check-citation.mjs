@@ -6,7 +6,7 @@ const issues = [];
 if (!citation.startsWith('cff-version: 1.2.0\n')) {
   issues.push('CITATION.cff must use CFF 1.2.0.');
 }
-if (/^version:/m.test(citation)) {
+if (/^version:/mu.test(citation)) {
   issues.push('CITATION.cff must not pin a package version.');
 }
 if (readme.includes('version = {')) {

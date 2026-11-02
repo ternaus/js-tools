@@ -275,7 +275,6 @@ OpenAPIのコンポジションツール（`oneOf` / `anyOf` / `allOf`）は、�
 
 #### ❌ 悪い
 
-
 ```yaml
 Pet:
   type: object
@@ -312,7 +311,6 @@ Pet:
 
 
 #### ✅ 良い
-
 
 ```yaml
 Pet:
@@ -428,4 +426,3 @@ export interface components {
 > **tip**
 >
 > 共有する定義は `components.schemas` に置いてください。`$defs` は Schema Object 内で利用でき、OpenAPI ドキュメントのルートには置けません。
->

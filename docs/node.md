@@ -48,7 +48,7 @@ fs.writeFileSync("./my-schema.ts", contents);
 
 ### Redoc config
 
-A Redoc config isn’t required to use openapi-typescript. By default it extends the `"minimal"` built-in config. But if you want to modify the default settings, you’ll need to provide a fully-initialized Redoc config to the Node API. You can do this with the helpers in `@redocly/openapi-core`:
+A Redoc config isn’t required to use openapi-typescript. By default it extends the `"spec"` built-in config. But if you want to modify the default settings, you’ll need to provide a fully-initialized Redoc config to the Node API. You can do this with the helpers in `@redocly/openapi-core`:
 
 
 ```ts
@@ -77,14 +77,14 @@ const ast = await openapiTS(mySchema, { redocly });
 
 The Node API supports all the [CLI flags](cli.md#flags) in `camelCase` format, plus the following additional options:
 
-| Name               |      Type       |     Default     | Description                                                                                  |
-| :----------------- | :-------------: | :-------------: | :------------------------------------------------------------------------------------------- |
-| `transform`        |   `Function`    |                 | Override the default Schema Object ➝ TypeScript transformer in certain scenarios             |
-| `postTransform`    |   `Function`    |                 | Same as `transform` but runs _after_ the TypeScript transformation                           |
-| `transformProperty`|   `Function`    |                 | Transform individual property signatures for Schema Object properties                        |
-| `silent`           |    `boolean`    |     `false`     | Silence warning messages (fatal errors will still show)                                      |
-| `cwd`              | `string \| URL` | `process.cwd()` | (optional) Provide the current working directory to help resolve remote `$ref`s (if needed). |
-| `inject`           |    `string`     |                 | Inject arbitrary TypeScript types into the start of the file                                 |
+| Name                |      Type       |     Default     | Description                                                                                  |
+| :------------------ | :-------------: | :-------------: | :------------------------------------------------------------------------------------------- |
+| `transform`         |   `Function`    |                 | Override the default Schema Object ➝ TypeScript transformer in certain scenarios             |
+| `postTransform`     |   `Function`    |                 | Same as `transform` but runs _after_ the TypeScript transformation                           |
+| `transformProperty` |   `Function`    |                 | Transform individual property signatures for Schema Object properties                        |
+| `silent`            |    `boolean`    |     `false`     | Silence warning messages (fatal errors will still show)                                      |
+| `cwd`               | `string \| URL` | `process.cwd()` | (optional) Provide the current working directory to help resolve remote `$ref`s (if needed). |
+| `inject`            |    `string`     |                 | Inject arbitrary TypeScript types into the start of the file                                 |
 
 ### transform / postTransform
 
@@ -116,9 +116,7 @@ const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "date-time") {
-      return schemaObject.nullable
-        ? ts.factory.createUnionTypeNode([DATE, NULL])
-        : DATE;
+      return schemaObject.nullable ? ts.factory.createUnionTypeNode([DATE, NULL]) : DATE;
     }
   },
 });
@@ -161,9 +159,7 @@ const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "binary") {
-      return schemaObject.nullable
-        ? ts.factory.createUnionTypeNode([BLOB, NULL])
-        : BLOB;
+      return schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB;
     }
   },
 });
@@ -208,9 +204,7 @@ const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "binary") {
       return {
-        schema: schemaObject.nullable
-          ? ts.factory.createUnionTypeNode([BLOB, NULL])
-          : BLOB,
+        schema: schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB,
         questionToken: true,
       };
     }
@@ -307,14 +301,9 @@ const ast = await openapiTS(mySchema, {
       );
 
       // Add JSDoc comment
-      const jsDocText = `*\n * ${validationTags.join('\n * ')}\n `;
+      const jsDocText = `*\n * ${validationTags.join("\n * ")}\n `;
 
-      ts.addSyntheticLeadingComment(
-        newProperty,
-        ts.SyntaxKind.MultiLineCommentTrivia,
-        jsDocText,
-        true,
-      );
+      ts.addSyntheticLeadingComment(newProperty, ts.SyntaxKind.MultiLineCommentTrivia, jsDocText, true);
 
       return newProperty;
     }

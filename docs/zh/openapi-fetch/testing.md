@@ -59,11 +59,7 @@ test("my API call", async () => {
 
   const BASE_URL = "https://my-site.com";
 
-  server.use(
-    http.get(`${BASE_URL}/api/v1/foo`, () =>
-      HttpResponse.json(rawData, { status: 200 })
-    )
-  );
+  server.use(http.get(`${BASE_URL}/api/v1/foo`, () => HttpResponse.json(rawData, { status: 200 })));
 
   const client = createClient<paths>({
     baseUrl: BASE_URL,

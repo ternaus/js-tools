@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "root": true,
   "files": {
     "ignoreUnknown": true,
@@ -13,7 +13,8 @@
       "!!**/.vitepress/dist",
       "!!**/.vitepress/.temp",
       "!!packages/openapi-typescript/test/fixtures",
-      "!!packages/openapi-fetch/examples",
+      "!!packages/openapi-fetch/examples/nextjs/lib/api/v1.d.ts",
+      "!!packages/openapi-fetch/examples/nextjs/lib/api/v1.json",
       "!!packages/openapi-fetch/test/fixtures",
       "!!packages/openapi-fetch/test/**/schemas",
       "!!packages/openapi-react-query/test/fixtures",
@@ -49,6 +50,9 @@
         "useBlockStatements": "error"
       },
       "preset": "recommended"
+    },
+    "domains": {
+      "reactNative": "none"
     }
   },
   "vcs": {
@@ -210,5 +214,10 @@
         }
       }
     }
-  ]
+  ],
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
 }

@@ -18,15 +18,11 @@ const fetchClient = createFetchClient<paths>({
 const $api = createClient(fetchClient);
 
 const MyComponent = () => {
-  const { data, error, isLoading } = $api.useQuery(
-    "get",
-    "/blogposts/{post_id}",
-    {
-      params: {
-        path: { post_id: 5 },
-      },
+  const { data, error, isLoading } = $api.useQuery("get", "/blogposts/{post_id}", {
+    params: {
+      path: { post_id: 5 },
     },
-  );
+  });
 
   if (isLoading || !data) return "Loading...";
 
@@ -75,15 +71,11 @@ const fetchClient = createFetchClient<paths>({
 const $api = createClient(fetchClient);
 
 const MyComponent = () => {
-  const { data, error, isLoading } = $api.useQuery(
-    "get",
-    "/blogposts/{post_id}",
-    {
-      params: {
-        path: { post_id: 5 },
-      },
+  const { data, error, isLoading } = $api.useQuery("get", "/blogposts/{post_id}", {
+    params: {
+      path: { post_id: 5 },
     },
-  );
+  });
 
   if (isLoading || !data) return "Loading...";
 

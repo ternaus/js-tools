@@ -14,7 +14,7 @@ import { browser } from 'react-dom';
 
 browser();
 void browser();
-(browser(), continueRendering());
+browser(), continueRendering();
 throw browser();
 ```
 

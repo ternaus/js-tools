@@ -12,7 +12,6 @@ The `useSuspenseQuery` method allows you to use the original [useSuspenseQuery](
 
 ## Example
 
-
 ```tsx
 import { ErrorBoundary } from "react-error-boundary";
 import { $api } from "./api";

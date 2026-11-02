@@ -56,7 +56,7 @@ npx @ternaus/openapi-typescript
 
 ## Redocly config
 
-openapi-typescript を使用するには `redocly.yaml` ファイルは必須ではありません。デフォルトでは、組み込みの `"minimal"` 設定を拡張します。ただし、カスタム検証ルールや[複数のスキーマ](#複数のスキーマ)の型を構築したい場合には使用をお勧めします。CLI はプロジェクトのルートディレクトリで `redocly.yaml` を自動的に見つけようとしますが、`--redocly` フラグを使用してその場所を指定することもできます：
+openapi-typescript を使用するには `redocly.yaml` ファイルは必須ではありません。デフォルトでは、組み込みの `"spec"` 設定を拡張します。ただし、カスタム検証ルールや[複数のスキーマ](#複数のスキーマ)の型を構築したい場合には使用をお勧めします。CLI はプロジェクトのルートディレクトリで `redocly.yaml` を自動的に見つけようとしますが、`--redocly` フラグを使用してその場所を指定することもできます：
 
 ```bash
 npx @ternaus/openapi-typescript --redocly ./path/to/redocly.yaml
@@ -88,26 +88,26 @@ resolve:
 
 CLI は以下のフラグをサポートしています：
 
-| フラグ                             | エイリアス | デフォルト | 説明                                                                                                     |
-| :--------------------------------- | :--------- | :--------: | :------------------------------------------------------------------------------------------------------- |
-| `--help`                           |            |            | インラインヘルプメッセージを表示し終了します                                                             |
-| `--version`                        |            |            | このライブラリのバージョンを表示し終了します                                                             |
-| `--output [location]`              | `-o`       | (stdout) | 出力ファイルを保存する場所を指定します                                                                   |
-| `--redocly [location]`             |            |            | `redocly.yaml` ファイルへのパスを指定します (詳細は [複数スキーマ](#複数のスキーマ) を参照)              |
-| `--additional-properties`          |            |  `false`   | `additionalProperties: false` がないすべてのスキーマオブジェクトに任意のプロパティを許可します           |
-| `--alphabetize`                    |            |  `false`   | 型をアルファベット順にソートします                                                                       |
-| `--array-length`                   |            |  `false`   | 配列の `minItems` / `maxItems` を使用してタプルを生成します                                              |
-| `--default-non-nullable`           |            |   `true`   | デフォルト値を持つスキーマオブジェクトを、非nullableとして扱います（parametersを除きます）                       |
-| `--properties-required-by-default` |            |  `false`   | `required` がないスキーマオブジェクトについて、すべてのプロパティを必須として扱います                |
-| `--empty-objects-unknown`          |            |  `false`   | 指定されたプロパティも `additionalProperties` もないスキーマオブジェクトに任意のプロパティを許可します   |
+| フラグ                             | エイリアス | デフォルト | 説明                                                                                                         |
+| :--------------------------------- | :--------- | :--------: | :----------------------------------------------------------------------------------------------------------- |
+| `--help`                           |            |            | インラインヘルプメッセージを表示し終了します                                                                 |
+| `--version`                        |            |            | このライブラリのバージョンを表示し終了します                                                                 |
+| `--output [location]`              | `-o`       |  (stdout)  | 出力ファイルを保存する場所を指定します                                                                       |
+| `--redocly [location]`             |            |            | `redocly.yaml` ファイルへのパスを指定します (詳細は [複数スキーマ](#複数のスキーマ) を参照)                  |
+| `--additional-properties`          |            |  `false`   | `additionalProperties: false` がないすべてのスキーマオブジェクトに任意のプロパティを許可します               |
+| `--alphabetize`                    |            |  `false`   | 型をアルファベット順にソートします                                                                           |
+| `--array-length`                   |            |  `false`   | 配列の `minItems` / `maxItems` を使用してタプルを生成します                                                  |
+| `--default-non-nullable`           |            |   `true`   | デフォルト値を持つスキーマオブジェクトを、非nullableとして扱います（parametersを除きます）                   |
+| `--properties-required-by-default` |            |  `false`   | `required` がないスキーマオブジェクトについて、すべてのプロパティを必須として扱います                        |
+| `--empty-objects-unknown`          |            |  `false`   | 指定されたプロパティも `additionalProperties` もないスキーマオブジェクトに任意のプロパティを許可します       |
 | `--enum`                           |            |  `false`   | 文字列のユニオン型ではなく、[TS enums](https://www.typescriptlang.org/docs/handbook/enums.html) を生成します |
-| `--enum-values`                    |            |  `false`   | enumの値を配列としてエクスポートします                                                                   |
-| `--dedupe-enums`                   |            |  `false`   | `--enum=true` が設定されている場合、enumの重複を排除します                                               |
-| `--check`                          |            |  `false`   | 生成された型が最新であることを確認します                                                                 |
-| `--exclude-deprecated`             |            |  `false`   | 型から廃止されたフィールドを除外します                                                                   |
-| `--export-type`                    | `-t`       |  `false`   | `interface` の代わりに `type` をエクスポートします                                                       |
-| `--immutable`                      |            |  `false`   | 不変の型（readonlyプロパティおよびreadonly配列）を生成します                                             |
-| `--path-params-as-types`           |            |  `false`   | `paths` オブジェクトで動的な文字列の参照を許可します                                                     |
+| `--enum-values`                    |            |  `false`   | enumの値を配列としてエクスポートします                                                                       |
+| `--dedupe-enums`                   |            |  `false`   | `--enum=true` が設定されている場合、enumの重複を排除します                                                   |
+| `--check`                          |            |  `false`   | 生成された型が最新であることを確認します                                                                     |
+| `--exclude-deprecated`             |            |  `false`   | 型から廃止されたフィールドを除外します                                                                       |
+| `--export-type`                    | `-t`       |  `false`   | `interface` の代わりに `type` をエクスポートします                                                           |
+| `--immutable`                      |            |  `false`   | 不変の型（readonlyプロパティおよびreadonly配列）を生成します                                                 |
+| `--path-params-as-types`           |            |  `false`   | `paths` オブジェクトで動的な文字列の参照を許可します                                                         |
 | `--root-types`                     |            |  `false`   | `components` から型をルートレベルの型エイリアスとしてエクスポートする                                        |
 
 ### pathParamsAsTypes

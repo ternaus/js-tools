@@ -150,9 +150,7 @@ const UNPROTECTED_ROUTES = ["/v1/login", "/v1/logout", "/v1/public/"];
 
 const authMiddleware = {
   onRequest({ schemaPath, request }) {
-    if (
-      UNPROTECTED_ROUTES.some((pathname) => schemaPath.startsWith(pathname))
-    ) {
+    if (UNPROTECTED_ROUTES.some((pathname) => schemaPath.startsWith(pathname))) {
       return undefined; // 特定のパスに対してはリクエストを変更しない
     }
 

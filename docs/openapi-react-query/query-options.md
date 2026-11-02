@@ -17,7 +17,7 @@ If you would like to use a query API that is not explicitly supported by `openap
 
 
 ```tsx
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import { $api } from "./api";
 
 export const App = () => {
@@ -57,20 +57,19 @@ Usage with [useQueries](https://tanstack.com/query/latest/docs/framework/react/r
 
 
 ```tsx
-import { useQueries } from '@tanstack/react-query';
+import { useQueries } from "@tanstack/react-query";
 import { $api } from "./api";
 
-export const useUsersById = (userIds: number[]) => (
+export const useUsersById = (userIds: number[]) =>
   useQueries({
-    queries: userIds.map((userId) => (
+    queries: userIds.map((userId) =>
       $api.queryOptions("get", "/users/{user_id}", {
         params: {
           path: { user_id: userId },
         },
-      })
-    ))
-  })
-);
+      }),
+    ),
+  });
 ```
 
 ```ts

@@ -12,7 +12,6 @@
 
 ## 使用例
 
-
 ```tsx
 import { $api } from "./api";
 

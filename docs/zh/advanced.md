@@ -65,12 +65,12 @@ enum ErrorCode {
 
 为了减少TypeScript生成中的错误，建议在[Redocly配置](https://redocly.com/docs/cli/rules/built-in-rules/)中强制执行以下内置规则：
 
-| 规则                                                         |      设置      | 原因               |
-| :----------------------------------------------------------- | :------------: | :----------------- |
+| 规则                                                                                          |      设置      | 原因               |
+| :-------------------------------------------------------------------------------------------- | :------------: | :----------------- |
 | [operation-operationId-unique](https://redocly.com/docs/cli/rules/built-in-rules/#operations) |    `error`     | 防止无效的TS生成   |
-| [operation-parameters-unique](https://redocly.com/docs/cli/rules/built-in-rules/#parameters) |    `error`     | 防止丢失参数       |
-| [path-not-include-query](https://redocly.com/docs/cli/rules/built-in-rules/#parameters) |    `error`     | 防止丢失参数       |
-| [spec](https://redocly.com/docs/cli/rules/built-in-rules/#special-rules) | `3.0` 或 `3.1` | 启用更好的模式检查 |
+| [operation-parameters-unique](https://redocly.com/docs/cli/rules/built-in-rules/#parameters)  |    `error`     | 防止丢失参数       |
+| [path-not-include-query](https://redocly.com/docs/cli/rules/built-in-rules/#parameters)       |    `error`     | 防止丢失参数       |
+| [spec](https://redocly.com/docs/cli/rules/built-in-rules/#special-rules)                      | `3.0` 或 `3.1` | 启用更好的模式检查 |
 
 ### 支持在 JS 中使用 `snake_case`
 
@@ -410,4 +410,3 @@ export interface components {
 > **tip**
 >
 > 共享定义应放在 `components.schemas` 中。`$defs` 可以用于 Schema Object 内部，但不能放在 OpenAPI 文档的根级别。
->

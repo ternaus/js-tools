@@ -7,7 +7,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import createFetchClient from "@ternaus/openapi-fetch";
-import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
+import { act, renderHook, screen, waitFor } from "@testing-library/react";
 import { type ReactNode, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { afterAll, assert, beforeAll, describe, expect, it } from "vitest";
@@ -516,8 +516,16 @@ describe("client", () => {
       const client = createClient(fetchClient);
       const customQueryClient = new QueryClient({});
 
-      function Page() {
-        const { data } = client.useQuery(
+      useMockRequestHandler({
+        baseUrl,
+        method: "get",
+        path: "/blogposts/:post_id",
+        status: 200,
+        body: { title: "hello" },
+      });
+
+      const { result } = renderHook(() =>
+        client.useQuery(
           "get",
           "/blogposts/{post_id}",
           {
@@ -529,21 +537,10 @@ describe("client", () => {
           },
           {},
           customQueryClient,
-        );
-        return <div>data: {data?.title}</div>;
-      }
+        ),
+      );
 
-      useMockRequestHandler({
-        baseUrl,
-        method: "get",
-        path: "/blogposts/:post_id",
-        status: 200,
-        body: { title: "hello" },
-      });
-
-      const rendered = render(<Page />);
-
-      await waitFor(() => expect(rendered.getByText("data: hello")));
+      await waitFor(() => expect(result.current.data?.title).toBe("hello"));
     });
 
     it("uses provided options", async () => {
@@ -601,25 +598,20 @@ describe("client", () => {
         body: { code: 500, message: "Something went wrong" },
       });
 
-      const TestComponent = () => {
-        client.useSuspenseQuery("get", "/string-array");
-        return <div />;
-      };
-
-      render(
-        <QueryClientProvider client={queryClient}>
-          <ErrorBoundary
-            fallbackRender={({ error }) => {
-              assert(error && typeof error === "object" && "message" in error && typeof error.message === "string");
-              return <p>{error.message}</p>;
-            }}
-          >
-            <Suspense fallback={<p>loading</p>}>
-              <TestComponent />
-            </Suspense>
-          </ErrorBoundary>
-        </QueryClientProvider>,
-      );
+      renderHook(() => client.useSuspenseQuery("get", "/string-array"), {
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={queryClient}>
+            <ErrorBoundary
+              fallbackRender={({ error }) => {
+                assert(error && typeof error === "object" && "message" in error && typeof error.message === "string");
+                return <p>{error.message}</p>;
+              }}
+            >
+              <Suspense fallback={<p>loading</p>}>{children}</Suspense>
+            </ErrorBoundary>
+          </QueryClientProvider>
+        ),
+      });
 
       expect(await screen.findByText("Something went wrong")).toBeDefined();
       errorSpy.mockRestore();
@@ -630,8 +622,16 @@ describe("client", () => {
       const client = createClient(fetchClient);
       const customQueryClient = new QueryClient({});
 
-      function Page() {
-        const { data } = client.useSuspenseQuery(
+      useMockRequestHandler({
+        baseUrl,
+        method: "get",
+        path: "/blogposts/:post_id",
+        status: 200,
+        body: { title: "Hello" },
+      });
+
+      const { result } = renderHook(() =>
+        client.useSuspenseQuery(
           "get",
           "/blogposts/{post_id}",
           {
@@ -643,21 +643,10 @@ describe("client", () => {
           },
           {},
           customQueryClient,
-        );
-        return <div>data: {data?.title}</div>;
-      }
+        ),
+      );
 
-      useMockRequestHandler({
-        baseUrl,
-        method: "get",
-        path: "/blogposts/:post_id",
-        status: 200,
-        body: { title: "Hello" },
-      });
-
-      const rendered = render(<Page />);
-
-      await waitFor(() => rendered.findByText("data: Hello"));
+      await waitFor(() => expect(result.current.data?.title).toBe("Hello"));
     });
 
     it("passes abort signal to fetch", async () => {
@@ -791,31 +780,6 @@ describe("client", () => {
         const client = createClient(fetchClient);
         const customQueryClient = new QueryClient({});
 
-        function Page() {
-          const mutation = client.useMutation("put", "/comment", {}, customQueryClient);
-
-          return (
-            <div>
-              <button
-                type="button"
-                onClick={() =>
-                  mutation.mutate({
-                    body: {
-                      message: "Hello",
-                      replied_at: 0,
-                    },
-                  })
-                }
-              >
-                mutate
-              </button>
-              <div>
-                data: {mutation.data?.message ?? "null"}, status: {mutation.status}
-              </div>
-            </div>
-          );
-        }
-
         useMockRequestHandler({
           baseUrl,
           method: "put",
@@ -824,13 +788,15 @@ describe("client", () => {
           body: { message: "Hello" },
         });
 
-        const rendered = render(<Page />);
+        const { result } = renderHook(() => client.useMutation("put", "/comment", {}, customQueryClient));
+        expect(result.current.status).toBe("idle");
 
-        await rendered.findByText("data: null, status: idle");
+        await act(async () => {
+          result.current.mutate({ body: { message: "Hello", replied_at: 0 } });
+        });
 
-        fireEvent.click(rendered.getByRole("button", { name: /mutate/i }));
-
-        await waitFor(() => rendered.findByText("data: Hello, status: success"));
+        await waitFor(() => expect(result.current.status).toBe("success"));
+        expect(result.current.data?.message).toBe("Hello");
       });
 
       it("should type mutate results properly", async () => {
@@ -904,31 +870,6 @@ describe("client", () => {
         const client = createClient(fetchClient);
         const customQueryClient = new QueryClient({});
 
-        function Page() {
-          const mutation = client.useMutation("put", "/comment", {}, customQueryClient);
-
-          return (
-            <div>
-              <button
-                type="button"
-                onClick={() =>
-                  mutation.mutateAsync({
-                    body: {
-                      message: "Hello",
-                      replied_at: 0,
-                    },
-                  })
-                }
-              >
-                mutate
-              </button>
-              <div>
-                data: {mutation.data?.message ?? "null"}, status: {mutation.status}
-              </div>
-            </div>
-          );
-        }
-
         useMockRequestHandler({
           baseUrl,
           method: "put",
@@ -937,13 +878,15 @@ describe("client", () => {
           body: { message: "Hello" },
         });
 
-        const rendered = render(<Page />);
+        const { result } = renderHook(() => client.useMutation("put", "/comment", {}, customQueryClient));
+        expect(result.current.status).toBe("idle");
 
-        await rendered.findByText("data: null, status: idle");
+        await act(async () => {
+          await result.current.mutateAsync({ body: { message: "Hello", replied_at: 0 } });
+        });
 
-        fireEvent.click(rendered.getByRole("button", { name: /mutate/i }));
-
-        await waitFor(() => rendered.findByText("data: Hello, status: success"));
+        await waitFor(() => expect(result.current.status).toBe("success"));
+        expect(result.current.data?.message).toBe("Hello");
       });
     });
   });

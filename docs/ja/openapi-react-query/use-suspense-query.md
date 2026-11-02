@@ -12,7 +12,6 @@
 
 ## 使用例
 
-
 ```tsx
 import { ErrorBoundary } from "react-error-boundary";
 import { $api } from "./api";
@@ -51,13 +50,7 @@ export const $api = createClient(fetchClient);
 ## Api
 
 ```tsx
-const query = $api.useSuspenseQuery(
-  method,
-  path,
-  options,
-  queryOptions,
-  queryClient
-);
+const query = $api.useSuspenseQuery(method, path, options, queryOptions, queryClient);
 ```
 
 **引数**

@@ -57,7 +57,7 @@ npx @ternaus/openapi-typescript
 
 ## Redocly config
 
-A `redocly.yaml` file isn’t required to use openapi-typescript. By default it extends the `"minimal"` built-in config. But it is recommended if you want to have custom validation rules (or build types for [multiple schemas](#multiple-schemas)). The CLI will try to automatically find a `redocly.yaml` in the root of your project, but you can also provide its location with the `--redocly` flag:
+A `redocly.yaml` file isn’t required to use openapi-typescript. By default it extends the `"spec"` built-in config. But it is recommended if you want to have custom validation rules (or build types for [multiple schemas](#multiple-schemas)). The CLI will try to automatically find a `redocly.yaml` in the root of your project, but you can also provide its location with the `--redocly` flag:
 
 ```bash
 npx @ternaus/openapi-typescript --redocly ./path/to/redocly.yaml
@@ -90,7 +90,7 @@ Refer to the [Redocly docs](https://redocly.com/docs/cli/configuration/#resolve-
 The following flags are supported in the CLI:
 
 | Flag                               | Alias | Default  | Description                                                                                                         |
-|:-----------------------------------| :---- | :------: |:--------------------------------------------------------------------------------------------------------------------|
+| :--------------------------------- | :---- | :------: | :------------------------------------------------------------------------------------------------------------------ |
 | `--help`                           |       |          | Display inline help message and exit                                                                                |
 | `--version`                        |       |          | Display this library’s version and exit                                                                             |
 | `--output [location]`              | `-o`  | (stdout) | Where should the output file be saved?                                                                              |
@@ -112,7 +112,7 @@ The following flags are supported in the CLI:
 | `--path-params-as-types`           |       | `false`  | Allow dynamic string lookups on the `paths` object                                                                  |
 | `--root-types`                     |       | `false`  | Exports types from `components` as root level type aliases                                                          |
 | `--root-types-no-schema-prefix`    |       | `false`  | Do not add "Schema" prefix to types at the root level (should only be used with --root-types)                       |
-| `--root-types-keep-casing`         |       | `false`  | Do not convert root type names to pascal case                                                                        |
+| `--root-types-keep-casing`         |       | `false`  | Do not convert root type names to pascal case                                                                       |
 | `--make-paths-enum`                |       | `false`  | Generate ApiPaths enum for all paths                                                                                |
 | `--generate-path-params`           |       | `false`  | Generate path parameters for all paths where they are undefined by schema                                           |
 | `--read-write-markers`             |       | `false`  | Generate `$Read<T>`/`$Write<T>` markers for readOnly/writeOnly properties                                           |

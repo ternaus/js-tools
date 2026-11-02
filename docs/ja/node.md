@@ -44,7 +44,7 @@ fs.writeFileSync("./my-schema.ts", contents);
 
 ### Redoc config
 
-Redoc configはopenapi-typescriptを使用するために必須ではありません。デフォルトでは `"minimal"` ビルトイン設定を拡張しますが、デフォルト設定を変更したい場合は、完全に初期化されたRedoc configをNode APIに提供する必要があります。これを行うには、`@redocly/openapi-core` のヘルパーを使用できます：
+Redoc configはopenapi-typescriptを使用するために必須ではありません。デフォルトでは `"spec"` ビルトイン設定を拡張しますが、デフォルト設定を変更したい場合は、完全に初期化されたRedoc configをNode APIに提供する必要があります。これを行うには、`@redocly/openapi-core` のヘルパーを使用できます：
 
 
 ```ts
@@ -105,17 +105,13 @@ properties:
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
 
-const DATE = ts.factory.createTypeReferenceNode(
-  ts.factory.createIdentifier("Date")
-); // `Date`
+const DATE = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Date")); // `Date`
 const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null`
 
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "date-time") {
-      return schemaObject.nullable
-        ? ts.factory.createUnionTypeNode([DATE, NULL])
-        : DATE;
+      return schemaObject.nullable ? ts.factory.createUnionTypeNode([DATE, NULL]) : DATE;
     }
   },
 });
@@ -152,17 +148,13 @@ Body_file_upload:
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
 
-const BLOB = ts.factory.createTypeReferenceNode(
-  ts.factory.createIdentifier("Blob")
-); // `Blob`
+const BLOB = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Blob")); // `Blob`
 const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null`
 
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "binary") {
-      return schemaObject.nullable
-        ? ts.factory.createUnionTypeNode([BLOB, NULL])
-        : BLOB;
+      return schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB;
     }
   },
 });
@@ -200,18 +192,14 @@ Body_file_upload:
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
 
-const BLOB = ts.factory.createTypeReferenceNode(
-  ts.factory.createIdentifier("Blob")
-); // `Blob`
+const BLOB = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Blob")); // `Blob`
 const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null`
 
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "binary") {
       return {
-        schema: schemaObject.nullable
-          ? ts.factory.createUnionTypeNode([BLOB, NULL])
-          : BLOB,
+        schema: schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB,
         questionToken: true,
       };
     }

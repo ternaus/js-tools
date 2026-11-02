@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import {
   CATALOG_PATH,
+  formatMarkdown,
   README_PATH,
   renderConfigSummary,
   renderRuleCatalog,
@@ -9,8 +10,8 @@ import {
 } from './rule-documentation.mjs';
 
 const [readme, catalog] = await Promise.all([readFile(README_PATH, 'utf8'), readFile(CATALOG_PATH, 'utf8')]);
-const expectedReadme = replaceGeneratedSection(readme, renderConfigSummary());
-const expectedCatalog = `${renderRuleCatalog()}\n`;
+const expectedReadme = formatMarkdown(replaceGeneratedSection(readme, renderConfigSummary()));
+const expectedCatalog = formatMarkdown(renderRuleCatalog());
 const issues = [];
 
 if (readme !== expectedReadme) {

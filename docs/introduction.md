@@ -59,7 +59,6 @@ And in your `tsconfig.json`, to load the types properly:
 }
 ```
 
->
 > ## Basic usage
 >
 > First, generate a local type file by running `npx @ternaus/openapi-typescript`, first specifying your input schema (JSON or YAML), and where you’d like the `--output` (`-o`) to be saved:
@@ -87,13 +86,10 @@ type MyType = components["schemas"]["MyType"];
 type EndpointParams = paths["/my/endpoint"]["parameters"];
 
 // Response obj
-type SuccessResponse =
-  paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
-type ErrorResponse =
-  paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
+type SuccessResponse = paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
+type ErrorResponse = paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
 ```
 
->
 > From here, you can use these types for any of the following (but not limited to):
 >
 > - Using an OpenAPI-supported fetch client (like [openapi-fetch](openapi-fetch/index.md))

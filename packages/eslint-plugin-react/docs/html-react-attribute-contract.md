@@ -66,12 +66,12 @@ automatically mean that the same name is an HTML content attribute.
 
 This distinction is required for `value`:
 
-| Element | HTML content attribute | React DOM prop | Rule consequence |
-| --- | --- | --- | --- |
-| `input` | `value` exists | `value` controls the input | Allow both contracts. |
-| `option` | `value` exists | `value` supplies the option value | Allow the HTML attribute. |
-| `select` | `value` is not listed as a content attribute | `value` controls the selected option | Allow the React prop. |
-| `textarea` | `value` is not listed as a content attribute | `value` controls the text area | Allow the React prop. |
+| Element    | HTML content attribute                       | React DOM prop                       | Rule consequence          |
+| ---------- | -------------------------------------------- | ------------------------------------ | ------------------------- |
+| `input`    | `value` exists                               | `value` controls the input           | Allow both contracts.     |
+| `option`   | `value` exists                               | `value` supplies the option value    | Allow the HTML attribute. |
+| `select`   | `value` is not listed as a content attribute | `value` controls the selected option | Allow the React prop.     |
+| `textarea` | `value` is not listed as a content attribute | `value` controls the text area       | Allow the React prop.     |
 
 The table is not interchangeable across elements. A shared spelling does not
 imply a shared source or meaning.

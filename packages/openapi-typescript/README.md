@@ -44,6 +44,7 @@ And in your `tsconfig.json`, to load the types properly:
 > **Highly recommended**
 >
 > Also adding the following can boost type safety:
+>
 > ```diff
 > {
 >   "compilerOptions": {
@@ -78,10 +79,8 @@ type MyType = components["schemas"]["MyType"];
 type EndpointParams = paths["/my/endpoint"]["parameters"];
 
 // Response obj
-type SuccessResponse =
-  paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
-type ErrorResponse =
-  paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
+type SuccessResponse = paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
+type ErrorResponse = paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
 ```
 
 From here, you can use these types for any of the following (but not limited to):

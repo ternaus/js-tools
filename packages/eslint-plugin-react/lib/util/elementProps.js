@@ -49,7 +49,7 @@ function getJsxProps(node) {
 
 function isHtmlNamespace(context, node) {
   for (let parent = node.parent; parent; parent = parent.parent) {
-    if (/^(ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(parent.type)) {
+    if (/^(?:ArrowFunctionExpression|FunctionDeclaration|FunctionExpression)$/u.test(parent.type)) {
       break;
     }
     let name;

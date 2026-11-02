@@ -37,7 +37,7 @@ client.GET("/my-url", options);
 | `parseAs`         | `"json"` \| `"text"` \| `"arrayBuffer"` \| `"blob"` \| `"stream"` | (optional) Parse the response using [a built-in instance method](https://developer.mozilla.org/en-US/docs/Web/API/Response#instance_methods) (default: `"json"`). `"stream"` skips parsing altogether and returns the raw stream. |
 | `baseUrl`         | `string`                                                          | Prefix the fetch URL with this option (e.g. `"https://myapi.dev/v1/"`)                                                                                                                                                            |
 | `fetch`           | `fetch`                                                           | Fetch instance used for requests (default: fetch from `createClient`)                                                                                                                                                             |
-| `middleware`      | `Middleware[]`                                                    | [See docs](middleware-auth.md)                                                                                                                                                                                        |
+| `middleware`      | `Middleware[]`                                                    | [See docs](middleware-auth.md)                                                                                                                                                                                                    |
 | (Fetch options)   |                                                                   | Any valid fetch option (`headers`, `mode`, `cache`, `signal`, …) ([docs](https://developer.mozilla.org/en-US/docs/Web/API/fetch#options))                                                                                         |
 
 ## wrapAsPathBasedClient
@@ -285,7 +285,7 @@ client.use(myMiddleware);
 Each middleware callback receives the following `options` object with the following:
 
 | Name         | Type            | Description                                                      |
-| :----------- | :-------------- | :----------------------------------------------------------------|
+| :----------- | :-------------- | :--------------------------------------------------------------- |
 | `request`    | `Request`       | The current `Request` to be sent to the endpoint.                |
 | `schemaPath` | `string`        | The original OpenAPI path called (e.g. `/users/{user_id}`)       |
 | `params`     | `Object`        | The original `params` object passed to `GET()` / `POST()` / etc. |
@@ -294,15 +294,15 @@ Each middleware callback receives the following `options` object with the follow
 
 In addition to these, the `onResponse` callback receives an additional `response` property:
 
-| Name         | Type            | Description                                |
-| :----------- | :-------------- | :------------------------------------------|
-| `response`   | `Response`      | The `Response` returned from the endpoint. |
+| Name       | Type       | Description                                |
+| :--------- | :--------- | :----------------------------------------- |
+| `response` | `Response` | The `Response` returned from the endpoint. |
 
 And the `onError` callback receives an additional `error` property:
 
-| Name         | Type            | Description                                                              |
-| :----------- | :-------------- | :------------------------------------------------------------------------|
-| `error`      | `unknown`       | The error thrown by `fetch`, probably a `TypeError` or a `DOMException`. |
+| Name    | Type      | Description                                                              |
+| :------ | :-------- | :----------------------------------------------------------------------- |
+| `error` | `unknown` | The error thrown by `fetch`, probably a `TypeError` or a `DOMException`. |
 
 #### Response
 

@@ -19,7 +19,9 @@ async function save(formData) {
 }
 
 <form action={save} method="get" />;
-<button type="button" formAction={save}>Save</button>;
+<button type="button" formAction={save}>
+  Save
+</button>;
 <input type="text" formAction="/save" />;
 ```
 
@@ -27,10 +29,14 @@ async function save(formData) {
 
 ```jsx
 <form action={save} />;
-<button type="submit" formAction={save}>Save</button>;
+<button type="submit" formAction={save}>
+  Save
+</button>;
 <input type="image" formAction="/save" />;
 <form action="/save" method="get" target="preview" />;
-<button type="submit" name="operation" formAction="/save">Save</button>;
+<button type="submit" name="operation" formAction="/save">
+  Save
+</button>;
 ```
 
 ## Analysis boundary

@@ -12,7 +12,9 @@ Use a template literal to combine the parts. See [React's title examples](https:
 ```jsx
 <title>Page {page}</title>;
 <title>{['Page', page]}</title>;
-<title><b>Page</b></title>;
+<title>
+  <b>Page</b>
+</title>;
 ```
 
 ## Correct
@@ -20,7 +22,9 @@ Use a template literal to combine the parts. See [React's title examples](https:
 ```jsx
 <title>{`Page ${page}`}</title>;
 <title>{page}</title>;
-<svg><title>Chart {number}</title></svg>;
+<svg>
+  <title>Chart {number}</title>
+</svg>;
 ```
 
 Numbers and other values that React can convert to text are not required to

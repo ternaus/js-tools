@@ -13,6 +13,10 @@
       "env": ["PORT"],
       "dependsOn": ["build"]
     },
+    "@example/openapi-fetch-nextjs#test-e2e": {
+      "env": ["NEXTJS_PORT", "NEXTJS_API_PORT"],
+      "dependsOn": ["^build"]
+    },
     "typecheck": {
       "dependsOn": ["build"]
     }

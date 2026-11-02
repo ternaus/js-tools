@@ -62,10 +62,8 @@ type MyType = components["schemas"]["MyType"];
 type EndpointParams = paths["/my/endpoint"]["parameters"];
 
 // 响应对象
-type SuccessResponse =
-  paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
-type ErrorResponse =
-  paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
+type SuccessResponse = paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
+type ErrorResponse = paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
 ```
 
 

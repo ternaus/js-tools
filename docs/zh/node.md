@@ -44,7 +44,7 @@ fs.writeFileSync("./my-schema.ts", contents);
 
 ### Redoc 配置
 
-使用 openapi-typescript 不需要 Redoc 配置。默认情况下，它扩展了内置配置 `"minimal"`。但如果要修改默认设置，您需要向 Node API 提供完全初始化的 Redoc 配置。您可以使用 `@redocly/openapi-core` 中的辅助函数完成这个任务：
+使用 openapi-typescript 不需要 Redoc 配置。默认情况下，它扩展了内置配置 `"spec"`。但如果要修改默认设置，您需要向 Node API 提供完全初始化的 Redoc 配置。您可以使用 `@redocly/openapi-core` 中的辅助函数完成这个任务：
 
 
 ```ts
@@ -79,7 +79,7 @@ Node API 支持所有 [CLI 参数](cli.md#命令行参数)（采用 `camelCase` 
 | `postTransform` |   `Function`    |                 | 与 `transform` 相同，但在 TypeScript 转换之后运行               |
 | `silent`        |    `boolean`    |     `false`     | 静默警告消息（致命错误仍将显示）                                |
 | `cwd`           | `string \| URL` | `process.cwd()` | （可选）提供当前工作目录以帮助解析远程 `$ref`（如果需要的话）。 |
-| `inject`        |    `string`     |                 | 在文件开头注入任意的 TypeScript 类型   |
+| `inject`        |    `string`     |                 | 在文件开头注入任意的 TypeScript 类型                            |
 
 ### transform / postTransform
 
@@ -113,9 +113,7 @@ const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "date-time") {
-      return schemaObject.nullable
-        ? ts.factory.createUnionTypeNode([DATE, NULL])
-        : DATE;
+      return schemaObject.nullable ? ts.factory.createUnionTypeNode([DATE, NULL]) : DATE;
     }
   },
 });
@@ -158,9 +156,7 @@ const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull()); // `null
 const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "binary") {
-      return schemaObject.nullable
-        ? ts.factory.createUnionTypeNode([BLOB, NULL])
-        : BLOB;
+      return schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB;
     }
   },
 });
@@ -205,9 +201,7 @@ const ast = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
     if (schemaObject.format === "binary") {
       return {
-        schema: schemaObject.nullable
-          ? ts.factory.createUnionTypeNode([BLOB, NULL])
-          : BLOB,
+        schema: schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB,
         questionToken: true,
       };
     }
