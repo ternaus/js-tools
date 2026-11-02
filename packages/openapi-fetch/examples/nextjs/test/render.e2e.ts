@@ -16,18 +16,3 @@ test("server-renders the API response and hydrates its visibility control", asyn
   await expect(page.locator("pre code")).toBeVisible();
   expect(errors).toEqual([]);
 });
-
-test("uses the default API URL when the environment variable is empty", async () => {
-  const previous = process.env.CAT_FACT_API_URL;
-  process.env.CAT_FACT_API_URL = "";
-  try {
-    const { default: client } = await import("../lib/api/index");
-    expect(client.baseUrl).toBe("https://catfact.ninja");
-  } finally {
-    if (previous === undefined) {
-      delete process.env.CAT_FACT_API_URL;
-    } else {
-      process.env.CAT_FACT_API_URL = previous;
-    }
-  }
-});

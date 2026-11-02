@@ -26,7 +26,7 @@ pnpm --filter @example/openapi-fetch-nextjs run check
 pnpm --filter @example/openapi-fetch-nextjs run test-e2e
 ```
 
-The browser test builds and starts Next.js in production mode with a local API fixture. It checks the initial server HTML, then hides and shows the response through the client control to verify hydration. It also checks the empty API URL fallback. The tests do not contact `catfact.ninja`.
+The browser test builds and starts Next.js in production mode with a local API fixture. It checks the initial server HTML, then hides and shows the response through the client control to verify hydration. The Vitest suite checks the empty API URL fallback without starting either server. The tests do not contact `catfact.ninja`.
 
 If the default ports are occupied, set `NEXTJS_PORT` (default `4174`) and `NEXTJS_API_PORT` (default `4175`) to two different free ports:
 
