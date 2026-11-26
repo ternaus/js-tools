@@ -2,6 +2,7 @@ import type { DefaultTheme, UserConfig } from "vitepress";
 
 const siteUrl = "https://ternaus.github.io";
 const siteBase = "/js-tools";
+const googleTagId = "G-NF874BVLYY";
 
 function addSiteBase(url: string): string {
   const value = new URL(url, siteUrl);
@@ -33,7 +34,15 @@ const shared: UserConfig<DefaultTheme.Config> = {
       }));
     },
   },
-  head: [["link", { rel: "icon", href: "/js-tools/favicon.svg", type: "image/svg+xml" }]],
+  head: [
+    ["link", { rel: "icon", href: "/js-tools/favicon.svg", type: "image/svg+xml" }],
+    ["script", { async: "", src: `https://www.googletagmanager.com/gtag/js?id=${googleTagId}` }],
+    [
+      "script",
+      {},
+      `window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag("js", new Date());\ngtag("config", "${googleTagId}");`,
+    ],
+  ],
   themeConfig: {
     siteTitle: "@ternaus/js-tools",
     i18nRouting: false,

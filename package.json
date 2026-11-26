@@ -16,6 +16,7 @@
     "quality:precommit": "pnpm run format:check && pnpm run lint",
     "quality:complete": "pnpm run quality:precommit && pnpm test && pnpm run size && pnpm run test-e2e && pnpm run docs:build && pnpm run audit",
     "docs:build": "pnpm --filter @example/js-tools-docs build",
+    "docs:indexnow": "node scripts/indexnow.mjs",
     "lint:biome": "biome lint packages scripts docs/.vitepress eslint.config.js vitest.config.ts --error-on-warnings",
     "lint:eslint": "eslint packages/eslint-plugin-react",
     "format:check": "biome check --linter-enabled=false .",
