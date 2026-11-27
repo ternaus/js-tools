@@ -10,6 +10,10 @@
 - [openapi-react-query](https://ternaus.github.io/js-tools/openapi-react-query/): React Query client for OpenAPI.
 - [Type helpers](https://ternaus.github.io/js-tools/openapi-typescript-helpers/): Shared OpenAPI helper types.
 
+## Guides
+
+- [Migrate from upstream](https://ternaus.github.io/js-tools/migrating): Package swap and behavior changes per package.
+
 ## Support
 
 Support ongoing maintenance at https://github.com/sponsors/ternaus.
