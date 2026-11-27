@@ -4,9 +4,6 @@
 
 `@ternaus/openapi-fetch` は、OpenAPI の型定義からリクエストとレスポンスの型を推論する Fetch クライアントです。
 
-
-
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import type { paths } from "./my-openapi-3-schema"; // openapi-typescriptで生成された型
@@ -28,7 +25,6 @@ await client.PUT("/blogposts", {
   },
 });
 ```
-
 
 `data` と `error` は型チェックが行われ、VS Code や他の TypeScript 対応 IDE で Intellisense による補完が利用可能です。同様に、リクエストの `body` もフィールドが型チェックされ、必要なパラメータが不足している場合や型の不一致がある場合にはエラーが発生します。
 
@@ -64,7 +60,6 @@ npx @ternaus/openapi-typescript ./path/to/api/v1.yaml -o ./src/lib/api/v1.d.ts
 
 最後に、プロジェクトで **型チェックを実行** してください。これは、`tsc --noEmit` を [npm scripts](https://docs.npmjs.com/cli/v9/using-npm/scripts) に追加することで可能です：
 
-
 ```json{3} [package.json]
 {
   "scripts": {
@@ -72,7 +67,6 @@ npx @ternaus/openapi-typescript ./path/to/api/v1.yaml -o ./src/lib/api/v1.d.ts
   }
 }
 ```
-
 
 そして、CIで `npm run test:ts` を実行して型エラーを検出します。
 
@@ -85,7 +79,6 @@ npx @ternaus/openapi-typescript ./path/to/api/v1.yaml -o ./src/lib/api/v1.d.ts
 `@ternaus/openapi-fetch` は、OpenAPI の型定義からリクエストとレスポンスの型を推論する Fetch クライアントです。
 
 ![OpenAPI schema example](/assets/openapi-schema.png)
-
 
 ```ts
 import createClient from "@ternaus/openapi-fetch";

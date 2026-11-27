@@ -20,7 +20,6 @@ The code is [MIT-licensed](https://github.com/ternaus/js-tools/blob/main/package
 - ✅ Load schemas from YAML or JSON, locally or remotely
 - ✅ Generate types for even huge schemas within milliseconds
 
-
 ## Examples
 
 👀 [See examples](https://github.com/ternaus/js-tools/tree/main/packages/openapi-typescript/examples/)
@@ -35,7 +34,6 @@ npm i -D @ternaus/openapi-typescript typescript
 
 And in your `tsconfig.json`, to load the types properly:
 
-
 ```json
 {
   "compilerOptions": {
@@ -44,7 +42,6 @@ And in your `tsconfig.json`, to load the types properly:
   }
 }
 ```
-
 
 > **tip Highly recommended**
 >

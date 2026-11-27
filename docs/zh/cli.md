@@ -24,7 +24,6 @@ npx @ternaus/openapi-typescript https://petstore3.swagger.io/api/v3/openapi.yaml
 
 要转换多个模式，请在项目根目录创建一个 `redocly.yaml` 文件，并[定义 APIs](https://redocly.com/docs/cli/configuration/)。在 `apis` 下，为每个模式提供一个唯一的名称和可选的版本（名称无关紧要，只要唯一即可）。将 `root` 值设置为模式的入口点，这将充当主输入。对于输出，使用 `x-openapi-ts.output` 设置：
 
-
 ```yaml
 apis:
   core@v2:
@@ -36,7 +35,6 @@ apis:
     x-openapi-ts:
       output: ./openapi/external.ts
 ```
-
 
 > **tip**
 >
@@ -68,7 +66,6 @@ npx @ternaus/openapi-typescript --redocly ./path/to/redocly.yaml
 
 非公共模式的身份验证在您的 [Redocly 配置](https://redocly.com/docs/cli/configuration/#resolve-non-public-or-non-remote-urls)中处理。您可以添加头部和基本身份验证，如下所示：
 
-
 ```yaml
 resolve:
   http:
@@ -80,7 +77,6 @@ resolve:
         name: Authorization
         envVariable: SECRET_AUTH
 ```
-
 
 有关其他选项，请参阅 [Redocly 文档](https://redocly.com/docs/cli/configuration/#resolve-non-public-or-non-remote-urls)。
 
@@ -112,16 +108,13 @@ CLI 支持以下参数：
 
 默认情况下，URL 会按照在模式中编写的方式保留：
 
-
 ```ts
 export interface paths {
   "/user/{user_id}": components["schemas"]["User"];
 }
 ```
 
-
 这意味着您的类型查找也必须与确切的 URL 匹配：
-
 
 ```ts
 import type { paths } from "./my-openapi-3-schema"; // 由openapi-typescript生成
@@ -130,9 +123,7 @@ const url = `/user/${id}`;
 type UserResponses = paths["/user/{user_id}"]["responses"];
 ```
 
-
 但当启用 `--path-params-as-types` 时，您可以这样利用动态查找：
-
 
 ```ts
 import type { paths } from "./my-openapi-3-schema"; // 由openapi-typescript生成
@@ -140,7 +131,6 @@ import type { paths } from "./my-openapi-3-schema"; // 由openapi-typescript生�
 const url = `/user/${id}`;
 type UserResponses = paths[url]["responses"]; // 自动匹配 `paths['/user/{user_id}']`
 ```
-
 
 虽然这是一个假设的例子，但您可以使用此功能自动推断基于应用程序中 URL 的有用位置的类型，例如在 fetch 客户端中。
 
@@ -151,7 +141,6 @@ _感谢，[@Powell-v2](https://github.com/Powell-v2)!_
 如果数组类型指定了 `minItems` 或 `maxItems`，此选项非常有用。
 
 例如，给定以下模式：
-
 
 ```yaml
 components:
@@ -164,9 +153,7 @@ components:
       maxItems: 2
 ```
 
-
 启用 `--array-length` 将更改类型如下：
-
 
 ```ts
 export interface components {
@@ -176,7 +163,6 @@ export interface components {
   };
 }
 ```
-
 
 这导致了对数组长度的更明确的类型检查。
 

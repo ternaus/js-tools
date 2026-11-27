@@ -4,8 +4,6 @@
 
 `@ternaus/openapi-fetch` 是根据 OpenAPI 类型定义推断请求和响应类型的 Fetch 客户端。
 
-
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import type { paths } from "./my-openapi-3-schema"; // 由openapi-typescript生成
@@ -27,7 +25,6 @@ await client.PUT("/blogposts", {
   }),
 });
 ```
-
 
 `data`和`error`经过类型检查，并将其类型暴露给VS Code（以及任何其他支持TypeScript的IDE）的智能感知。同样，请求`body`也将检查其字段，如果缺少任何必需的参数或存在类型不匹配，则会出错。
 
@@ -86,7 +83,6 @@ npx @ternaus/openapi-typescript ./path/to/api/v1.yaml -o ./src/lib/api/v1.d.ts
 使用 `openapi-fetch` 而不是传统的代码生成的最大优点是不需要文档。`openapi-fetch` 鼓励使用现有的 OpenAPI 文档，而不是试图找出要导入的函数或该函数需要哪些参数：
 
 ![OpenAPI 模式示例](/assets/openapi-schema.png)
-
 
 ```ts
 import createClient from "@ternaus/openapi-fetch";

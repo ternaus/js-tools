@@ -6,7 +6,6 @@
 
 每个中间件都可以提供 `onRequest()` 和 `onResponse()` 回调，用于观察/变更请求和响应。
 
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import type { paths } from "./my-openapi-3-schema"; // 由openapi-typescript生成
@@ -29,7 +28,6 @@ const client = createClient<paths>({ baseUrl: "https://myapi.dev/v1/" });
 // 注册中间件
 client.use(myMiddleware);
 ```
-
 
 > **tip**
 >

@@ -15,7 +15,6 @@ If you would like to use a query API that is not explicitly supported by `openap
 
 [useQuery example](use-query.md#example) rewritten using `queryOptions`.
 
-
 ```tsx
 import { useQuery } from "@tanstack/react-query";
 import { $api } from "./api";
@@ -47,14 +46,12 @@ const fetchClient = createFetchClient<paths>({
 export const $api = createClient(fetchClient);
 ```
 
-
 > **info Good to Know**
 >
 > Both [useQuery](use-query.md) and [useSuspenseQuery](use-suspense-query.md) use `queryOptions` under the hood.
 >
 
 Usage with [useQueries](https://tanstack.com/query/latest/docs/framework/react/reference/useQueries).
-
 
 ```tsx
 import { useQueries } from "@tanstack/react-query";
@@ -82,7 +79,6 @@ const fetchClient = createFetchClient<paths>({
 });
 export const $api = createClient(fetchClient);
 ```
-
 
 ## Cache invalidation
 

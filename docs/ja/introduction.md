@@ -18,7 +18,6 @@ openapi-typescriptは、[OpenAPI 3.0 & 3.1](https://spec.openapis.org/oas/latest
 - ✅ YAMLまたはJSONから、ローカルまたはリモートでスキーマを読み込む
 - ✅ 巨大なスキーマであってもミリ秒単位で型を生成
 
-
 ## 使用例
 
 👀 [使用例を見る](https://github.com/ternaus/js-tools/tree/main/packages/openapi-typescript/examples/)
@@ -33,7 +32,6 @@ npm i -D @ternaus/openapi-typescript typescript
 
 次に、`tsconfig.json` ファイルに以下を追加して、型を正しく読み込めるようにします：
 
-
 ```json
 {
   "compilerOptions": {
@@ -42,7 +40,6 @@ npm i -D @ternaus/openapi-typescript typescript
   }
 }
 ```
-
 
 > **tip 強く推奨**
 >

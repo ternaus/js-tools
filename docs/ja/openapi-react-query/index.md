@@ -10,7 +10,6 @@ openapi-react-queryは、[@tanstack/react-query](https://tanstack.com/query/late
 - ✅ バグを隠す可能性がある `any` 型の排除
 - ✅ バグを隠す可能性がある `as` による型の上書きも排除
 
-
 ```tsx
 import createFetchClient from "@ternaus/openapi-fetch";
 import createClient from "@ternaus/openapi-react-query";
@@ -35,7 +34,6 @@ const MyComponent = () => {
   return <div>{data.title}</div>;
 };
 ```
-
 
 ## セットアップ
 
@@ -63,7 +61,6 @@ npx @ternaus/openapi-typescript ./path/to/api/v1.yaml -o ./src/lib/api/v1.d.ts
 
 スキーマから型が生成されたら、[fetch クライアント](../introduction.md)と react-query クライアントを作成し、API にクエリを実行できます。
 
-
 ```tsx
 import createFetchClient from "@ternaus/openapi-fetch";
 import createClient from "@ternaus/openapi-react-query";
@@ -88,7 +85,6 @@ const MyComponent = () => {
   return <div>{data.title}</div>;
 };
 ```
-
 
 > **tip**
 > `createFetchClient` に関する詳細は [openapi-fetch ドキュメント](../openapi-fetch/index.md) をご覧ください。

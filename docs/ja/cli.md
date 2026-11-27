@@ -24,7 +24,6 @@ npx @ternaus/openapi-typescript https://petstore3.swagger.io/api/v3/openapi.yaml
 
 複数のスキーマを変換するには、プロジェクトのルートディレクトリに `redocly.yaml` ファイルを作成し、[APIs を定義します](https://redocly.com/docs/cli/configuration/)。`apis` の下に、それぞれのスキーマに一意の名前と、必要に応じてオプションのバージョンを指定します（名前は一意であれば問題ありません）。`root` の値をスキーマのエントリーポイントに設定します。これが主な入力として機能します。出力については、`x-openapi-ts.output` で設定します：
 
-
 ```yaml
 apis:
   core@v2:
@@ -36,7 +35,6 @@ apis:
     x-openapi-ts:
       output: ./openapi/external.ts
 ```
-
 
 > **tip**
 >
@@ -68,7 +66,6 @@ Redoclyの設定オプションについての詳細は [Redoclyのドキュメ�
 
 非公開スキーマの認証は、[Redocly config](https://redocly.com/docs/cli/configuration/#resolve-non-public-or-non-remote-urls)で処理します。次のようにヘッダーや基本認証を追加できます：
 
-
 ```yaml
 resolve:
   http:
@@ -80,7 +77,6 @@ resolve:
         name: Authorization
         envVariable: SECRET_AUTH
 ```
-
 
 その他のオプションについては、[Redocly ドキュメント](https://redocly.com/docs/cli/configuration/#resolve-non-public-or-non-remote-urls)をご参照ください。
 
@@ -114,16 +110,13 @@ CLI は以下のフラグをサポートしています：
 
 デフォルトでは、URL はスキーマに記載された通りに保持されます：
 
-
 ```ts
 export interface paths {
   "/user/{user_id}": components["schemas"]["User"];
 }
 ```
 
-
 つまり、型の参照も正確な URL に一致する必要があります。
-
 
 ```ts
 import type { paths } from "./my-openapi-3-schema";
@@ -132,9 +125,7 @@ const url = `/user/${id}`;
 type UserResponses = paths["/user/{user_id}"]["responses"];
 ```
 
-
 しかし、`--path-params-as-types` オプションを有効にすると、次のように動的な参照を利用することができます。
-
 
 ```ts
 import type { paths } from "./my-openapi-3-schema";
@@ -142,7 +133,6 @@ import type { paths } from "./my-openapi-3-schema";
 const url = `/user/${id}`;
 type UserResponses = paths[url]["responses"]; // 自動的に `paths['/user/{user_id}']` に一致します
 ```
-
 
 これは人為的な例ですが、この機能を使用して、フェッチクライアントやアプリケーション内の他に有用的な場面で、URLに基づいて型を自動的に推論することができます。
 
@@ -153,7 +143,6 @@ _ありがとう, [@Powell-v2](https://github.com/Powell-v2)!_
 このオプションは、配列タイプが `minItems` または `maxItems` を指定している場合にタプルを生成するのに便利です。
 
 例えば、以下のスキーマが与えられた場合:
-
 
 ```yaml
 components:
@@ -166,9 +155,7 @@ components:
       maxItems: 2
 ```
 
-
 `--array-length` を有効にすると、型が次のように変更されます:
-
 
 ```ts
 export interface components {
@@ -178,7 +165,6 @@ export interface components {
   };
 }
 ```
-
 
 これにより、配列の長さに対するより明示的な型チェックが可能になります。
 

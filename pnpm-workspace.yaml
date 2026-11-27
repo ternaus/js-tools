@@ -6,16 +6,10 @@ packages:
 catalog:
   execa: 10.2.1
   typescript: 7.0.2
-  vite: 8.3.5
+  vite: 8.3.8
 
 allowBuilds:
   "@biomejs/biome": true
   esbuild: false
   msw: false
   sharp: false
-
-# Requested stable releases are under 24 hours old; remove after 2026-11-02 11:02 UTC.
-minimumReleaseAgeExclude:
-  - "@tanstack/query-core@5.105.1"
-  - "@tanstack/react-query@5.105.1"
-  - globals@17.14.0

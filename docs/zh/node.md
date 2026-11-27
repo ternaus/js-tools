@@ -29,7 +29,6 @@ Node API 返回一个带有 TypeScript AST 的 `Promise`。然后，您可以按
 
 要将 TypeScript AST 转换为字符串，可以使用 `astToString()` 辅助函数，它是对 [TypeScript’s printer](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#re-printing-sections-of-a-typescript-file) 的简单封装：
 
-
 ```ts
 import fs from "node:fs";
 import openapiTS, { astToString } from "@ternaus/openapi-typescript";
@@ -41,11 +40,9 @@ const contents = astToString(ast);
 fs.writeFileSync("./my-schema.ts", contents);
 ```
 
-
 ### Redoc 配置
 
 使用 openapi-typescript 不需要 Redoc 配置。默认情况下，它扩展了内置配置 `"spec"`。但如果要修改默认设置，您需要向 Node API 提供完全初始化的 Redoc 配置。您可以使用 `@redocly/openapi-core` 中的辅助函数完成这个任务：
-
 
 ```ts
 import { createConfig, loadConfig } from "@redocly/openapi-core";
@@ -67,7 +64,6 @@ const redoc = await loadConfig({ configPath: "redocly.yaml" });
 
 const ast = await openapiTS(mySchema, { redoc });
 ```
-
 
 ## 选项
 
@@ -92,7 +88,6 @@ Node API 支持所有 [CLI 参数](cli.md#命令行参数)（采用 `camelCase` 
 
 例如，假设您的模式具有以下属性：
 
-
 ```yaml
 properties:
   updated_at:
@@ -100,9 +95,7 @@ properties:
     format: date-time
 ```
 
-
 默认情况下，openapiTS 将生成 `updated_at?: string;`，因为它不确定您希望按照 `"date-time"`（格式是非标准的，可以是任何您喜欢的东西）的哪种格式。但我们可以通过提供自己的自定义格式化程序来增强此功能，如下所示：
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -119,20 +112,16 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 这将导致以下更改：
-
 
 ```ts
 updated_at?: string; // [!code --]
 updated_at: Date | null; // [!code ++]
 ```
 
-
 #### 示例：`Blob` 类型
 
 另一种常见的转换是对文件上传的处理，其中请求的 `body` 是 `multipart/form-data`，带有一些 `Blob` 字段的情况。以下是一个示例模式：
-
 
 ```yaml
 Body_file_upload:
@@ -143,9 +132,7 @@ Body_file_upload:
       format: binary;
 ```
 
-
 使用相同的模式来转换类型：
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -162,20 +149,16 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 具有正确类型的 `file` 属性的结果差异：
-
 
 ```ts
 file?: string; // [!code --]
 file: Blob | null; // [!code ++]
 ```
 
-
 #### 示例：向属性添加 "?" 标记
 
 使用上述 `transform` 函数不能创建带有可选 "?" 标记的属性。`transform` 函数还接受不同的返回对象，该对象允许向属性添加 "?" 标记。以下是一个示例模式：
-
 
 ```yaml
 Body_file_upload:
@@ -187,9 +170,7 @@ Body_file_upload:
       required: true;
 ```
 
-
 在这里，我们返回一个带有模式属性的对象，与上面的示例相同，但我们还添加了 `questionToken` 属性，这将在属性中添加 "?" 标记。
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -209,15 +190,12 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 带有正确类型和 "?" 标记的 `file` 属性的结果差异：
-
 
 ```ts
 file: Blob; // [!code --]
 file?: Blob | null; // [!code ++]
 ```
-
 
 您的模式中的任何 [Schema Object](https://spec.openapis.org/oas/latest.html#schema-object) 都将通过此格式化程序（甚至是远程的！）。还请务必检查 `metadata` 参数，以获取可能有用的其他上下文。
 

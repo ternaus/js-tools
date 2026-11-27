@@ -29,7 +29,6 @@ Node APIはTypeScript の AST を含む `Promise` を返します。その後、
 
 TypeScript ASTを文字列に変換するには、[TypeScriptのprinterのラッパー](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#re-printing-sections-of-a-typescript-file)である `astToString()` ヘルパーを使用できます:
 
-
 ```ts
 import fs from "node:fs";
 import openapiTS, { astToString } from "@ternaus/openapi-typescript";
@@ -41,11 +40,9 @@ const contents = astToString(ast);
 fs.writeFileSync("./my-schema.ts", contents);
 ```
 
-
 ### Redoc config
 
 Redoc configはopenapi-typescriptを使用するために必須ではありません。デフォルトでは `"spec"` ビルトイン設定を拡張しますが、デフォルト設定を変更したい場合は、完全に初期化されたRedoc configをNode APIに提供する必要があります。これを行うには、`@redocly/openapi-core` のヘルパーを使用できます：
-
 
 ```ts
 import { createConfig, loadConfig } from "@redocly/openapi-core";
@@ -67,7 +64,6 @@ const redocly = await loadConfig({ configPath: "redocly.yaml" });
 
 const ast = await openapiTS(mySchema, { redocly });
 ```
-
 
 ## オプション
 
@@ -101,7 +97,6 @@ properties:
 
 デフォルトでは、openapiTSは`updated_at?: string;`を生成します。これは、`"date-time"`がどのフォーマットを意味するのかが明確でないためです（フォーマットは標準化されておらず、任意の形式にできるため）。しかし、独自のカスタムフォーマッタを提供することで、これを改善できます。例えば次のようにします：
 
-
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
 
@@ -117,20 +112,16 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 その結果、以下のようになります：
-
 
 ```yaml
 updated_at?: string; // [!code --]
 updated_at: Date | null; // [!code ++]
 ```
 
-
 #### 例: `Blob` 型
 
 もう一つの一般的な変換は、リクエストの `body` が `multipart/form-data` で、いくつかの `Blob` フィールドを持つファイルアップロードの場合です。例えば次のようなスキーマがあります
-
 
 ```yaml
 Body_file_upload:
@@ -141,9 +132,7 @@ Body_file_upload:
       format: binary;
 ```
 
-
 同じパターンを使用して型を変換します：
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -160,20 +149,16 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 fileプロパティが正しく型付けされた差分は次のようになります：
-
 
 ```ts
 file?: string; // [!code --]
 file: Blob | null; // [!code ++]
 ```
 
-
 #### 例: プロパティに "?" トークンを追加
 
 上記の `transform` 関数では、オプションの"?"トークンを持つプロパティを作成することはできません。しかし、transform関数は異なる戻りオブジェクトを受け入れることもでき、これを使用してプロパティに”?“トークンを追加することができます。以下はその例です：
-
 
 ```yaml
 Body_file_upload:
@@ -185,9 +170,7 @@ Body_file_upload:
       required: true;
 ```
 
-
 ここではスキーマプロパティを持つオブジェクトを返しますが、これに加えて `questionToken` プロパティを追加し、プロパティに"?"トークンを追加します。
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -207,15 +190,12 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 `file` プロパティが正しく型付けされ、"?"トークンが追加された結果の差分は次のとおりです：
-
 
 ```ts
 file: Blob; // [!code --]
 file?: Blob | null; // [!code ++]
 ```
-
 
 スキーマ内の任意の[Schema Object](https://spec.openapis.org/oas/latest.html#schema-object)は、このフォーマッタを通じて処理されます（リモートのものも含まれます!）。また、追加のコンテキストが役立つ場合があるので、`metadata` パラメータも必ず確認してください。
 

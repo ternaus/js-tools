@@ -24,7 +24,6 @@ $ DEBUG=openapi-ts:* npx @ternaus/openapi-typescript schema.yaml -o my-types.ts
 
 例：
 
-
 ```yaml
 ErrorCode:
   type: integer
@@ -43,9 +42,7 @@ ErrorCode:
     - "何かがうまくいきませんでした"
 ```
 
-
 これは、次のようになります：
-
 
 ```ts
 enum ErrorCode {
@@ -57,7 +54,6 @@ enum ErrorCode {
   Unknown = 300
 }
 ```
-
 
 この方法で生成するには、[コマンドライン](cli.md#%E3%83%95%E3%83%A9%E3%82%AF%E3%82%99)で `--enum` を指定する必要があります。
 
@@ -297,9 +293,7 @@ Pet:
     - $ref: "#/components/schemas/Turtle"
 ```
 
-
 これは、TypeScript のユニオン型とインターセクション型の両方を組み合わせた次のような型が生成されます。これは有効な TypeScript ですが、複雑であり、推論が意図した通りに機能しない可能性があります。しかし、最も問題となるのは、TypeScript が type プロパティを通じて区別できないことです。
-
 
 ```ts
   Pet: ({
@@ -308,7 +302,6 @@ Pet:
     name?: string;
   }) & (components["schemas"]["Cat"] | components["schemas"]["Dog"] | components["schemas"]["Rabbit"] | components["schemas"]["Snake"] | components["schemas"]["Turtle"]);
 ```
-
 
 #### ✅ 良い
 
@@ -334,15 +327,12 @@ Cat:
       - cat
 ```
 
-
 生成された型は単純化されるだけでなく、TypeScriptが `type` を使用して区別できるようになります（`Cat` には `type` として単一の列挙値 `"cat"` が指定されています）。
-
 
 ```ts
 Pet: components["schemas"]["Cat"] | components["schemas"]["Dog"] | components["schemas"]["Rabbit"] | components["schemas"]["Snake"] | components["schemas"]["Turtle"];
 Cat: { type?: "cat"; } & components["schemas"]["PetCommonProperties"];
 ```
-
 
 _注: 任意で、`Pet` に `discriminator.propertyName: "type"` を指定することもできます（[ドキュメント](https://spec.openapis.org/oas/v3.1.0#discriminator-object)）。これにより、自動的に `type` キーが生成されますが、明示性が低くなります。_
 
@@ -351,7 +341,6 @@ _注: 任意で、`Pet` に `discriminator.propertyName: "type"` を指定する
 ## JSONSchema $defs の注意点
 
 [JSONSchema $defs](https://json-schema.org/understanding-json-schema/structuring.html#defs) はサブスキーマの定義をどこにでも提供するために使用できます。ただし、これらが常にTypeScriptにスムーズに変換されるとは限りません。例えば、次のような場合は動作します:
-
 
 ```yaml
 components:
@@ -368,9 +357,7 @@ components:
           $ref: "#/components/schemas/DefType/$defs/myDefType"
 ```
 
-
 これは次のようなTypeScriptに変換されます:
-
 
 ```ts
 export interface components {
@@ -387,9 +374,7 @@ export interface components {
 }
 ```
 
-
 しかし、これは動作しません:
-
 
 ```yaml
 components:
@@ -405,9 +390,7 @@ components:
           $ref: "#/components/schemas/DefType/$defs/myDefType"
 ```
 
-
 なぜなら、次のように変換されるからです:
-
 
 ```ts
 export interface components {
@@ -419,7 +402,6 @@ export interface components {
   };
 }
 ```
-
 
 そのため、`$defs` を定義する場所には注意が必要です。最終的に生成される型から $defs が消えてしまう可能性があります。
 
