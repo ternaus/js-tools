@@ -14,6 +14,7 @@ const en = {
           { text: "Type helpers", link: "/openapi-typescript-helpers/" },
         ],
       },
+      { text: "Migrate from upstream", link: "/migrating" },
       { text: "Forks and authors", link: "/about" },
       { text: "Buy me a coffee", link: "https://github.com/sponsors/ternaus" },
     ],
@@ -50,6 +51,7 @@ const en = {
             { text: "queryOptions", link: "/openapi-react-query/query-options" },
           ],
         },
+        { text: "Migrate from upstream", link: "/migrating" },
         { text: "About", link: "/about" },
         {
           text: "React ESLint plugin",
