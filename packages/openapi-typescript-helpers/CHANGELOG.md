@@ -1,5 +1,11 @@
 # openapi-typescript-helpers
 
+## 1.0.1
+
+### Patch Changes
+
+- [#16](https://github.com/ternaus/js-tools/pull/16) [`3d6f8c9`](https://github.com/ternaus/js-tools/commit/3d6f8c9f7bd495d15a7b4049fb9a6a3680bb8a97) Thanks [@ternaus](https://github.com/ternaus)! - Send `Blob` and `File` request bodies unchanged and leave `Content-Type` to the Blob. `Readable`, `Writable` and the strict request check treat Blob-like values as opaque, so a `File` is assignable to a `Blob` field.
+
 ## 1.0.0
 
 ### Major Changes

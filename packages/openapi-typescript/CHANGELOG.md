@@ -1,5 +1,11 @@
 # openapi-typescript
 
+## 9.0.0
+
+### Major Changes
+
+- [#16](https://github.com/ternaus/js-tools/pull/16) [`3d6f8c9`](https://github.com/ternaus/js-tools/commit/3d6f8c9f7bd495d15a7b4049fb9a6a3680bb8a97) Thanks [@ternaus](https://github.com/ternaus)! - Type raw binary strings as `Blob` by default: OpenAPI 3.0 `format: binary` and 3.1 `contentMediaType` without `contentEncoding`. Encoded binary (`contentEncoding`) and textual media types (`text/*`, JSON, XML) stay `string`. Pass `--no-binary-as-blob` (`binaryAsBlob: false`) to keep the previous `string` output; regenerate types and update upload `body` types accordingly.
+
 ## 8.0.2
 
 ### Patch Changes
