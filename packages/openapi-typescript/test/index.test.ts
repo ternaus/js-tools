@@ -914,6 +914,43 @@ export type operations = Record<string, never>;`,
       },
     ],
     [
+      "binary strings > Blob by default",
+      {
+        given: {
+          openapi: "3.1.0",
+          info: { title: "Test", version: "1.0" },
+          components: {
+            schemas: {
+              Upload: {
+                type: "object",
+                required: ["file"],
+                properties: {
+                  file: { type: "string", contentMediaType: "application/octet-stream" },
+                  meta: { type: "string", contentMediaType: "application/json" },
+                },
+              },
+            },
+          },
+        },
+        want: `export type paths = Record<string, never>;
+export type webhooks = Record<string, never>;
+export interface components {
+    schemas: {
+        Upload: {
+            file: Blob;
+            meta?: string;
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
+}
+export type operations = Record<string, never>;`,
+      },
+    ],
+    [
       "nullable > 3.0 syntax",
       {
         given: {

@@ -160,7 +160,7 @@ describe("POST", () => {
       });
 
       const { data } = await client.POST("/multipart-form-data-file-upload", {
-        body: formData as unknown as string,
+        body: formData as unknown as Blob,
       });
 
       expect(data?.text).toBe(TEST_STRING);

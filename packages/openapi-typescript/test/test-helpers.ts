@@ -40,6 +40,7 @@ export const DEFAULT_CTX: GlobalContext = {
   makePathsEnum: false,
   generatePathParams: false,
   readWriteMarkers: false,
+  binaryAsBlob: true,
 };
 
 export type TestCase<T = any, O = TransformNodeOptions> = [
