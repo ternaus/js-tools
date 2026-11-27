@@ -42,6 +42,7 @@ Options
   --root-types-keep-casing   Keep casing of root types (should only be used with --root-types)
   --make-paths-enum          Generate ApiPaths enum for all paths
   --read-write-markers       Generate $Read/$Write markers for readOnly/writeOnly properties
+  --binary-as-blob           Set to \`false\` to type binary strings (format: binary, or contentMediaType without contentEncoding) as string instead of Blob
 `;
 
 const OUTPUT_FILE = "FILE";
@@ -65,6 +66,7 @@ const BOOLEAN_FLAGS = [
   "additionalProperties",
   "alphabetize",
   "arrayLength",
+  "binaryAsBlob",
   "check",
   "conditionalEnums",
   "contentNever",

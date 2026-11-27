@@ -16,12 +16,17 @@ type IsMarker<T, Marker> = [
 ] ? false : NonNullable<T> extends Marker ? true : false;
 type Scalar = string | number | boolean | bigint | symbol | null | undefined;
 type Callable = (...args: never[]) => unknown;
-export type Readable<T> = T extends $Write<unknown> ? never : T extends $Read<infer U> ? Readable<U> : T extends Scalar | Callable ? T : T extends readonly unknown[] ? {
+type BlobLike = {
+    readonly size: number;
+    arrayBuffer: Callable;
+    slice: Callable;
+};
+export type Readable<T> = T extends $Write<unknown> ? never : T extends $Read<infer U> ? Readable<U> : T extends Scalar | Callable | BlobLike ? T : T extends readonly unknown[] ? {
     [K in keyof T]: Readable<T[K]>;
 } : T extends object ? {
     [K in keyof T as IsMarker<T[K], $Write<unknown>> extends true ? never : K]: Readable<T[K]>;
 } : T;
-export type Writable<T> = T extends $Read<unknown> ? never : T extends $Write<infer U> ? Writable<U> : T extends Scalar | Callable ? T : T extends readonly unknown[] ? {
+export type Writable<T> = T extends $Read<unknown> ? never : T extends $Write<infer U> ? Writable<U> : T extends Scalar | Callable | BlobLike ? T : T extends readonly unknown[] ? {
     [K in keyof T]: Writable<T[K]>;
 } : T extends object ? {
     [K in keyof T as IsMarker<T[K], $Read<unknown>> extends true ? never : K]: Writable<T[K]>;

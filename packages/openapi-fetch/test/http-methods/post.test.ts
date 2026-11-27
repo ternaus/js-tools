@@ -160,10 +160,24 @@ describe("POST", () => {
       });
 
       const { data } = await client.POST("/multipart-form-data-file-upload", {
-        body: formData as unknown as string,
+        body: formData as unknown as Blob,
       });
 
       expect(data?.text).toBe(TEST_STRING);
+    });
+
+    test("sends a Blob body unchanged with its own content type", async () => {
+      const file = new Blob(["raw bytes"], { type: "application/octet-stream" });
+      let received: { contentType: string | null; text: string } | undefined;
+
+      const client = createObservedClient<paths>({}, async (req) => {
+        received = { contentType: req.headers.get("Content-Type"), text: await req.text() };
+        return Response.json({ text: "" });
+      });
+
+      await client.POST("/multipart-form-data-file-upload", { body: file });
+
+      expect(received).toEqual({ contentType: "application/octet-stream", text: "raw bytes" });
     });
   });
 });

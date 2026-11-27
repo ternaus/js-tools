@@ -127,7 +127,7 @@ export interface paths {
           "multipart/form-data": {
             message?: string;
             /** Format: binary */
-            file?: string;
+            file?: Blob;
           };
         };
       };

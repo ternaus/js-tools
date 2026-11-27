@@ -7,6 +7,8 @@ export type $Write<T> = { readonly $write: T };
 type IsMarker<T, Marker> = [NonNullable<T>] extends [never] ? false : NonNullable<T> extends Marker ? true : false;
 type Scalar = string | number | boolean | bigint | symbol | null | undefined;
 type Callable = (...args: never[]) => unknown;
+/** Structural `Blob`/`File`, kept opaque so uploads stay assignable without requiring DOM or Node globals. */
+type BlobLike = { readonly size: number; arrayBuffer: Callable; slice: Callable };
 
 /** Resolve response data by excluding $Write properties and unwrapping $Read properties. */
 export type Readable<T> =
@@ -14,7 +16,7 @@ export type Readable<T> =
     ? never
     : T extends $Read<infer U>
       ? Readable<U>
-      : T extends Scalar | Callable
+      : T extends Scalar | Callable | BlobLike
         ? T
         : T extends readonly unknown[]
           ? { [K in keyof T]: Readable<T[K]> }
@@ -28,7 +30,7 @@ export type Writable<T> =
     ? never
     : T extends $Write<infer U>
       ? Writable<U>
-      : T extends Scalar | Callable
+      : T extends Scalar | Callable | BlobLike
         ? T
         : T extends readonly unknown[]
           ? { [K in keyof T]: Writable<T[K]> }

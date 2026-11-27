@@ -110,7 +110,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "multipart/form-data": string;
+                    "multipart/form-data": Blob;
                 };
             };
             responses: {

@@ -5,6 +5,11 @@ const DEFAULT_OPTIONS = {
   ctx: { ...DEFAULT_CTX },
 };
 
+const BINARY_AS_STRING_OPTIONS = {
+  ...DEFAULT_OPTIONS,
+  ctx: { ...DEFAULT_CTX, binaryAsBlob: false },
+};
+
 describe("transformSchemaObject > string", () => {
   const tests: TestCase[] = [
     [
@@ -117,6 +122,78 @@ describe("transformSchemaObject > string", () => {
           additionalProperties: true,
         },
         want: `("A" | "B" | "C") | (string & {})`,
+      },
+    ],
+    [
+      "options > binaryAsBlob: false > format: binary",
+      {
+        given: { type: "string", format: "binary" },
+        want: "string",
+        options: BINARY_AS_STRING_OPTIONS,
+      },
+    ],
+    [
+      "options > binaryAsBlob: false > contentMediaType",
+      {
+        given: { type: "string", contentMediaType: "application/octet-stream" },
+        want: "string",
+        options: BINARY_AS_STRING_OPTIONS,
+      },
+    ],
+    [
+      "binary > format: binary",
+      {
+        given: { type: "string", format: "binary" },
+        want: "Blob",
+      },
+    ],
+    [
+      "binary > contentMediaType",
+      {
+        given: { type: "string", contentMediaType: "application/octet-stream" },
+        want: "Blob",
+      },
+    ],
+    [
+      "binary > contentMediaType without type",
+      {
+        given: { contentMediaType: "image/png" },
+        want: "Blob",
+      },
+    ],
+    [
+      "binary > nullable",
+      {
+        given: { type: ["string", "null"], contentMediaType: "application/octet-stream" },
+        want: "Blob | null",
+      },
+    ],
+    [
+      "binary > text contents stay string",
+      {
+        given: { type: "string", contentMediaType: "application/json" },
+        want: "string",
+      },
+    ],
+    [
+      "binary > base64 stays string",
+      {
+        given: { type: "string", contentMediaType: "image/png", contentEncoding: "base64" },
+        want: "string",
+      },
+    ],
+    [
+      "binary > format: binary with contentEncoding stays string",
+      {
+        given: { type: "string", format: "binary", contentMediaType: "image/png", contentEncoding: "base64" },
+        want: "string",
+      },
+    ],
+    [
+      "binary > textual media type with whitespace before parameters stays string",
+      {
+        given: { type: "string", contentMediaType: "application/json ; charset=utf-8" },
+        want: "string",
       },
     ],
   ];

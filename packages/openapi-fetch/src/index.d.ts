@@ -203,9 +203,11 @@ type Exact<T, Shape> = Shape extends unknown
         ? Shape extends readonly (infer Item)[]
           ? { [K in keyof T]: Exact<T[K], Item> }
           : T
-        : T extends object
-          ? T & { [K in keyof T]: K extends keyof Shape ? Exact<T[K], Shape[K]> : never }
-          : T
+        : T extends { arrayBuffer: (...args: never[]) => unknown }
+          ? T // Blob and File carry extra members that are not excess properties
+          : T extends object
+            ? T & { [K in keyof T]: K extends keyof Shape ? Exact<T[K], Shape[K]> : never }
+            : T
       : never
   : never;
 

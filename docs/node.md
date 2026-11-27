@@ -126,7 +126,7 @@ updated_at: Date | null; // [!code ++]
 
 #### Example: `Blob` types
 
-Another common transformation is for file uploads, where the `body` of a request is a `multipart/form-data` with some `Blob` fields. Here's an example schema:
+Another common transformation is for file uploads, where the `body` of a request is a `multipart/form-data` with some `Blob` fields. Raw binary is already typed as `Blob` by default (see [`binaryAsBlob`](/cli#binaryasblob)), so a transform is only needed for something more specific, such as `File`. Here's an example schema:
 
 ```yaml
 Body_file_upload:
