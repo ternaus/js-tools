@@ -182,6 +182,20 @@ describe("transformSchemaObject > string", () => {
         want: "string",
       },
     ],
+    [
+      "binary > format: binary with contentEncoding stays string",
+      {
+        given: { type: "string", format: "binary", contentMediaType: "image/png", contentEncoding: "base64" },
+        want: "string",
+      },
+    ],
+    [
+      "binary > textual media type with whitespace before parameters stays string",
+      {
+        given: { type: "string", contentMediaType: "application/json ; charset=utf-8" },
+        want: "string",
+      },
+    ],
   ];
 
   testSchemaObjects(tests, DEFAULT_OPTIONS);

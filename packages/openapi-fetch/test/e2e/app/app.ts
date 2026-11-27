@@ -23,7 +23,7 @@ async function testMultiForm() {
   const { data } = await client.POST("/multi-form", {
     body: {
       message: "Form",
-      file: new File(["Hello, World!"], "hello.txt") as unknown as string,
+      file: new File(["Hello, World!"], "hello.txt"),
     },
   });
   if (data?.message !== "success") {

@@ -813,7 +813,7 @@ function wrapWithReadWriteMarker(
   return type;
 }
 
-const TEXT_MEDIA_TYPE_RE = /^text\/|[/+](json|xml)(;|$)/i;
+const TEXT_MEDIA_TYPE_RE = /^text\/|[/+](json|xml)\s*(;|$)/i;
 
 /**
  * Raw (unencoded) binary: 3.0 `format: binary`, or 3.1 `contentMediaType` without `contentEncoding`.
@@ -821,10 +821,8 @@ const TEXT_MEDIA_TYPE_RE = /^text\/|[/+](json|xml)(;|$)/i;
  * @see https://spec.openapis.org/oas/v3.1.1.html#working-with-binary-data
  */
 function isRawBinary({ format, contentMediaType, contentEncoding }: SchemaObject): boolean {
-  return (
-    format === "binary" ||
-    (typeof contentMediaType === "string" &&
-      contentEncoding === undefined &&
-      !TEXT_MEDIA_TYPE_RE.test(contentMediaType))
-  );
+  if (contentEncoding !== undefined) {
+    return false;
+  }
+  return format === "binary" || (typeof contentMediaType === "string" && !TEXT_MEDIA_TYPE_RE.test(contentMediaType));
 }

@@ -77,7 +77,7 @@ export default function createClient(clientOptions) {
             mergeHeaders(baseHeaders, headers, params.header),
           );
     const finalHeaders = mergeHeaders(
-      serializedBody === undefined || serializedBody instanceof FormData
+      serializedBody === undefined || serializedBody instanceof FormData || serializedBody instanceof Blob
         ? {}
         : {
             "Content-Type": "application/json",
@@ -563,7 +563,7 @@ export function defaultPathSerializer(pathname, pathParams) {
  * @type {import("./index.js").defaultBodySerializer}
  */
 export function defaultBodySerializer(body, headers) {
-  if (body instanceof FormData) {
+  if (body instanceof FormData || body instanceof Blob) {
     return body;
   }
   if (headers) {

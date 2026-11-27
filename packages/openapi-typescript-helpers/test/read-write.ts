@@ -4,6 +4,16 @@ type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ?
 type Expect<T extends true> = T;
 type Id = string & { readonly __brand: "Id" };
 type Callable = (value: string) => number;
+declare class FakeBlob {
+  readonly size: number;
+  readonly type: string;
+  arrayBuffer(): Promise<ArrayBuffer>;
+  slice(start?: number): FakeBlob;
+}
+declare class FakeFile extends FakeBlob {
+  readonly name: string;
+  readonly webkitRelativePath: string;
+}
 type Payload = { id: $Read<number>; name: string; password?: $Write<string>; optional?: null };
 
 export type ReadWriteContracts = [
@@ -14,6 +24,9 @@ export type ReadWriteContracts = [
   Expect<Equal<Readable<readonly [string, number]>, readonly [string, number]>>,
   Expect<Equal<Readable<Id>, Id>>,
   Expect<Equal<Writable<Id>, Id>>,
+  Expect<Equal<Readable<FakeBlob>, FakeBlob>>,
+  Expect<Equal<Writable<FakeBlob>, FakeBlob>>,
+  Expect<Equal<Writable<FakeFile>, FakeFile>>,
   Expect<Readable<Date> extends Date ? true : false>,
   Expect<Writable<Date> extends Date ? true : false>,
   Expect<Equal<Readable<Callable>, Callable>>,
