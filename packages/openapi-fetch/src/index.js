@@ -1,11 +1,14 @@
 const PATH_PARAM_RE = /\{[^{}]+\}/g;
 
+let lastID = 0;
+
 /**
- * Returns a cheap, non-cryptographically-secure random ID
- * Courtesy of @imranbarbhuiya (https://github.com/imranbarbhuiya)
+ * Returns a process-unique request ID. It avoids `Math.random()`, which Next.js
+ * `cacheComponents` rejects during prerendering.
  */
 export function randomID() {
-  return Math.random().toString(36).slice(2, 11);
+  lastID += 1;
+  return lastID.toString(36);
 }
 
 /**

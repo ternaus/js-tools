@@ -1,4 +1,4 @@
-import { assertType, expect, expectTypeOf, test } from "vitest";
+import { assertType, expect, expectTypeOf, test, vi } from "vitest";
 import type { Middleware, MiddlewareCallbackParams } from "../../src/index.js";
 import { createObservedClient } from "../helpers.js";
 import type { paths } from "./schemas/middleware.js";
@@ -546,4 +546,19 @@ test("add middleware at the request level", async () => {
   });
 
   expect(response).toBe(customResponse);
+});
+
+test("middleware ids are unique and do not use Math.random", async () => {
+  const random = vi.spyOn(Math, "random");
+  const ids: string[] = [];
+  const client = createObservedClient<paths>({}, async () => Response.json({}));
+  client.use({
+    onRequest({ id }) {
+      ids.push(id);
+    },
+  });
+  await Promise.all(Array.from({ length: 50 }, () => client.GET("/posts/{id}", { params: { path: { id: 1 } } })));
+  expect(new Set(ids).size).toBe(50);
+  expect(random).not.toHaveBeenCalled();
+  random.mockRestore();
 });
