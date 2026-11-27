@@ -69,7 +69,6 @@ const fetchClient = createFetchClient<paths>({
 export const $api = createClient(fetchClient);
 ```
 
-
 ## Api
 
 ```tsx

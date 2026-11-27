@@ -6,7 +6,6 @@
 
 要测试请求，可以使用 `fetch` 选项并提供任何 spy 函数，比如 `vi.fn()`（Vitest）或 `jest.fn()`（Jest）。
 
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import { expect, test, vi } from "vitest";
@@ -28,11 +27,9 @@ test("my request", async () => {
 });
 ```
 
-
 ## Mocking Responses
 
 [Mock Service Worker](https://mswjs.io/) is highly recommended for mocking API responses in tests:
-
 
 ```ts
 import { http, HttpResponse } from "msw";

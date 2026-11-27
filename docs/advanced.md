@@ -24,7 +24,6 @@ Note that debug messages will be suppressed if the output is `stdout`.
 
 Example:
 
-
 ```yaml
 ErrorCode:
   type: integer
@@ -43,9 +42,7 @@ ErrorCode:
     - "Something went wrong"
 ```
 
-
 Will result in:
-
 
 ```ts
 enum ErrorCode {
@@ -57,7 +54,6 @@ enum ErrorCode {
   Unknown = 300
 }
 ```
-
 
 To generate in this fashion, `--enum` needs to be specified on the [command line](cli.md#flags).
 
@@ -297,9 +293,7 @@ Pet:
     - $ref: "#/components/schemas/Turtle"
 ```
 
-
 This generates the following type which mixes both TypeScript unions and intersections. While this is valid TypeScript, it’s complex, and inference may not work as you intended. But the biggest offense is TypeScript can’t discriminate via the `type` property:
-
 
 ```ts
   Pet: ({
@@ -308,7 +302,6 @@ This generates the following type which mixes both TypeScript unions and interse
     name?: string;
   }) & (components["schemas"]["Cat"] | components["schemas"]["Dog"] | components["schemas"]["Rabbit"] | components["schemas"]["Snake"] | components["schemas"]["Turtle"]);
 ```
-
 
 #### ✅ Better
 
@@ -334,15 +327,12 @@ Cat:
       - cat
 ```
 
-
 The resulting generated types are not only simpler; TypeScript can now discriminate using `type` (notice `Cat` has `type` with a single enum value of `"cat"`).
-
 
 ```ts
 Pet: components["schemas"]["Cat"] | components["schemas"]["Dog"] | components["schemas"]["Rabbit"] | components["schemas"]["Snake"] | components["schemas"]["Turtle"];
 Cat: { type?: "cat"; } & components["schemas"]["PetCommonProperties"];
 ```
-
 
 _Note: you optionally could provide `discriminator.propertyName: "type"` on `Pet` ([docs](https://spec.openapis.org/oas/v3.1.0#discriminator-object)) to automatically generate the `type` key, but is less explicit._
 
@@ -351,7 +341,6 @@ While the schema permits you to use composition in any way you like, it’s good
 ## JSONSchema $defs caveats
 
 [JSONSchema $defs](https://json-schema.org/understanding-json-schema/structuring.html#defs) can be used to provide sub-schema definitions anywhere. However, these won’t always convert cleanly to TypeScript. For example, this works:
-
 
 ```yaml
 components:
@@ -368,9 +357,7 @@ components:
           $ref: "#/components/schemas/DefType/$defs/myDefType"
 ```
 
-
 This will transform into the following TypeScript:
-
 
 ```ts
 export interface components {
@@ -387,9 +374,7 @@ export interface components {
 }
 ```
 
-
 However, this won’t:
-
 
 ```yaml
 components:
@@ -405,9 +390,7 @@ components:
           $ref: "#/components/schemas/DefType/$defs/myDefType"
 ```
 
-
 Because it will transform into:
-
 
 ```ts
 export interface components {
@@ -419,7 +402,6 @@ export interface components {
   };
 }
 ```
-
 
 So be wary about where you define `$defs` as they may go missing in your final generated types.
 

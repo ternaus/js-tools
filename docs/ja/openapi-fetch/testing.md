@@ -6,7 +6,6 @@ openapi-fetchのテストは、[Vitest](https://vitest.dev/) や Jest のよう�
 
 リクエストをテストするには、`fetch` オプションに `vi.fn()`（Vitest）や `jest.fn()`（Jest）などのスパイ関数を渡すことができます。
 
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import { expect, test, vi } from "vitest";
@@ -28,11 +27,9 @@ test("my request", async () => {
 });
 ```
 
-
 ## レスポンスのモック
 
 テストでAPIレスポンスをモックするには、[Mock Service Worker](https://mswjs.io/) の使用を強くお勧めします。
-
 
 ```ts
 import { http, HttpResponse } from "msw";

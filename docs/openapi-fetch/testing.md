@@ -6,7 +6,6 @@ Testing openapi-fetch is best done in a test runner that supports TypeScript, su
 
 To test requests, the `fetch` option can be supplied with any spy function like `vi.fn()` (Vitest) or `jest.fn()` (Jest).
 
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import { expect, test, vi } from "vitest";
@@ -28,11 +27,9 @@ test("my request", async () => {
 });
 ```
 
-
 ## Mocking Responses
 
 [Mock Service Worker](https://mswjs.io/) is highly recommended for mocking API responses in tests:
-
 
 ```ts
 import { http, HttpResponse } from "msw";

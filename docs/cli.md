@@ -24,7 +24,6 @@ npx @ternaus/openapi-typescript https://petstore3.swagger.io/api/v3/openapi.yaml
 
 To transform multiple schemas, create a `redocly.yaml` file in the root of your project with [APIs defined](https://redocly.com/docs/cli/configuration/). Under `apis`, give each schema a unique name and optionally a version (the name doesn’t matter, so long as it’s unique). Set the `root` value to your schema’s entry point—this will act as the main input. For the output, set it with `x-openapi-ts.output`:
 
-
 ```yaml
 apis:
   core@v2:
@@ -37,7 +36,6 @@ apis:
       output: ./openapi/external.ts
       additional-properties: true # CLI flags are also supported, either in kebab-case or camelCase format
 ```
-
 
 > **tip**
 >
@@ -69,7 +67,6 @@ You can read more about the Redoc’s configuration options [in their docs](http
 
 Authentication for non-public schemas is handled in your [Redocly config](https://redocly.com/docs/cli/configuration/#resolve-non-public-or-non-remote-urls). You can add headers and basic authentication like so:
 
-
 ```yaml
 resolve:
   http:
@@ -81,7 +78,6 @@ resolve:
         name: Authorization
         envVariable: SECRET_AUTH
 ```
-
 
 Refer to the [Redocly docs](https://redocly.com/docs/cli/configuration/#resolve-non-public-or-non-remote-urls) for additional options.
 
@@ -121,16 +117,13 @@ The following flags are supported in the CLI:
 
 By default, your URLs are preserved exactly as-written in your schema:
 
-
 ```ts
 export interface paths {
   "/user/{user_id}": components["schemas"]["User"];
 }
 ```
 
-
 Which means your type lookups also have to match the exact URL:
-
 
 ```ts
 import type { paths } from "./my-openapi-3-schema";
@@ -139,9 +132,7 @@ const url = `/user/${id}`;
 type UserResponses = paths["/user/{user_id}"]["responses"];
 ```
 
-
 But when `--path-params-as-types` is enabled, you can take advantage of dynamic lookups like so:
-
 
 ```ts
 import type { paths } from "./my-openapi-3-schema";
@@ -149,7 +140,6 @@ import type { paths } from "./my-openapi-3-schema";
 const url = `/user/${id}`;
 type UserResponses = paths[url]["responses"]; // automatically matches `paths['/user/{user_id}']`
 ```
-
 
 Though this is a contrived example, you could use this feature to automatically infer typing based on the URL in a fetch client or in some other useful place in your application.
 
@@ -160,7 +150,6 @@ _Thanks, [@Powell-v2](https://github.com/Powell-v2)!_
 This option is useful for generating tuples if an array type specifies `minItems` or `maxItems`.
 
 For example, given the following schema:
-
 
 ```yaml
 components:
@@ -173,9 +162,7 @@ components:
       maxItems: 2
 ```
 
-
 Enabling `--array-length` would change the typing like so:
-
 
 ```ts
 export interface components {
@@ -185,7 +172,6 @@ export interface components {
   };
 }
 ```
-
 
 This results in more explicit typechecking of array lengths.
 
@@ -199,7 +185,6 @@ This option is useful for generating an enum for all paths in the schema. This c
 
 Enabling `--make-paths-enum` will add an `ApiPaths` enum like this to the generated types:
 
-
 ```ts
 export enum ApiPaths {
   "/user/{user_id}" = "/user/{user_id}",
@@ -208,7 +193,6 @@ export enum ApiPaths {
   "/user/{user_id}/pets/{pet_id}" = "/user/{user_id}/pets/{pet_id}",
 }
 ```
-
 
 ### generatePathParams
 
@@ -221,7 +205,6 @@ Does not override already defined by schema path parameters.
 This option enables proper handling of OpenAPI's `readOnly` and `writeOnly` property modifiers. When enabled, properties are wrapped with marker types that allow [openapi-fetch](openapi-fetch/index.md) to enforce visibility rules at compile time.
 
 For example, given the following schema:
-
 
 ```yaml
 components:
@@ -239,9 +222,7 @@ components:
           writeOnly: true
 ```
 
-
 Enabling `--read-write-markers` would generate:
-
 
 ```ts
 // Helper types generated inline when readWriteMarkers is enabled
@@ -261,12 +242,10 @@ export interface components {
 }
 ```
 
-
 When used with [openapi-fetch](openapi-fetch/index.md), the `Readable<T>` and `Writable<T>` helper types automatically:
 
 - **Exclude `readOnly` properties from request bodies** - You can't accidentally send `id` in a POST/PUT request
 - **Exclude `writeOnly` properties from responses** - You can't access `password` on response data
-
 
 ```ts
 import createClient from "@ternaus/openapi-fetch";

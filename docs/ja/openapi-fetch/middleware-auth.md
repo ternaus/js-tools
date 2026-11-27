@@ -6,7 +6,6 @@
 
 各ミドルウェアは、リクエストやレスポンスを監視および/または変更するための `onRequest()` および `onResponse()` コールバックを提供できます。
 
-
 ```ts
 import createClient from "@ternaus/openapi-fetch";
 import type { paths } from "./my-openapi-3-schema"; // openapi-typescriptで生成された型
@@ -29,7 +28,6 @@ const client = createClient<paths>({ baseUrl: "https://myapi.dev/v1/" });
 // ミドルウェアを登録
 client.use(myMiddleware);
 ```
-
 
 > **tip**
 >
@@ -106,7 +104,6 @@ const myMiddleware: Middleware = {
 
 この基本的な例では、各リクエストで最新のトークンを取得するためにミドルウェアを使用します。この例では、アクセストークンがJavaScriptモジュールの状態で保持されており、クライアントアプリケーションには安全ですが、サーバーアプリケーションでは避けるべきです。
 
-
 ```ts
 import createClient, { type Middleware } from "@ternaus/openapi-fetch";
 import type { paths } from "./my-openapi-3-schema";
@@ -139,11 +136,9 @@ client.use(authMiddleware);
 const authRequest = await client.GET("/some/auth/url");
 ```
 
-
 ### 条件付き認証
 
 特定のルートには認証が不要な場合、ミドルウェアでそれを処理することもできます:
-
 
 ```ts
 const UNPROTECTED_ROUTES = ["/v1/login", "/v1/logout", "/v1/public/"];

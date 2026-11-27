@@ -116,7 +116,6 @@ openapi-typescript **永远不会生成 `any` 类型**。任何未在模式中�
       </th>
       <td>
 
-
 ```yaml
 type: object
 ```
@@ -191,7 +190,6 @@ Record<string, string>;
         ❌ 不好
       </th>
       <td>
-
 
 ```yaml
 type: array

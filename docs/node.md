@@ -33,7 +33,6 @@ The Node API returns a `Promise` with a TypeScript AST. You can then traverse / 
 
 To convert the TypeScript AST into a string, you can use `astToString()` helper which is a thin wrapper around [TypeScript’s printer](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#re-printing-sections-of-a-typescript-file):
 
-
 ```ts
 import fs from "node:fs";
 import openapiTS, { astToString } from "@ternaus/openapi-typescript";
@@ -45,11 +44,9 @@ const contents = astToString(ast);
 fs.writeFileSync("./my-schema.ts", contents);
 ```
 
-
 ### Redoc config
 
 A Redoc config isn’t required to use openapi-typescript. By default it extends the `"spec"` built-in config. But if you want to modify the default settings, you’ll need to provide a fully-initialized Redoc config to the Node API. You can do this with the helpers in `@redocly/openapi-core`:
-
 
 ```ts
 import { createConfig, loadConfig } from "@redocly/openapi-core";
@@ -71,7 +68,6 @@ const redocly = await loadConfig({ configPath: "redocly.yaml" });
 
 const ast = await openapiTS(mySchema, { redocly });
 ```
-
 
 ## Options
 
@@ -106,7 +102,6 @@ properties:
 
 By default, openapiTS will generate `updated_at?: string;` because it’s not sure which format you want by `"date-time"` (formats are nonstandard and can be whatever you’d like). But we can enhance this by providing our own custom formatter, like so:
 
-
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
 
@@ -122,20 +117,16 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 That would result in the following change:
-
 
 ```yaml
 updated_at?: string; // [!code --]
 updated_at: Date | null; // [!code ++]
 ```
 
-
 #### Example: `Blob` types
 
 Another common transformation is for file uploads, where the `body` of a request is a `multipart/form-data` with some `Blob` fields. Here's an example schema:
-
 
 ```yaml
 Body_file_upload:
@@ -146,9 +137,7 @@ Body_file_upload:
       format: binary;
 ```
 
-
 Use the same pattern to transform the types:
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -165,20 +154,16 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 Resultant diff with correctly-typed `file` property:
-
 
 ```ts
 file?: string; // [!code --]
 file: Blob | null; // [!code ++]
 ```
 
-
 #### Example: Add "?" token to property
 
 It is not possible to create a property with the optional "?" token with the above `transform` functions. The transform function also accepts a different return object, which allows you to add a "?" token to the property. Here's an example schema:
-
 
 ```yaml
 Body_file_upload:
@@ -190,9 +175,7 @@ Body_file_upload:
       required: true;
 ```
 
-
 Here we return an object with a schema property, which is the same as the above example, but we also add a `questionToken` property, which will add the "?" token to the property.
-
 
 ```ts
 import openapiTS, { ts } from "@ternaus/openapi-typescript";
@@ -212,15 +195,12 @@ const ast = await openapiTS(mySchema, {
 });
 ```
 
-
 Resultant diff with correctly-typed `file` property and "?" token:
-
 
 ```ts
 file: Blob; // [!code --]
 file?: Blob | null; // [!code ++]
 ```
-
 
 Any [Schema Object](https://spec.openapis.org/oas/latest.html#schema-object) present in your schema will be run through this formatter (even remote ones!). Also be sure to check the `metadata` parameter for additional context that may be helpful.
 
@@ -237,7 +217,6 @@ Use the `transformProperty()` option to modify individual property signatures wi
 #### Example: JSDoc validation annotations
 
 A common use case is adding validation annotations based on OpenAPI schema constraints:
-
 
 ```yaml
 components:
@@ -258,8 +237,6 @@ components:
           maximum: 120
       required: [name, email]
 ```
-
-
 
 ```ts
 import fs from "node:fs";
@@ -316,9 +293,7 @@ const contents = astToString(ast);
 fs.writeFileSync("./my-schema.ts", contents);
 ```
 
-
 This transforms the schema into TypeScript with validation annotations:
-
 
 ```ts
 export interface components {
@@ -343,8 +318,8 @@ export interface components {
 }
 ```
 
-
 The `transformProperty` function provides access to:
+
 - `property`: The TypeScript PropertySignature AST node
 - `schemaObject`: The original OpenAPI Schema Object for this property
 - `options`: Transformation context including path information and other utilities

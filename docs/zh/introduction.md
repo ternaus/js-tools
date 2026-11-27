@@ -17,7 +17,6 @@ openapi-typescript 使用 Node.js 快速将 [OpenAPI 3.0 & 3.1](https://spec.ope
 - ✅ 从本地或远程加载 YAML 或 JSON 模式
 - ✅ 在毫秒内生成即使是庞大模式的类型
 
-
 ## 示例
 
 👀 [查看示例](https://github.com/ternaus/js-tools/tree/main/packages/openapi-typescript/examples/)
@@ -51,7 +50,6 @@ npx @ternaus/openapi-typescript https://myapi.dev/api/v1/openapi.yaml -o ./path/
 
 然后在您的 TypeScript 项目中，根据需要导入类型：
 
-
 ```ts
 import type { paths, components } from "./my-openapi-3-schema"; // 由openapi-typescript生成
 
@@ -65,7 +63,6 @@ type EndpointParams = paths["/my/endpoint"]["parameters"];
 type SuccessResponse = paths["/my/endpoint"]["get"]["responses"][200]["content"]["application/json"]["schema"];
 type ErrorResponse = paths["/my/endpoint"]["get"]["responses"][500]["content"]["application/json"]["schema"];
 ```
-
 
 从这里开始，您可以将这些类型用于以下任何操作（但不限于）：
 
